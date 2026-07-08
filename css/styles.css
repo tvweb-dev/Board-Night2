@@ -1,0 +1,136 @@
+/* Board Night — shared styles
+   Simple, no framework. Edit freely. */
+
+:root {
+  --bg: #f4f1ea;
+  --card: #ffffff;
+  --ink: #2b2b2b;
+  --muted: #6b6b6b;
+  --accent: #b4452f;      /* board-game red */
+  --accent-dark: #8e3424;
+  --green: #3a7d44;
+  --amber: #c9962b;
+  --red: #b4452f;
+  --line: #e3ddd0;
+  --radius: 10px;
+  --shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+a { color: var(--accent); }
+
+/* Layout */
+.topbar {
+  background: var(--accent);
+  color: #fff;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow);
+}
+.topbar .brand { font-weight: 700; font-size: 1.2rem; letter-spacing: .3px; }
+.topbar a { color: #fff; text-decoration: none; margin-left: 16px; font-size: .95rem; }
+.topbar a:hover { text-decoration: underline; }
+
+.container { max-width: 820px; margin: 24px auto; padding: 0 16px; }
+
+h1 { font-size: 1.6rem; margin: 0 0 4px; }
+h2 { font-size: 1.2rem; margin: 24px 0 8px; }
+.subtle { color: var(--muted); font-size: .92rem; }
+
+/* Cards */
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+.card h3 { margin: 0 0 6px; }
+
+.grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+
+/* Forms */
+label { display: block; font-size: .9rem; color: var(--muted); margin: 10px 0 4px; }
+input, select, textarea {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font: inherit;
+  background: #fff;
+}
+textarea { min-height: 70px; resize: vertical; }
+
+.btn {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 9px 16px;
+  border-radius: 8px;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn:hover { background: var(--accent-dark); }
+.btn.secondary { background: #fff; color: var(--ink); border: 1px solid var(--line); }
+.btn.secondary:hover { background: #f7f4ee; }
+.btn.small { padding: 5px 10px; font-size: .85rem; }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+
+/* Lists */
+ul.plain { list-style: none; padding: 0; margin: 0; }
+ul.plain li {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+ul.plain li:last-child { border-bottom: none; }
+
+/* RSVP status pills */
+.pill { font-size: .8rem; padding: 2px 9px; border-radius: 999px; color: #fff; }
+.pill.going { background: var(--green); }
+.pill.maybe { background: var(--amber); }
+.pill.no { background: var(--red); }
+.pill.cancelled { background: var(--muted); }
+
+.count-badge {
+  display: inline-block;
+  background: var(--green);
+  color: #fff;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 999px;
+}
+
+.empty { color: var(--muted); font-style: italic; padding: 8px 0; }
+
+.notice {
+  background: #fff8e6;
+  border: 1px solid var(--amber);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 12px 0;
+  font-size: .9rem;
+}
+
+footer.note {
+  text-align: center;
+  color: var(--muted);
+  font-size: .82rem;
+  margin: 30px 0;
+}

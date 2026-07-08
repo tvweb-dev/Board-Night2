@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Board Night — Dashboard</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="topbar" id="topbar"></header>
+
+  <div class="container">
+    <h1>Your Groups</h1>
+    <p class="subtle">Story 1: create a group. It appears below.</p>
+
+    <div class="card">
+      <h3>Create a board game group</h3>
+      <label for="groupName">Group name</label>
+      <input id="groupName" placeholder="e.g. Friday Night Catan" />
+      <div class="btn-row">
+        <button class="btn" id="createGroupBtn">Create group</button>
+      </div>
+    </div>
+
+    <h2>Groups</h2>
+    <div id="groupList" class="grid"></div>
+
+    <footer class="note">Scaffold — replace the data layer with a real backend when ready.</footer>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    ready(function () {
+      renderTopbar();
+
+      function renderGroups() {
+        const list = document.getElementById("groupList");
+        const groups = DB.getGroups();
+        if (!groups.length) {
+          list.innerHTML = '<p class="empty">No groups yet — create one above.</p>';
+          return;
+        }
+        list.innerHTML = groups.map(function (g) {
+          const memberCount = DB.getMembers(g.id).length;
+          const eventCount = DB.getEvents(g.id).length;
+          return `<a class="card" style="text-decoration:none;color:inherit;display:block;"
+                     href="group.html?group=${encodeURIComponent(g.id)}">
+                    <h3>${esc(g.name)}</h3>
+                    <p class="subtle">${memberCount} member(s) · ${eventCount} event(s)</p>
+                  </a>`;
+        }).join("");
+      }
+
+      document.getElementById("createGroupBtn").addEventListener("click", function () {
+        const name = document.getElementById("groupName").value.trim();
+        if (!name) { alert("Please enter a group name."); return; }
+        DB.createGroup(name);
+        document.getElementById("groupName").value = "";
+        renderGroups();
+      });
+
+      renderGroups();
+    });
+  </script>
+</body>
+</html>

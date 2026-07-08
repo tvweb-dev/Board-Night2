@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Board Night — Sign In</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="container" style="max-width:420px;margin-top:8vh;">
+    <h1 style="text-align:center;">🎲 Board Night</h1>
+    <p class="subtle" style="text-align:center;">Plan game nights. Invite players. See who's coming.</p>
+
+    <div class="card">
+      <h3>Sign in</h3>
+      <p class="subtle">Scaffold note: login is not wired up yet (Sprint 0 task). For now this just opens the demo.</p>
+      <label for="email">Email</label>
+      <input id="email" type="email" placeholder="you@example.com" />
+      <label for="password">Password</label>
+      <input id="password" type="password" placeholder="••••••••" />
+      <div class="btn-row">
+        <a class="btn" href="dashboard.html">Enter demo</a>
+        <button class="btn secondary" id="resetBtn">Reset demo data</button>
+      </div>
+    </div>
+
+    <footer class="note">Board Night scaffold — front-end only, data stored in your browser.</footer>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    ready(function () {
+      DB.load(); // seed demo data on first visit
+      document.getElementById("resetBtn").addEventListener("click", function () {
+        DB.reset();
+        alert("Demo data reset. It will reseed when you enter.");
+      });
+    });
+  </script>
+</body>
+</html>

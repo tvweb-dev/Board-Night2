@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Board Night — Create / Edit Event</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="topbar" id="topbar"></header>
+
+  <div class="container">
+    <p><a id="backLink" href="dashboard.html">&larr; Back</a></p>
+    <h1 id="pageTitle">Create event</h1>
+    <p class="subtle">Story 3: set time, date and location. Story 10 (V2): description.</p>
+
+    <div class="card">
+      <label for="title">Event title</label>
+      <input id="title" placeholder="e.g. Catan Night" />
+
+      <label for="date">Date</label>
+      <input id="date" type="date" />
+
+      <label for="time">Time</label>
+      <input id="time" type="time" />
+
+      <label for="location">Location</label>
+      <input id="location" placeholder="e.g. Sam's place" />
+
+      <label for="description">Description <span class="subtle">(optional)</span></label>
+      <textarea id="description" placeholder="What to bring, which games, etc."></textarea>
+
+      <div class="btn-row">
+        <button class="btn" id="saveBtn">Save event</button>
+        <a class="btn secondary" id="cancelBtn" href="dashboard.html">Cancel</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    ready(function () {
+      renderTopbar();
+      const groupId = qs("group");
+      const eventId = qs("event"); // present when editing
+      const existing = eventId ? DB.getEvent(eventId) : null;
+
+      const back = existing
+        ? "event.html?event=" + encodeURIComponent(existing.id)
+        : (groupId ? "group.html?group=" + encodeURIComponent(groupId) : "dashboard.html");
+      document.getElementById("backLink").href = back;
+      document.getElementById("cancelBtn").href = back;
+
+      if (existing) {
+        document.getElementById("pageTitle").textContent = "Edit event";
+        document.getElementById("title").value = existing.title;
+        document.getElementById("date").value = existing.date;
+        document.getElementById("time").value = existing.time;
+        document.getElementById("location").value = existing.location;
+        document.getElementById("description").value = existing.description;
+      }
+
+      document.getElementById("saveBtn").addEventListener("click", function () {
+        const fields = {
+          title: document.getElementById("title").value.trim(),
+          date: document.getElementById("date").value,
+          time: document.getElementById("time").value,
+          location: document.getElementById("location").value.trim(),
+          description: document.getElementById("description").value.trim(),
+        };
+        if (!fields.title || !fields.date || !fields.location) {
+          alert("Please fill in at least a title, date and location.");
+          return;
+        }
+        let saved;
+        if (existing) {
+          saved = DB.updateEvent(existing.id, fields);
+        } else {
+          fields.groupId = groupId;
+          saved = DB.createEvent(fields);
+        }
+        window.location.href = "event.html?event=" + encodeURIComponent(saved.id);
+      });
+    });
+  </script>
+</body>
+</html>
