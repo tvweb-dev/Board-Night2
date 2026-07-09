@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Board Night — Event</title>
+  <title>Board Night - Event</title>
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
@@ -18,7 +18,6 @@
     <p class="subtle" id="eventMeta"></p>
     <p id="eventDesc"></p>
 
-    <!-- Your RSVP: Stories 4 & 6 -->
     <div class="card">
       <h3>Your RSVP</h3>
       <label for="rsvpSelect">Are you going?</label>
@@ -32,7 +31,6 @@
       </div>
     </div>
 
-    <!-- Who's coming: Stories 7 & 13 -->
     <h2>Who's coming <span class="count-badge" id="goingCount">0</span> going</h2>
     <div class="card">
       <h3>Going</h3><ul class="plain" id="listGoing"></ul>
@@ -40,7 +38,6 @@
       <h3>Can't make it</h3><ul class="plain" id="listNo"></ul>
     </div>
 
-    <!-- Host controls: Stories 5, 8, 9 -->
     <div class="card" id="hostBox">
       <h3>Host controls</h3>
       <div class="btn-row">
@@ -59,10 +56,10 @@
   <script src="js/data.js"></script>
   <script src="js/app.js"></script>
   <script>
-    ready(function () {
+    ready(async function () {
       renderTopbar();
       const eventId = qs("event");
-      const ev = DB.getEvent(eventId);
+      const ev = await DB.getEvent(eventId);
 
       if (!ev) {
         document.querySelector(".container").innerHTML =
@@ -71,7 +68,7 @@
       }
 
       const me = DB.currentUser();
-      const amHost = ev.hostId === me.id;
+      const amHost = String(ev.hostId) === String(me.id);
 
       document.getElementById("backLink").href = "group.html?group=" + encodeURIComponent(ev.groupId);
       document.getElementById("editBtn").href = "event-edit.html?event=" + encodeURIComponent(ev.id);
@@ -80,76 +77,83 @@
       function renderHeader() {
         document.getElementById("eventTitle").textContent = ev.title;
         document.getElementById("eventMeta").textContent =
-          prettyDate(ev.date) + " · " + (ev.time || "") + " · " + (ev.location || "");
+          prettyDate(ev.date) + " - " + (ev.time || "") + " - " + (ev.location || "");
         document.getElementById("eventDesc").textContent = ev.description || "";
         document.getElementById("cancelledBanner").innerHTML = ev.cancelled
           ? '<div class="notice"><strong>This event is cancelled.</strong></div>' : "";
       }
 
-      function renderWhosComing() {
-        const rsvps = DB.getRsvps(ev.id);
+      async function renderWhosComing() {
+        const rsvps = await DB.getRsvps(ev.id);
         const buckets = { going: [], maybe: [], no: [] };
+
         rsvps.forEach(function (r) {
-          const u = DB.load().users.find(function (x) { return x.id === r.userId; });
-          if (u && buckets[r.status]) buckets[r.status].push(u.name);
+          if (buckets[r.status]) {
+            buckets[r.status].push(r.userName || r.userEmail || `User ${r.userId}`);
+          }
         });
+
         function fill(id, names) {
           const ul = document.getElementById(id);
           ul.innerHTML = names.length
             ? names.map(function (n) { return "<li>" + esc(n) + "</li>"; }).join("")
             : '<li class="empty">Nobody yet</li>';
         }
+
         fill("listGoing", buckets.going);
         fill("listMaybe", buckets.maybe);
         fill("listNo", buckets.no);
         document.getElementById("goingCount").textContent = buckets.going.length;
       }
 
-      function renderMyRsvp() {
-        const mine = DB.getRsvpFor(ev.id, me.id);
+      async function renderMyRsvp() {
+        const mine = await DB.getRsvpFor(ev.id, me.id);
         if (mine) document.getElementById("rsvpSelect").value = mine.status;
       }
 
-      function renderHostControls() {
+      async function renderHostControls() {
         const box = document.getElementById("hostBox");
-        if (!amHost) { box.style.display = "none"; return; }
-        // Cancel button state
-        const btn = document.getElementById("cancelEventBtn");
-        const started = ev.date && new Date(ev.date + "T" + (ev.time || "00:00")) < new Date();
-        if (ev.cancelled) { btn.textContent = "Already cancelled"; btn.disabled = true; }
-        else if (started) { btn.textContent = "Can't cancel (already started)"; btn.disabled = true; }
-        // Host dropdown = other members
+        if (!amHost) {
+          box.style.display = "none";
+          return;
+        }
+
+        const cancelButton = document.getElementById("cancelEventBtn");
+        cancelButton.disabled = true;
+        cancelButton.textContent = "Cancel not in MVP API";
+
         const sel = document.getElementById("hostSelect");
-        const members = DB.getMembers(ev.groupId).filter(function (m) { return m.id !== ev.hostId; });
+        const members = (await DB.getMembers(ev.groupId)).filter(function (m) {
+          return String(m.id) !== String(ev.hostId);
+        });
+
         sel.innerHTML = members.length
           ? members.map(function (m) { return '<option value="' + m.id + '">' + esc(m.name) + "</option>"; }).join("")
           : '<option value="">No other members</option>';
       }
 
-      document.getElementById("saveRsvpBtn").addEventListener("click", function () {
-        DB.setRsvp(ev.id, me.id, document.getElementById("rsvpSelect").value);
-        renderWhosComing();
-        alert("RSVP saved!");
+      document.getElementById("saveRsvpBtn").addEventListener("click", async function () {
+        try {
+          await DB.setRsvp(ev.id, me.id, document.getElementById("rsvpSelect").value);
+          await renderWhosComing();
+          alert("RSVP saved!");
+        } catch (error) {
+          alert(error.message);
+        }
       });
 
-      document.getElementById("cancelEventBtn").addEventListener("click", function () {
-        if (!confirm("Cancel this event?")) return;
-        DB.cancelEvent(ev.id);
-        window.location.reload();
+      document.getElementById("cancelEventBtn").addEventListener("click", async function () {
+        await DB.cancelEvent(ev.id);
       });
 
-      document.getElementById("changeHostBtn").addEventListener("click", function () {
-        const newHostId = document.getElementById("hostSelect").value;
-        if (!newHostId) { alert("No member to hand off to."); return; }
-        DB.changeHost(ev.id, newHostId);
-        alert("Host changed. You are no longer the host.");
-        window.location.reload();
+      document.getElementById("changeHostBtn").addEventListener("click", async function () {
+        await DB.changeHost(ev.id, document.getElementById("hostSelect").value);
       });
 
       renderHeader();
-      renderWhosComing();
-      renderMyRsvp();
-      renderHostControls();
+      await renderWhosComing();
+      await renderMyRsvp();
+      await renderHostControls();
     });
   </script>
 </body>

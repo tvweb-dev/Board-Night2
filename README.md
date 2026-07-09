@@ -1,28 +1,21 @@
-# Board Night — App Scaffold
+# Board Night - App Scaffold
 
-A starting point for the Board Night MVP, built with **plain HTML, CSS, and JavaScript** (no framework, no build step). It runs in the browser and stores data in `localStorage` so the team can see the core loop working before there's a real backend.
+A starting point for the Board Night MVP, built with **plain HTML, CSS, and JavaScript**. The frontend talks to the real Board Night API/database server on `http://localhost:3000`.
 
 > This is a scaffold, not a finished app. It gives you working pages and a clean place to plug in real logic.
 
 ## How to run
 
-No install needed. Either:
+1. Start the API/database server on `http://localhost:3000`.
+2. Do not run `server.js`; the static frontend server is intentionally disabled so only the API/database server uses port `3000`.
 
-- **Easiest:** double-click `index.html` to open it in your browser, **or**
-- **Recommended (avoids browser file limits):** serve the folder locally:
-  ```
-  # from inside the board-night/ folder
-  python -m http.server 8000
-  ```
-  Then open <http://localhost:8000>.
-
-Click **"Enter demo"** on the sign-in page. Demo data (one group, one event) is seeded automatically. Use **"Reset demo data"** to start fresh.
+Sign in with a user that exists in the API database. Use **Clear session** to remove the browser session.
 
 ## File structure
 
 ```
 board-night/
-├── index.html        Sign-in page (login not wired yet — Sprint 0)
+├── index.html        Sign-in page
 ├── dashboard.html    Your groups + create a group        (Story 1)
 ├── group.html        Members, invite member, events list  (Stories 2, 3)
 ├── event-edit.html   Create / edit an event               (Stories 3, 10)
@@ -32,14 +25,14 @@ board-night/
 ├── css/
 │   └── styles.css    Shared styles
 ├── js/
-│   ├── data.js       Data store (localStorage) — SWAP THIS for a real backend
+│   ├── data.js       API-backed data layer for localhost:3000
 │   └── app.js        Shared helpers (used by every page)
 └── README.md
 ```
 
 ## How the pieces fit
 
-Every page talks to the data layer through the `DB` object in `js/data.js`. Pages never touch storage directly. **When you're ready for a real backend, you only rewrite `js/data.js`** to call your API/database — the pages stay the same.
+Every page talks to the data layer through the `DB` object in `js/data.js`. Pages never touch the API directly. `js/data.js` points to `http://localhost:3000` by default, or to `window.BOARD_NIGHT_API_URL` if you set one before loading `js/data.js`.
 
 `js/app.js` holds small shared helpers: reading URL params (`qs`), escaping text (`esc`), formatting dates, and rendering the top bar.
 
@@ -47,27 +40,26 @@ Every page talks to the data layer through the `DB` object in `js/data.js`. Page
 
 | Story | Where | Status |
 |-------|-------|--------|
-| 1 Create group | dashboard.html | ✅ working |
-| 2 Invite members | group.html | ✅ working |
-| 3 Create event | event-edit.html | ✅ working |
-| 4 RSVP to event | event.html | ✅ working |
-| 6 Change RSVP | event.html (dropdown + save) | ✅ working |
-| 7 / 13 Who's coming + count | event.html | ✅ working |
-| 8 Cancel event | event.html (host) | ✅ working |
-| 9 Change host | event.html (host) | ✅ working |
-| 5 Email invite | rsvp.html (link works) | 🟡 link works, real email sending TODO |
+| 1 Create group | dashboard.html | working |
+| 2 Invite members | group.html | working |
+| 3 Create event | event-edit.html | working |
+| 4 RSVP to event | event.html | working |
+| 6 Change RSVP | event.html (dropdown + save) | working |
+| 7 / 13 Who's coming + count | event.html | working |
+| 8 Cancel event | event.html (host) | UI present; not in MVP API yet |
+| 9 Change host | event.html (host) | UI present; not in MVP API yet |
+| 5 Email invite | rsvp.html (link works) | real email sending TODO |
 
-## What's left to do (good first tasks)
+## What's left to do
 
-- **Real login / users** — right now there's one fake "current user" in `data.js`. (Sprint 0)
-- **Real email sending** for Story 5 — the RSVP link page exists; hook up an email service. (Sprint 2)
-- **Real backend + database** — replace `js/data.js` with API calls. (Sprint 0/1)
-- Maybe/not-going handling is in place; review wording and edge cases.
+- Real email sending for Story 5.
+- Event update/cancel/change-host endpoints if those are added to the API.
+- Description persistence once the API supports it.
 
 ## Out of scope for now (V2 / V3)
 
-Description field is stubbed in; everything else from V2/V3 (game voting, rules links, dice/timer, snack list, profiles) is intentionally **not** built yet — see the Project Starter doc, Section 9.
+Description field is stubbed in; everything else from V2/V3 (game voting, rules links, dice/timer, snack list, profiles) is intentionally not built yet.
 
 ---
 
-*Front-end-only scaffold. Data lives in your browser until a backend is added.*
+*Frontend scaffold connected to the local Board Night API/database server.*

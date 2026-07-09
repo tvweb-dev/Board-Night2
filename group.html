@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Board Night — Group</title>
+  <title>Board Night - Group</title>
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
@@ -14,10 +14,10 @@
     <h1 id="groupName">Group</h1>
 
     <div class="card">
-      <h3>Invite a member <span class="subtle">(Story 2)</span></h3>
-      <label for="memberName">Name</label>
-      <input id="memberName" placeholder="e.g. Alex" />
-      <label for="memberEmail">Email (optional)</label>
+      <h3>Invite a member</h3>
+      <label for="memberName">Existing user ID or display name</label>
+      <input id="memberName" placeholder="e.g. 2" />
+      <label for="memberEmail">Email for new member</label>
       <input id="memberEmail" type="email" placeholder="alex@example.com" />
       <div class="btn-row">
         <button class="btn" id="addMemberBtn">Add member</button>
@@ -31,16 +31,16 @@
     <p><a class="btn" id="newEventBtn" href="#">+ Create event</a></p>
     <div id="eventList"></div>
 
-    <footer class="note">Scaffold page for Stories 2 &amp; 3.</footer>
+    <footer class="note">Connected to the Board Night Express API.</footer>
   </div>
 
   <script src="js/data.js"></script>
   <script src="js/app.js"></script>
   <script>
-    ready(function () {
+    ready(async function () {
       renderTopbar();
       const groupId = qs("group");
-      const group = DB.getGroup(groupId);
+      const group = await DB.getGroup(groupId);
 
       if (!group) {
         document.querySelector(".container").innerHTML =
@@ -52,46 +52,63 @@
       document.getElementById("newEventBtn").href =
         "event-edit.html?group=" + encodeURIComponent(groupId);
 
-      function renderMembers() {
+      async function renderMembers() {
         const ul = document.getElementById("memberList");
-        const members = DB.getMembers(groupId);
-        ul.innerHTML = members.map(function (m) {
-          const isHost = m.id === group.hostId;
+        const members = await DB.getMembers(groupId);
+
+        ul.innerHTML = members.length ? members.map(function (m) {
+          const isHost = String(m.id) === String(group.hostId);
           return `<li><span>${esc(m.name)} ${isHost ? '<span class="subtle">(host)</span>' : ""}</span>
                       <span class="subtle">${esc(m.email || "")}</span></li>`;
-        }).join("");
+        }).join("") : '<li class="empty">No members yet.</li>';
       }
 
-      function renderEvents() {
+      async function renderEvents() {
         const wrap = document.getElementById("eventList");
-        const events = DB.getEvents(groupId);
+        const events = await DB.getEvents(groupId);
+
         if (!events.length) {
           wrap.innerHTML = '<p class="empty">No events yet.</p>';
           return;
         }
-        wrap.innerHTML = events.map(function (e) {
-          const going = DB.getRsvps(e.id).filter(function (r) { return r.status === "going"; }).length;
+
+        const cards = await Promise.all(events.map(async function (e) {
+          const going = (await DB.getRsvps(e.id)).filter(function (r) {
+            return r.status === "going";
+          }).length;
+
           return `<a class="card" style="text-decoration:none;color:inherit;display:block;"
                      href="event.html?event=${encodeURIComponent(e.id)}">
                     <h3>${esc(e.title)} ${e.cancelled ? '<span class="pill cancelled">Cancelled</span>' : ""}</h3>
-                    <p class="subtle">${prettyDate(e.date)} · ${esc(e.time || "")} · ${esc(e.location || "")}</p>
+                    <p class="subtle">${prettyDate(e.date)} - ${esc(e.time || "")} - ${esc(e.location || "")}</p>
                     <p><span class="count-badge">${going}</span> going</p>
                   </a>`;
-        }).join("");
+        }));
+
+        wrap.innerHTML = cards.join("");
       }
 
-      document.getElementById("addMemberBtn").addEventListener("click", function () {
+      document.getElementById("addMemberBtn").addEventListener("click", async function () {
         const name = document.getElementById("memberName").value.trim();
         const email = document.getElementById("memberEmail").value.trim();
-        if (!name) { alert("Please enter a name."); return; }
-        DB.addMember(groupId, name, email);
-        document.getElementById("memberName").value = "";
-        document.getElementById("memberEmail").value = "";
-        renderMembers();
+
+        if (!name && !email) {
+          alert("Please enter an existing user ID or an email.");
+          return;
+        }
+
+        try {
+          await DB.addMember(groupId, name, email);
+          document.getElementById("memberName").value = "";
+          document.getElementById("memberEmail").value = "";
+          await renderMembers();
+        } catch (error) {
+          alert(error.message);
+        }
       });
 
-      renderMembers();
-      renderEvents();
+      await renderMembers();
+      await renderEvents();
     });
   </script>
 </body>

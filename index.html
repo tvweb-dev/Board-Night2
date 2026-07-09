@@ -13,28 +13,44 @@
 
     <div class="card">
       <h3>Sign in</h3>
-      <p class="subtle">Scaffold note: login is not wired up yet (Sprint 0 task). For now this just opens the demo.</p>
+      <p class="subtle">Sign in with a Board Night account from the local API.</p>
       <label for="email">Email</label>
       <input id="email" type="email" placeholder="you@example.com" />
       <label for="password">Password</label>
       <input id="password" type="password" placeholder="••••••••" />
       <div class="btn-row">
-        <a class="btn" href="dashboard.html">Enter demo</a>
-        <button class="btn secondary" id="resetBtn">Reset demo data</button>
+        <button class="btn" id="loginBtn">Sign in</button>
+        <button class="btn secondary" id="resetBtn">Clear session</button>
       </div>
     </div>
 
-    <footer class="note">Board Night scaffold — front-end only, data stored in your browser.</footer>
+    <footer class="note">Board Night is connected to the API server at localhost:3000.</footer>
   </div>
 
   <script src="js/data.js"></script>
   <script src="js/app.js"></script>
   <script>
     ready(function () {
-      DB.load(); // seed demo data on first visit
+      document.getElementById("loginBtn").addEventListener("click", async function () {
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+
+        if (!email || !password) {
+          alert("Please enter your email and password.");
+          return;
+        }
+
+        try {
+          await DB.login(email, password);
+          window.location.href = "dashboard.html";
+        } catch (error) {
+          alert(error.message);
+        }
+      });
+
       document.getElementById("resetBtn").addEventListener("click", function () {
         DB.reset();
-        alert("Demo data reset. It will reseed when you enter.");
+        alert("Local session cleared.");
       });
     });
   </script>

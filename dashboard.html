@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Board Night — Dashboard</title>
+  <title>Board Night - Dashboard</title>
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
@@ -11,7 +11,7 @@
 
   <div class="container">
     <h1>Your Groups</h1>
-    <p class="subtle">Story 1: create a group. It appears below.</p>
+    <p class="subtle">Create a group. It appears below from the local API.</p>
 
     <div class="card">
       <h3>Create a board game group</h3>
@@ -25,7 +25,7 @@
     <h2>Groups</h2>
     <div id="groupList" class="grid"></div>
 
-    <footer class="note">Scaffold — replace the data layer with a real backend when ready.</footer>
+    <footer class="note">Connected to the Board Night Express API.</footer>
   </div>
 
   <script src="js/data.js"></script>
@@ -34,33 +34,50 @@
     ready(function () {
       renderTopbar();
 
-      function renderGroups() {
+      async function renderGroups() {
         const list = document.getElementById("groupList");
-        const groups = DB.getGroups();
+        list.innerHTML = '<p class="empty">Loading groups...</p>';
+
+        const groups = await DB.getGroups();
         if (!groups.length) {
-          list.innerHTML = '<p class="empty">No groups yet — create one above.</p>';
+          list.innerHTML = '<p class="empty">No groups yet - create one above.</p>';
           return;
         }
-        list.innerHTML = groups.map(function (g) {
-          const memberCount = DB.getMembers(g.id).length;
-          const eventCount = DB.getEvents(g.id).length;
+
+        const cards = await Promise.all(groups.map(async function (g) {
+          const memberCount = (await DB.getMembers(g.id)).length;
+          const eventCount = (await DB.getEvents(g.id)).length;
+
           return `<a class="card" style="text-decoration:none;color:inherit;display:block;"
                      href="group.html?group=${encodeURIComponent(g.id)}">
                     <h3>${esc(g.name)}</h3>
-                    <p class="subtle">${memberCount} member(s) · ${eventCount} event(s)</p>
+                    <p class="subtle">${memberCount} member(s) - ${eventCount} event(s)</p>
                   </a>`;
-        }).join("");
+        }));
+
+        list.innerHTML = cards.join("");
       }
 
-      document.getElementById("createGroupBtn").addEventListener("click", function () {
+      document.getElementById("createGroupBtn").addEventListener("click", async function () {
         const name = document.getElementById("groupName").value.trim();
-        if (!name) { alert("Please enter a group name."); return; }
-        DB.createGroup(name);
-        document.getElementById("groupName").value = "";
-        renderGroups();
+        if (!name) {
+          alert("Please enter a group name.");
+          return;
+        }
+
+        try {
+          await DB.createGroup(name);
+          document.getElementById("groupName").value = "";
+          await renderGroups();
+        } catch (error) {
+          alert(error.message);
+        }
       });
 
-      renderGroups();
+      renderGroups().catch(function (error) {
+        document.getElementById("groupList").innerHTML =
+          '<p class="empty">' + esc(error.message) + '</p>';
+      });
     });
   </script>
 </body>

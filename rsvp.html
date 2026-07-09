@@ -3,47 +3,47 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Board Night — RSVP</title>
+  <title>Board Night - RSVP</title>
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
   <div class="container" style="max-width:460px;margin-top:6vh;">
-    <h1 style="text-align:center;">🎲 You're invited!</h1>
+    <h1 style="text-align:center;">Board Night Invite</h1>
     <p class="subtle" style="text-align:center;">
-      Story 5: this is the page an emailed invite link opens. The host sends a link
-      like <code>rsvp.html?event=EVENT_ID</code>.
+      This invite page is connected to the local API.
     </p>
 
     <div class="card" id="card">
-      <!-- filled by script -->
+      <p class="empty">Loading invite...</p>
     </div>
 
-    <footer class="note">Scaffold — real email sending is a Sprint 2 task.</footer>
+    <footer class="note">Connected to the Board Night Express API.</footer>
   </div>
 
   <script src="js/data.js"></script>
   <script src="js/app.js"></script>
   <script>
-    ready(function () {
+    ready(async function () {
       const eventId = qs("event");
-      const ev = DB.getEvent(eventId);
+      const ev = await DB.getEvent(eventId);
       const card = document.getElementById("card");
 
       if (!ev) {
         card.innerHTML = '<p class="empty">This invite link is invalid or the event was removed.</p>';
         return;
       }
+
       if (ev.cancelled) {
         card.innerHTML = '<div class="notice"><strong>This event has been cancelled.</strong></div>';
         return;
       }
 
       const me = DB.currentUser();
-      const mine = DB.getRsvpFor(ev.id, me.id);
+      const mine = await DB.getRsvpFor(ev.id, me.id);
 
       card.innerHTML = `
         <h3>${esc(ev.title)}</h3>
-        <p class="subtle">${prettyDate(ev.date)} · ${esc(ev.time || "")} · ${esc(ev.location || "")}</p>
+        <p class="subtle">${prettyDate(ev.date)} - ${esc(ev.time || "")} - ${esc(ev.location || "")}</p>
         <p>${esc(ev.description || "")}</p>
         <label for="rsvpSelect">Can you make it?</label>
         <select id="rsvpSelect">
@@ -58,11 +58,15 @@
 
       if (mine) document.getElementById("rsvpSelect").value = mine.status;
 
-      document.getElementById("saveBtn").addEventListener("click", function () {
-        DB.setRsvp(ev.id, me.id, document.getElementById("rsvpSelect").value);
-        card.innerHTML = '<div class="notice"><strong>Thanks — your RSVP is in!</strong></div>' +
-          '<div class="btn-row"><a class="btn" href="event.html?event=' +
-          encodeURIComponent(ev.id) + '">See who\'s coming</a></div>';
+      document.getElementById("saveBtn").addEventListener("click", async function () {
+        try {
+          await DB.setRsvp(ev.id, me.id, document.getElementById("rsvpSelect").value);
+          card.innerHTML = '<div class="notice"><strong>Thanks - your RSVP is in!</strong></div>' +
+            '<div class="btn-row"><a class="btn" href="event.html?event=' +
+            encodeURIComponent(ev.id) + '">See who is coming</a></div>';
+        } catch (error) {
+          alert(error.message);
+        }
       });
     });
   </script>
