@@ -1,4 +1,4 @@
-@baseUrl = http://localhost:3000
+@baseUrl = https://board-night-server-594j5.ondigitalocean.app
 
 ### API: Server health
 GET {{baseUrl}}/health

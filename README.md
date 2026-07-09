@@ -1,12 +1,12 @@
 # Board Night - App Scaffold
 
-A starting point for the Board Night MVP, built with **plain HTML, CSS, and JavaScript**. The frontend talks to the real Board Night API/database server on `http://localhost:3000`.
+A starting point for the Board Night MVP, built with **plain HTML, CSS, and JavaScript**. The frontend talks to the real Board Night API/database server on `https://board-night-server-594j5.ondigitalocean.app`.
 
 > This is a scaffold, not a finished app. It gives you working pages and a clean place to plug in real logic.
 
 ## How to run
 
-1. Start the API/database server on `http://localhost:3000`.
+1. Use the production API/database server at `https://board-night-server-594j5.ondigitalocean.app`.
 2. Do not run `server.js`; the static frontend server is intentionally disabled so only the API/database server uses port `3000`.
 
 Sign in with a user that exists in the API database. Use **Clear session** to remove the browser session.
@@ -25,14 +25,14 @@ board-night/
 ├── css/
 │   └── styles.css    Shared styles
 ├── js/
-│   ├── data.js       API-backed data layer for localhost:3000
+│   ├── data.js       API-backed data layer for the production server
 │   └── app.js        Shared helpers (used by every page)
 └── README.md
 ```
 
 ## How the pieces fit
 
-Every page talks to the data layer through the `DB` object in `js/data.js`. Pages never touch the API directly. `js/data.js` points to `http://localhost:3000` by default, or to `window.BOARD_NIGHT_API_URL` if you set one before loading `js/data.js`.
+Every page talks to the data layer through the `DB` object in `js/data.js`. Pages never touch the API directly. `js/data.js` points to `https://board-night-server-594j5.ondigitalocean.app` by default, or to `window.BOARD_NIGHT_API_URL` if you set one before loading `js/data.js`.
 
 `js/app.js` holds small shared helpers: reading URL params (`qs`), escaping text (`esc`), formatting dates, and rendering the top bar.
 
@@ -62,4 +62,4 @@ Description field is stubbed in; everything else from V2/V3 (game voting, rules 
 
 ---
 
-*Frontend scaffold connected to the local Board Night API/database server.*
+*Frontend scaffold connected to the production Board Night API/database server.*
