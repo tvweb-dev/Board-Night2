@@ -1,13 +1,25 @@
 # Board Night - App Scaffold
 
-A starting point for the Board Night MVP, built with **plain HTML, CSS, and JavaScript**. The frontend talks to the real Board Night API/database server on `https://board-night-server-594j5.ondigitalocean.app`.
+A starting point for the Board Night MVP, built with **plain HTML, CSS, and JavaScript** with a lightweight Node SSR layer. The frontend talks to the real Board Night API/database server on `https://board-night-server-594j5.ondigitalocean.app`.
 
 > This is a scaffold, not a finished app. It gives you working pages and a clean place to plug in real logic.
 
 ## How to run
 
-1. Use the production API/database server at `https://board-night-server-594j5.ondigitalocean.app`.
-2. Do not run `server.js`; the static frontend server is intentionally disabled so only the API/database server uses port `3000`.
+1. Use Node.js 18+.
+2. Use the production API/database server at `https://board-night-server-594j5.ondigitalocean.app`.
+3. Start the SSR frontend server:
+
+	`node server.js`
+
+4. Open `http://localhost:5173`.
+
+Optional environment variables:
+
+- `PORT` (default `5173`)
+- `BOARD_NIGHT_API_URL` (default production API URL)
+- `BOARD_NIGHT_SITE_URL` (used for canonical/OG URLs)
+- `BOARD_NIGHT_SSR_USER_ID` (default `1`, used for server pre-rendered dashboard/group/event snapshots)
 
 Sign in with a user that exists in the API database. Use **Clear session** to remove the browser session.
 
@@ -32,7 +44,9 @@ board-night/
 
 ## How the pieces fit
 
-Every page talks to the data layer through the `DB` object in `js/data.js`. Pages never touch the API directly. `js/data.js` points to `https://board-night-server-594j5.ondigitalocean.app` by default, or to `window.BOARD_NIGHT_API_URL` if you set one before loading `js/data.js`.
+Every page talks to the data layer through the `DB` object in `js/data.js`. Pages never touch the API directly in browser code. `js/data.js` points to `https://board-night-server-594j5.ondigitalocean.app` by default, or to `window.BOARD_NIGHT_API_URL` if you set one before loading `js/data.js`.
+
+The SSR server in `server.js` renders route-level SEO tags (title, description, canonical, Open Graph, Twitter, JSON-LD) and pre-renders core page content for crawlers and first paint.
 
 `js/app.js` holds small shared helpers: reading URL params (`qs`), escaping text (`esc`), formatting dates, and rendering the top bar.
 
