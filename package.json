@@ -1,0 +1,12 @@
+{
+  "name": "board-night-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SEO-rich server-rendered frontend for Board Night.",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
