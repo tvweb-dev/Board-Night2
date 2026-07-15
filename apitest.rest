@@ -6,30 +6,30 @@ GET {{baseUrl}}/health
 ### API: Database health
 GET {{baseUrl}}/db/health
 
-### USERS: Create host user
+### USERS: Create user
 POST {{baseUrl}}/api/users
 Content-Type: application/json
 
 {
-  "email": "host@test.com",
+  "email": "john@test.com",
   "password": "password123"
 }
 
-### USERS: Create member user
-POST {{baseUrl}}/api/users
-Content-Type: application/json
+### USERS: Create member user **not sure why this is here? looks like same as abover?? 
+# POST {{baseUrl}}/api/users
+# Content-Type: application/json
 
-{
-  "email": "member@test.com",
-  "password": "password123"
-}
+# {
+#   "email": "board-night@test.com",
+#   "password": "password123"
+# }
 
 ### USERS: Login host user
 POST {{baseUrl}}/api/users/login
 Content-Type: application/json
 
 {
-  "email": "host@test.com",
+  "email": "john@test.com",
   "password": "password123"
 }
 
