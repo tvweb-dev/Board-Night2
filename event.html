@@ -36,14 +36,26 @@
       <h3>Going</h3><ul class="plain" id="listGoing"></ul>
       <h3>Maybe</h3><ul class="plain" id="listMaybe"></ul>
       <h3>Can't make it</h3><ul class="plain" id="listNo"></ul>
+      <h3>Invited</h3><ul class="plain" id="listPending"></ul>
     </div>
 
-    <div class="card" id="hostBox">
+    <p class="notice" id="hostOnlyNotice" style="display:none;">Only this event's host can invite members or change event settings.</p>
+
+    <div class="card" id="hostBox" style="display:none;">
       <h3>Host controls</h3>
       <div class="btn-row">
         <a class="btn secondary" id="editBtn" href="#">Edit event</a>
-        <a class="btn secondary" id="emailBtn" href="#">Send email invites</a>
+        <a class="btn secondary" id="emailBtn" href="#">Open RSVP link</a>
         <button class="btn secondary" id="cancelEventBtn">Cancel event</button>
+      </div>
+      <div class="invite-members">
+        <h3>Invite group members</h3>
+        <p class="subtle">Select members to add to this event. They will appear as invited until they RSVP.</p>
+        <div id="inviteMemberList"></div>
+        <div class="btn-row">
+          <button class="btn" id="inviteMembersBtn">Invite selected members</button>
+        </div>
+        <p class="subtle" id="inviteStatus" role="status" aria-live="polite"></p>
       </div>
       <label for="hostSelect" style="margin-top:14px;">Change host to</label>
       <select id="hostSelect"></select>
@@ -85,7 +97,7 @@
 
       async function renderWhosComing() {
         const rsvps = await DB.getRsvps(ev.id);
-        const buckets = { going: [], maybe: [], no: [] };
+        const buckets = { going: [], maybe: [], no: [], pending: [] };
 
         rsvps.forEach(function (r) {
           if (buckets[r.status]) {
@@ -103,33 +115,58 @@
         fill("listGoing", buckets.going);
         fill("listMaybe", buckets.maybe);
         fill("listNo", buckets.no);
+        fill("listPending", buckets.pending);
         document.getElementById("goingCount").textContent = buckets.going.length;
       }
 
       async function renderMyRsvp() {
         const mine = await DB.getRsvpFor(ev.id, me.id);
-        if (mine) document.getElementById("rsvpSelect").value = mine.status;
+        if (mine && mine.status !== "pending") {
+          document.getElementById("rsvpSelect").value = mine.status;
+        }
       }
 
       async function renderHostControls() {
         const box = document.getElementById("hostBox");
         if (!amHost) {
           box.style.display = "none";
+          document.getElementById("hostOnlyNotice").style.display = "block";
           return;
         }
+
+        box.style.display = "block";
+        document.getElementById("hostOnlyNotice").style.display = "none";
 
         const cancelButton = document.getElementById("cancelEventBtn");
         cancelButton.disabled = true;
         cancelButton.textContent = "Cancel not in MVP API";
 
         const sel = document.getElementById("hostSelect");
-        const members = (await DB.getMembers(ev.groupId)).filter(function (m) {
+        const members = await DB.getMembers(ev.groupId);
+        const otherMembers = members.filter(function (m) {
           return String(m.id) !== String(ev.hostId);
         });
 
-        sel.innerHTML = members.length
-          ? members.map(function (m) { return '<option value="' + m.id + '">' + esc(m.name) + "</option>"; }).join("")
+        sel.innerHTML = otherMembers.length
+          ? otherMembers.map(function (m) { return '<option value="' + m.id + '">' + esc(m.name) + "</option>"; }).join("")
           : '<option value="">No other members</option>';
+
+        const invitedIds = new Set((await DB.getRsvps(ev.id)).map(function (r) {
+          return String(r.userId);
+        }));
+        const availableMembers = members.filter(function (m) {
+          return !invitedIds.has(String(m.id));
+        });
+        const inviteList = document.getElementById("inviteMemberList");
+        const inviteButton = document.getElementById("inviteMembersBtn");
+
+        inviteList.innerHTML = availableMembers.length
+          ? '<ul class="plain invite-list">' + availableMembers.map(function (m) {
+            return '<li><label><input type="checkbox" name="eventMember" value="' +
+              esc(m.id) + '"> ' + esc(m.name) + '</label></li>';
+          }).join("") + "</ul>"
+          : '<p class="empty">Every group member has already been invited.</p>';
+        inviteButton.disabled = !availableMembers.length;
       }
 
       document.getElementById("saveRsvpBtn").addEventListener("click", async function () {
@@ -148,6 +185,32 @@
 
       document.getElementById("changeHostBtn").addEventListener("click", async function () {
         await DB.changeHost(ev.id, document.getElementById("hostSelect").value);
+      });
+
+      document.getElementById("inviteMembersBtn").addEventListener("click", async function () {
+        const selected = Array.from(document.querySelectorAll('input[name="eventMember"]:checked'));
+        const status = document.getElementById("inviteStatus");
+
+        if (!selected.length) {
+          status.textContent = "Select at least one group member to invite.";
+          return;
+        }
+
+        const button = document.getElementById("inviteMembersBtn");
+        button.disabled = true;
+        status.textContent = "Sending invitations...";
+
+        try {
+          await Promise.all(selected.map(function (input) {
+            return DB.inviteToEvent(ev.id, input.value);
+          }));
+          status.textContent = selected.length + " member" + (selected.length === 1 ? " has" : "s have") + " been invited.";
+          await Promise.all([renderWhosComing(), renderHostControls()]);
+        } catch (error) {
+          status.textContent = "Unable to invite members.";
+          alert(error.message);
+          await renderHostControls();
+        }
       });
 
       renderHeader();

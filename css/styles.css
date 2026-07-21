@@ -89,6 +89,12 @@ textarea { min-height: 70px; resize: vertical; }
 .btn.secondary:hover { background: #f7f4ee; }
 .btn.small { padding: 5px 10px; font-size: .85rem; }
 .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.btn:disabled { cursor: not-allowed; opacity: .6; }
+
+.invite-members { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 14px; }
+.invite-members h3 { margin-bottom: 2px; }
+.invite-list label { color: var(--ink); cursor: pointer; margin: 0; }
+.invite-list input { width: auto; margin-right: 6px; }
 
 /* Lists */
 ul.plain { list-style: none; padding: 0; margin: 0; }
