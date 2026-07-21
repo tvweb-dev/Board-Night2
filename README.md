@@ -62,7 +62,7 @@ The SSR server in `server.js` renders route-level SEO tags (title, description, 
 | 7 / 13 Who's coming + count | event.html | working |
 | 8 Cancel event | event.html (host) | UI present; not in MVP API yet |
 | 9 Change host | event.html (host) | UI present; not in MVP API yet |
-| 5 Email invite | rsvp.html (link works) | real email sending TODO |
+| 5 Invite event members | event.html + rsvp.html | working through the invite API; real email sending TODO |
 
 ## What's left to do
 

@@ -246,6 +246,23 @@ const DB = {
     return rsvps.find((r) => String(r.userId) === String(userId)) || null;
   },
 
+  async inviteToEvent(eventId, userId) {
+    const existing = await this.getRsvpFor(eventId, userId);
+    if (existing) return existing;
+
+    const invite = await this.api("/api/invites", {
+      method: "POST",
+      body: JSON.stringify({ eventId, userId })
+    });
+
+    return {
+      id: invite.INVITE_ID,
+      eventId,
+      userId,
+      status: "pending"
+    };
+  },
+
   async setRsvp(eventId, userId, status) {
     const existing = await this.getRsvpFor(eventId, userId);
     const invite = existing || await this.api("/api/invites", {
@@ -284,7 +301,7 @@ const DB = {
       GOING: "going",
       MAYBE: "maybe",
       NOT_GOING: "no",
-      PENDING: "maybe"
-    }[status] || "maybe";
+      PENDING: "pending"
+    }[status] || "pending";
   }
 };

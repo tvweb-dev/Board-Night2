@@ -56,7 +56,9 @@
           <a class="btn secondary" href="event.html?event=${encodeURIComponent(ev.id)}">View event</a>
         </div>`;
 
-      if (mine) document.getElementById("rsvpSelect").value = mine.status;
+      if (mine && mine.status !== "pending") {
+        document.getElementById("rsvpSelect").value = mine.status;
+      }
 
       document.getElementById("saveBtn").addEventListener("click", async function () {
         try {
