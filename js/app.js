@@ -34,7 +34,13 @@ function renderTopbar() {
     <nav>
       <a href="dashboard.html">Dashboard</a>
       <span class="subtle" style="margin-left:16px;color:#ffd9cf">${esc(user ? user.name : "")}</span>
+      <button class="nav-signout" id="signOutBtn" type="button">Sign out</button>
     </nav>`;
+
+  document.getElementById("signOutBtn").addEventListener("click", function () {
+    DB.reset();
+    window.location.href = "index.html";
+  });
 }
 
 // Run a function once the DOM is ready
