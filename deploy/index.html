@@ -6,12 +6,10 @@
 <title>Board Night — Mobile Prototype</title>
 
 <!-- ================================================================
-     ADOBE FONTS (Decoy Black) — REQUIRED for the title font.
-     1. In Adobe Fonts, create a Web Project and add "Decoy" (Black).
-     2. Copy your project ID and replace YOUR_KIT_ID below.
-     Until then, titles fall back to a serif face automatically.
+     ADOBE FONTS
+     This kit supplies Gambado Sans Forte for headings and Tahoma for body copy.
 ================================================================= -->
-<link rel="stylesheet" href="https://use.typekit.net/YOUR_KIT_ID.css">
+<link rel="stylesheet" href="https://use.typekit.net/oga8xpj.css">
 
 <style>
   :root{
@@ -30,14 +28,14 @@
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   body{
-    margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    margin:0;font-family:"tahoma",Tahoma,sans-serif;
     background:var(--emerald);color:var(--ink);
     display:flex;flex-direction:column;align-items:center;gap:18px;
     padding:28px 12px;min-height:100vh;
   }
   /* Title font = Decoy Black (Adobe Fonts), serif fallback */
-  h1,h2,.bar .title,.page-head h1{
-    font-family:"decoy",Georgia,"Times New Roman",serif;font-weight:900;letter-spacing:.2px;}
+  h1,h2,h3,h4,h5,h6,.bar .title,.page-head h1{
+    font-family:"gambado-sans-forte",sans-serif;font-weight:700;letter-spacing:.2px;}
 
   .page-head{color:var(--peach);text-align:center;max-width:360px;}
   .page-head h1{margin:0 0 6px;font-size:1.4rem;color:var(--offwhite);}

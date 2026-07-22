@@ -20,10 +20,16 @@
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: "tahoma", Tahoma, sans-serif;
   background: var(--bg);
   color: var(--ink);
   line-height: 1.5;
+}
+
+h1, h2, h3, h4, h5, h6,
+.brand, .title {
+  font-family: "gambado-sans-forte", sans-serif;
+  font-weight: 700;
 }
 
 a { color: var(--accent); }
