@@ -180,8 +180,8 @@ const DB = {
       method: "POST",
       body: JSON.stringify({
         groupId: ev.groupId,
-        hostId: this.currentUserId(),
         eventTitle: ev.title || "Game Night",
+        eventDescription: ev.description || "",
         eventDate: ev.date || "",
         eventTime: ev.time || "",
         eventLocation: ev.location || ""
@@ -203,8 +203,10 @@ const DB = {
       date: ev.date || "",
       time: ev.time || "",
       location: ev.location || "",
-      description: ev.description || "",
-      cancelled: false,
+      EVENT_DESCRIPTION: created.EVENT_DESCRIPTION ?? null,
+      description: created.EVENT_DESCRIPTION || ev.description || "",
+      status: created.EVENT_STATUS || "ACTIVE",
+      cancelled: created.EVENT_STATUS === "CANCELED",
       hostRsvpStatus
     };
   },
@@ -240,8 +242,10 @@ const DB = {
       date: row.EVENT_DATE ? String(row.EVENT_DATE).slice(0, 10) : "",
       time: row.EVENT_TIME || "",
       location: row.EVENT_LOCATION || "",
-      description: "",
-      cancelled: row.EVENT_STATUS === "CANCELLED"
+      EVENT_DESCRIPTION: row.EVENT_DESCRIPTION ?? null,
+      description: row.EVENT_DESCRIPTION || "",
+      status: row.EVENT_STATUS || "ACTIVE",
+      cancelled: row.EVENT_STATUS === "CANCELED"
     };
   },
 

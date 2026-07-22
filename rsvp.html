@@ -35,7 +35,13 @@
       }
 
       if (ev.cancelled) {
-        card.innerHTML = '<div class="notice"><strong>This event has been cancelled.</strong></div>';
+        card.innerHTML = `
+          <h3>${esc(ev.title)}</h3>
+          <p class="subtle">${prettyDate(ev.date)} - ${esc(ev.time || "")} - ${esc(ev.location || "")}</p>
+          ${ev.description ? '<p class="event-description" id="eventDescription"></p>' : ""}
+          <div class="notice"><strong>This event has been canceled.</strong></div>`;
+        const canceledDescription = document.getElementById("eventDescription");
+        if (canceledDescription) canceledDescription.textContent = ev.description;
         return;
       }
 
@@ -45,7 +51,7 @@
       card.innerHTML = `
         <h3>${esc(ev.title)}</h3>
         <p class="subtle">${prettyDate(ev.date)} - ${esc(ev.time || "")} - ${esc(ev.location || "")}</p>
-        <p>${esc(ev.description || "")}</p>
+        ${ev.description ? '<p class="event-description" id="eventDescription"></p>' : ""}
         <label for="rsvpSelect">Can you make it?</label>
         <select id="rsvpSelect">
           <option value="going">Going</option>
@@ -56,6 +62,9 @@
           <button class="btn" id="saveBtn">Send RSVP</button>
           <a class="btn secondary" href="event.html?event=${encodeURIComponent(ev.id)}">View event</a>
         </div>`;
+
+      const eventDescription = document.getElementById("eventDescription");
+      if (eventDescription) eventDescription.textContent = ev.description;
 
       if (mine && mine.status !== "pending") {
         document.getElementById("rsvpSelect").value = mine.status;

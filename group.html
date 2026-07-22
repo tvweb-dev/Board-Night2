@@ -80,13 +80,20 @@
 
           return `<a class="card" style="text-decoration:none;color:inherit;display:block;"
                      href="event.html?event=${encodeURIComponent(e.id)}">
-                    <h3>${esc(e.title)} ${e.cancelled ? '<span class="pill cancelled">Cancelled</span>' : ""}</h3>
+                    <h3>${esc(e.title)} <span class="pill ${e.cancelled ? "cancelled" : "active"}">${esc(e.status)}</span></h3>
                     <p class="subtle">${prettyDate(e.date)} - ${esc(e.time || "")} - ${esc(e.location || "")}</p>
+                    ${e.description ? `<p class="event-description-preview" data-event-description="${encodeURIComponent(String(e.id))}"></p>` : ""}
                     <p><span class="count-badge">${going}</span> going</p>
+                    <span class="subtle">View details</span>
                   </a>`;
         }));
 
         wrap.innerHTML = cards.join("");
+        events.forEach(function (event) {
+          if (!event.description) return;
+          const preview = wrap.querySelector('[data-event-description="' + CSS.escape(String(event.id)) + '"]');
+          if (preview) preview.textContent = event.description;
+        });
       }
 
       document.getElementById("addMemberBtn").addEventListener("click", async function () {

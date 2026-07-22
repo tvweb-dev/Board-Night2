@@ -80,7 +80,9 @@ async function getEvents(groupId) {
     date: row.EVENT_DATE ? String(row.EVENT_DATE).slice(0, 10) : "",
     time: row.EVENT_TIME || "",
     location: row.EVENT_LOCATION || "",
-    cancelled: row.EVENT_STATUS === "CANCELLED"
+    description: row.EVENT_DESCRIPTION || "",
+    status: row.EVENT_STATUS || "ACTIVE",
+    cancelled: row.EVENT_STATUS === "CANCELED"
   }));
 }
 
@@ -245,7 +247,7 @@ async function renderGroup(reqUrl, html) {
           ? members.map((member) => `<li>${escapeHtml(member.name)}</li>`).join("")
           : '<li class="empty">No members yet.</li>';
         eventsHtml = events.length
-          ? events.map((event) => `<article class="card"><h3>${escapeHtml(event.title)}</h3><p class="subtle">${escapeHtml(prettyDate(event.date))} · ${escapeHtml(event.time || "TBD")} · ${escapeHtml(event.location || "Location TBD")}</p></article>`).join("")
+          ? events.map((event) => `<article class="card"><h3>${escapeHtml(event.title)} <span class="pill ${event.cancelled ? "cancelled" : "active"}">${escapeHtml(event.status)}</span></h3><p class="subtle">${escapeHtml(prettyDate(event.date))} · ${escapeHtml(event.time || "TBD")} · ${escapeHtml(event.location || "Location TBD")}</p>${event.description ? `<p class="event-description-preview">${escapeHtml(event.description)}</p>` : ""}</article>`).join("")
           : '<p class="empty">No events yet.</p>';
       }
     } catch (error) {
@@ -271,6 +273,7 @@ async function renderEvent(reqUrl, html) {
   let eventTitle = "Event";
   let eventMeta = "Select an event to view details.";
   let eventDesc = "";
+  let eventStatus = "ACTIVE";
   let goingCount = 0;
 
   if (eventId) {
@@ -282,7 +285,8 @@ async function renderEvent(reqUrl, html) {
         goingCount = rsvps.filter((r) => r.status === "GOING").length;
         eventTitle = event.title;
         eventMeta = `${prettyDate(event.date)} · ${event.time || "Time TBD"} · ${event.location || "Location TBD"}`;
-        eventDesc = event.cancelled ? "This event has been cancelled." : "RSVP to let the host know if you can make it.";
+        eventDesc = event.description;
+        eventStatus = event.status;
         title = `${event.title} | Board Night Event`;
         description = `${event.title} is on ${prettyDate(event.date)} at ${event.location || "TBD"}. ${goingCount} attendee(s) are currently going.`;
       }
@@ -316,9 +320,18 @@ async function renderEvent(reqUrl, html) {
     }
   };
 
-  let out = html.replace('<h1 id="eventTitle">Event</h1>', `<h1 id="eventTitle">${escapeHtml(eventTitle)}</h1>`);
+  let out = html.replace('<span id="eventTitle">Event</span>', `<span id="eventTitle">${escapeHtml(eventTitle)}</span>`);
+  out = out.replace(
+    '<span class="pill active" id="eventStatus">ACTIVE</span>',
+    `<span class="pill ${eventStatus === "CANCELED" ? "cancelled" : "active"}" id="eventStatus">${escapeHtml(eventStatus)}</span>`
+  );
   out = out.replace('<p class="subtle" id="eventMeta"></p>', `<p class="subtle" id="eventMeta">${escapeHtml(eventMeta)}</p>`);
-  out = out.replace('<p id="eventDesc"></p>', `<p id="eventDesc">${escapeHtml(eventDesc)}</p>`);
+  out = out.replace(
+    '<p class="event-description" id="eventDesc" hidden></p>',
+    eventDesc
+      ? `<p class="event-description" id="eventDesc">${escapeHtml(eventDesc)}</p>`
+      : '<p class="event-description" id="eventDesc" hidden></p>'
+  );
   out = out.replace('<span class="count-badge" id="goingCount">0</span>', `<span class="count-badge" id="goingCount">${goingCount}</span>`);
   return applySeo(out, meta);
 }
@@ -339,7 +352,7 @@ async function renderRsvp(reqUrl, html) {
         const { event } = found;
         title = `${event.title} RSVP | Board Night`;
         description = `RSVP for ${event.title} on ${prettyDate(event.date)} at ${event.location || "TBD"}.`;
-        card = `<h3>${escapeHtml(event.title)}</h3><p class="subtle">${escapeHtml(prettyDate(event.date))} · ${escapeHtml(event.time || "Time TBD")} · ${escapeHtml(event.location || "Location TBD")}</p><p>Use the form below to confirm your RSVP.</p>`;
+        card = `<h3>${escapeHtml(event.title)}</h3><p class="subtle">${escapeHtml(prettyDate(event.date))} · ${escapeHtml(event.time || "Time TBD")} · ${escapeHtml(event.location || "Location TBD")}</p>${event.description ? `<p class="event-description">${escapeHtml(event.description)}</p>` : ""}<p>Use the form below to confirm your RSVP.</p>`;
       }
     } catch (error) {
       card = '<p class="empty">Unable to pre-render this invite right now.</p>';

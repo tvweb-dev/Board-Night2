@@ -92,6 +92,16 @@ input, select, textarea {
   background: #fff;
 }
 textarea { min-height: 70px; resize: vertical; }
+.character-counter { color: var(--muted); font-size: .82rem; margin: 4px 0 0; text-align: right; }
+.event-description { white-space: pre-wrap; overflow-wrap: anywhere; }
+.event-description-preview {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
 
 .btn {
   display: inline-block;
@@ -132,6 +142,7 @@ ul.plain li:last-child { border-bottom: none; }
 .pill.going { background: var(--green); }
 .pill.maybe { background: var(--amber); }
 .pill.no { background: var(--red); }
+.pill.active { background: var(--green); }
 .pill.cancelled { background: var(--muted); }
 
 .count-badge {

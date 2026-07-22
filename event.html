@@ -15,9 +15,9 @@
 
     <div id="cancelledBanner"></div>
 
-    <h1 id="eventTitle">Event</h1>
+    <h1><span id="eventTitle">Event</span> <span class="pill active" id="eventStatus">ACTIVE</span></h1>
     <p class="subtle" id="eventMeta"></p>
-    <p id="eventDesc"></p>
+    <p class="event-description" id="eventDesc" hidden></p>
 
     <div class="card">
       <h3>Your RSVP</h3>
@@ -101,9 +101,14 @@
 
       function renderHeader() {
         document.getElementById("eventTitle").textContent = ev.title;
+        const eventStatus = document.getElementById("eventStatus");
+        eventStatus.textContent = ev.status;
+        eventStatus.className = "pill " + (ev.cancelled ? "cancelled" : "active");
         document.getElementById("eventMeta").textContent =
           prettyDate(ev.date) + " - " + (ev.time || "") + " - " + (ev.location || "");
-        document.getElementById("eventDesc").textContent = ev.description || "";
+        const description = document.getElementById("eventDesc");
+        description.textContent = ev.description || "";
+        description.hidden = !ev.description;
         document.getElementById("cancelledBanner").innerHTML = ev.cancelled
           ? '<div class="notice"><strong>This event is cancelled.</strong></div>' : "";
       }
@@ -228,7 +233,8 @@
         button.textContent = "Cancelling…";
         try {
           const updated = await DB.cancelEvent(ev.id);
-          ev.cancelled = String(updated.EVENT_STATUS || "CANCELLED").toUpperCase() === "CANCELLED";
+          ev.status = updated.EVENT_STATUS || "CANCELED";
+          ev.cancelled = String(ev.status).toUpperCase() === "CANCELED";
           renderHeader();
           showHostStatus("Event cancelled successfully.");
           await renderHostControls();

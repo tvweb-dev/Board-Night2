@@ -64,8 +64,8 @@ Content-Type: application/json
 
 {
   "groupId": 1,
-  "hostId": 1,
   "eventTitle": "Catan Night",
+  "eventDescription": "An evening of trading, building, and friendly competition.",
   "eventDate": "2026-07-15",
   "eventTime": "19:00:00",
   "eventLocation": "Library Room A"
