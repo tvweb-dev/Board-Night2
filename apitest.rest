@@ -74,6 +74,14 @@ Content-Type: application/json
 ### EVENTS: Get events for group 1
 GET {{baseUrl}}/api/events/group/1
 
+### EVENTS: Change event 1 host to user 2
+PATCH {{baseUrl}}/api/events/1/host
+Content-Type: application/json
+
+{
+  "newHostId": 2
+}
+
 ### INVITES: Invite user 2 to event 1
 POST {{baseUrl}}/api/invites
 Content-Type: application/json
@@ -82,6 +90,9 @@ Content-Type: application/json
   "eventId": 1,
   "userId": 2
 }
+
+### INVITES: Send email for invite 1
+POST {{baseUrl}}/api/invites/1/send-email
 
 ### RSVPS: Update invite 1 to GOING
 PUT {{baseUrl}}/api/invites/rsvp
@@ -94,3 +105,8 @@ Content-Type: application/json
 
 ### RSVPS: Get RSVPs for event 1
 GET {{baseUrl}}/api/events/1/rsvps
+
+### EVENTS: Cancel event 1
+# Keep this destructive state-change last so the invite and RSVP requests above
+# can still be run sequentially against the same event.
+PATCH {{baseUrl}}/api/events/1/cancel
