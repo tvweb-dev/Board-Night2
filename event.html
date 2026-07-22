@@ -112,7 +112,15 @@
         const rsvps = await DB.getRsvps(ev.id);
         const buckets = { going: [], maybe: [], no: [], pending: [] };
 
-        rsvps.forEach(function (r) {
+        const uniqueRsvps = new Map();
+        rsvps.forEach(function (rsvp) {
+          const key = String(rsvp.userId);
+          const existing = uniqueRsvps.get(key);
+          const preferHostGoing = String(rsvp.userId) === String(ev.hostId) && rsvp.status === "going";
+          if (!existing || preferHostGoing) uniqueRsvps.set(key, rsvp);
+        });
+
+        uniqueRsvps.forEach(function (r) {
           if (buckets[r.status]) {
             buckets[r.status].push(r);
           }
@@ -186,6 +194,7 @@
         const eventInvites = await DB.getRsvps(ev.id);
         const invitedByUser = new Map(eventInvites.map(function (r) { return [String(r.userId), r]; }));
         const availableMembers = members.filter(function (m) {
+          if (String(m.id) === String(ev.hostId)) return false;
           const invite = invitedByUser.get(String(m.id));
           return !invite || (invite.status === "pending" && String(invite.emailStatus).toUpperCase() !== "SENT");
         });

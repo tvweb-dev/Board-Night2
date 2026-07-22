@@ -4,6 +4,7 @@ const API_BASE_URL = window.BOARD_NIGHT_API_URL || "https://board-night-server-5
 
 const DB = {
   SESSION_KEY: "boardNightSession",
+  CREATED_EVENT_RSVP_KEY: "boardNightCreatedEventRsvp",
 
   async api(path, options = {}) {
     const rawSession = localStorage.getItem(this.SESSION_KEY);
@@ -187,6 +188,13 @@ const DB = {
       })
     });
 
+    const hostRsvpStatus = this.fromApiStatus(created.HOST_RSVP_STATUS);
+    sessionStorage.setItem(this.CREATED_EVENT_RSVP_KEY, JSON.stringify({
+      eventId: created.EVENT_ID,
+      userId: this.currentUserId(),
+      status: hostRsvpStatus
+    }));
+
     return {
       id: created.EVENT_ID,
       groupId: ev.groupId,
@@ -196,7 +204,8 @@ const DB = {
       time: ev.time || "",
       location: ev.location || "",
       description: ev.description || "",
-      cancelled: false
+      cancelled: false,
+      hostRsvpStatus
     };
   },
 
@@ -239,7 +248,7 @@ const DB = {
   /* ---- rsvps ---- */
   async getRsvps(eventId) {
     const rsvps = await this.api(`/api/events/${eventId}/rsvps`);
-    return rsvps.map((row) => ({
+    let mapped = rsvps.map((row) => ({
       id: row.INVITE_ID,
       eventId: row.EVENT_ID,
       userId: row.USER_ID,
@@ -249,6 +258,29 @@ const DB = {
       emailStatus: row.EMAIL_STATUS || row.INVITE_EMAIL_STATUS || "",
       emailSentAt: row.EMAIL_SENT_AT || row.INVITE_EMAIL_SENT_AT || null
     }));
+
+    const rawCreatedRsvp = sessionStorage.getItem(this.CREATED_EVENT_RSVP_KEY);
+    const createdRsvp = rawCreatedRsvp ? JSON.parse(rawCreatedRsvp) : null;
+
+    if (createdRsvp && String(createdRsvp.eventId) === String(eventId)) {
+      // The create-event response is authoritative for the host's initial RSVP.
+      // Replace any pending invite row for the host instead of showing both.
+      mapped = mapped.filter((rsvp) => String(rsvp.userId) !== String(createdRsvp.userId));
+      const host = this.currentUser();
+      mapped.unshift({
+        id: null,
+        eventId: Number(eventId),
+        userId: createdRsvp.userId,
+        userName: host.name,
+        userEmail: host.email,
+        status: createdRsvp.status,
+        emailStatus: "",
+        emailSentAt: null
+      });
+      sessionStorage.removeItem(this.CREATED_EVENT_RSVP_KEY);
+    }
+
+    return mapped;
   },
 
   async getRsvpFor(eventId, userId) {
