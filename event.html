@@ -42,6 +42,8 @@
 
     <p class="notice" id="hostOnlyNotice" style="display:none;">Only this event's host can invite members or change event settings.</p>
 
+    <p class="notice" id="hostActionStatus" role="status" aria-live="polite" style="display:none;"></p>
+
     <div class="card" id="hostBox" style="display:none;">
       <h3>Host controls</h3>
       <div class="btn-row">
@@ -54,7 +56,7 @@
         <p class="subtle">Select members to add to this event. They will appear as invited until they RSVP.</p>
         <div id="inviteMemberList"></div>
         <div class="btn-row">
-          <button class="btn" id="inviteMembersBtn">Invite selected members</button>
+          <button class="btn" id="inviteMembersBtn">Send Invitation</button>
         </div>
         <p class="subtle" id="inviteStatus" role="status" aria-live="polite"></p>
       </div>
@@ -81,7 +83,17 @@
       }
 
       const me = DB.currentUser();
-      const amHost = String(ev.hostId) === String(me.id);
+      let hostActionPending = false;
+
+      function amHost() {
+        return String(ev.hostId) === String(me.id);
+      }
+
+      function showHostStatus(message) {
+        const status = document.getElementById("hostActionStatus");
+        status.textContent = message;
+        status.style.display = message ? "block" : "none";
+      }
 
       document.getElementById("backLink").href = "group.html?group=" + encodeURIComponent(ev.groupId);
       document.getElementById("editBtn").href = "event-edit.html?event=" + encodeURIComponent(ev.id);
@@ -102,21 +114,32 @@
 
         rsvps.forEach(function (r) {
           if (buckets[r.status]) {
-            buckets[r.status].push(r.userName || r.userEmail || `User ${r.userId}`);
+            buckets[r.status].push(r);
           }
         });
 
-        function fill(id, names) {
+        function fill(id, entries) {
           const ul = document.getElementById(id);
-          ul.innerHTML = names.length
-            ? names.map(function (n) { return "<li>" + esc(n) + "</li>"; }).join("")
+          ul.innerHTML = entries.length
+            ? entries.map(function (entry) {
+              return "<li>" + esc(entry.userName || entry.userEmail || `User ${entry.userId}`) + "</li>";
+            }).join("")
             : '<li class="empty">Nobody yet</li>';
         }
 
         fill("listGoing", buckets.going);
         fill("listMaybe", buckets.maybe);
         fill("listNo", buckets.no);
-        fill("listPending", buckets.pending);
+        const pendingList = document.getElementById("listPending");
+        pendingList.innerHTML = buckets.pending.length
+          ? buckets.pending.map(function (entry) {
+            const emailStatus = String(entry.emailStatus).toUpperCase();
+            const sent = emailStatus === "SENT"
+              ? '<span class="subtle">Email sent' + (entry.emailSentAt ? " " + esc(new Date(entry.emailSentAt).toLocaleString()) : "") + "</span>"
+              : '<span class="subtle">' + (emailStatus === "FAILED" ? "Email failed" : "Email pending") + "</span>";
+            return "<li><span>" + esc(entry.userName || entry.userEmail || `User ${entry.userId}`) + "</span>" + sent + "</li>";
+          }).join("")
+          : '<li class="empty">Nobody yet</li>';
         document.getElementById("goingCount").textContent = buckets.going.length;
       }
 
@@ -129,9 +152,17 @@
 
       async function renderHostControls() {
         const box = document.getElementById("hostBox");
-        if (!amHost) {
+        if (!amHost()) {
           box.style.display = "none";
           document.getElementById("hostOnlyNotice").style.display = "block";
+          return;
+        }
+
+        if (ev.cancelled) {
+          box.style.display = "none";
+          const notice = document.getElementById("hostOnlyNotice");
+          notice.textContent = "Host actions are unavailable because this event is cancelled.";
+          notice.style.display = "block";
           return;
         }
 
@@ -139,8 +170,8 @@
         document.getElementById("hostOnlyNotice").style.display = "none";
 
         const cancelButton = document.getElementById("cancelEventBtn");
-        cancelButton.disabled = true;
-        cancelButton.textContent = "Cancel not in MVP API";
+        cancelButton.disabled = ev.cancelled;
+        cancelButton.textContent = ev.cancelled ? "Event cancelled" : "Cancel event";
 
         const sel = document.getElementById("hostSelect");
         const members = await DB.getMembers(ev.groupId);
@@ -149,14 +180,14 @@
         });
 
         sel.innerHTML = otherMembers.length
-          ? otherMembers.map(function (m) { return '<option value="' + m.id + '">' + esc(m.name) + "</option>"; }).join("")
+          ? '<option value="">Select a new host</option>' + otherMembers.map(function (m) { return '<option value="' + m.id + '">' + esc(m.name) + "</option>"; }).join("")
           : '<option value="">No other members</option>';
 
-        const invitedIds = new Set((await DB.getRsvps(ev.id)).map(function (r) {
-          return String(r.userId);
-        }));
+        const eventInvites = await DB.getRsvps(ev.id);
+        const invitedByUser = new Map(eventInvites.map(function (r) { return [String(r.userId), r]; }));
         const availableMembers = members.filter(function (m) {
-          return !invitedIds.has(String(m.id));
+          const invite = invitedByUser.get(String(m.id));
+          return !invite || (invite.status === "pending" && String(invite.emailStatus).toUpperCase() !== "SENT");
         });
         const inviteList = document.getElementById("inviteMemberList");
         const inviteButton = document.getElementById("inviteMembersBtn");
@@ -181,11 +212,47 @@
       });
 
       document.getElementById("cancelEventBtn").addEventListener("click", async function () {
-        await DB.cancelEvent(ev.id);
+        if (hostActionPending || !confirm("Are you sure you want to cancel this event?")) return;
+        const button = document.getElementById("cancelEventBtn");
+        hostActionPending = true;
+        button.disabled = true;
+        button.textContent = "Cancelling…";
+        try {
+          const updated = await DB.cancelEvent(ev.id);
+          ev.cancelled = String(updated.EVENT_STATUS || "CANCELLED").toUpperCase() === "CANCELLED";
+          renderHeader();
+          showHostStatus("Event cancelled successfully.");
+          await renderHostControls();
+        } catch (error) {
+          showHostStatus(error.message);
+          button.disabled = false;
+          button.textContent = "Cancel event";
+        } finally {
+          hostActionPending = false;
+        }
       });
 
       document.getElementById("changeHostBtn").addEventListener("click", async function () {
-        await DB.changeHost(ev.id, document.getElementById("hostSelect").value);
+        const newHostId = document.getElementById("hostSelect").value;
+        if (!newHostId) return showHostStatus("Select a new host.");
+        if (hostActionPending || !confirm("Transfer hosting to this member?")) return;
+        const button = document.getElementById("changeHostBtn");
+        hostActionPending = true;
+        button.disabled = true;
+        button.textContent = "Changing…";
+        try {
+          const updated = await DB.changeHost(ev.id, newHostId);
+          ev.hostId = updated.HOST_ID || updated.hostId || newHostId;
+          document.getElementById("hostSelect").value = "";
+          showHostStatus("Event host changed successfully.");
+          await renderHostControls();
+        } catch (error) {
+          showHostStatus(error.message);
+          button.disabled = false;
+          button.textContent = "Change host";
+        } finally {
+          hostActionPending = false;
+        }
       });
 
       document.getElementById("inviteMembersBtn").addEventListener("click", async function () {
@@ -198,19 +265,27 @@
         }
 
         const button = document.getElementById("inviteMembersBtn");
+        if (button.dataset.pending === "true") return;
+        let inviteSucceeded = false;
+        button.dataset.pending = "true";
         button.disabled = true;
-        status.textContent = "Sending invitations...";
+        button.textContent = "Sending…";
+        status.textContent = "Sending…";
 
         try {
           await Promise.all(selected.map(function (input) {
             return DB.inviteToEvent(ev.id, input.value);
           }));
-          status.textContent = selected.length + " member" + (selected.length === 1 ? " has" : "s have") + " been invited.";
+          status.textContent = "Invitation sent successfully.";
+          inviteSucceeded = true;
           await Promise.all([renderWhosComing(), renderHostControls()]);
         } catch (error) {
-          status.textContent = "Unable to invite members.";
-          alert(error.message);
-          await renderHostControls();
+          status.textContent = error.message;
+          await Promise.all([renderWhosComing(), renderHostControls()]);
+        } finally {
+          button.dataset.pending = "false";
+          button.textContent = "Send Invitation";
+          if (!inviteSucceeded && amHost() && !ev.cancelled && document.querySelector('input[name="eventMember"]')) button.disabled = false;
         }
       });
 

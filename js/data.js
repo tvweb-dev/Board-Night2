@@ -6,9 +6,12 @@ const DB = {
   SESSION_KEY: "boardNightSession",
 
   async api(path, options = {}) {
+    const rawSession = localStorage.getItem(this.SESSION_KEY);
+    const session = rawSession ? JSON.parse(rawSession) : null;
     const response = await fetch(API_BASE_URL + path, {
       headers: {
         "Content-Type": "application/json",
+        ...(session && session.token ? { Authorization: `Bearer ${session.token}` } : {}),
         ...(options.headers || {})
       },
       ...options
@@ -23,7 +26,7 @@ const DB = {
       throw new Error(payload.message || "API request failed");
     }
 
-    return payload.data;
+    return payload.data === undefined ? payload : payload.data;
   },
 
   load() {
@@ -205,12 +208,17 @@ const DB = {
     };
   },
 
-  async cancelEvent() {
-    alert("Cancelling events is not in the MVP API yet.");
+  async cancelEvent(eventId) {
+    const response = await this.api(`/api/events/${eventId}/cancel`, { method: "PATCH" });
+    return response.event || response;
   },
 
-  async changeHost() {
-    alert("Changing hosts is not in the MVP API yet.");
+  async changeHost(eventId, newHostId) {
+    const response = await this.api(`/api/events/${eventId}/host`, {
+      method: "PATCH",
+      body: JSON.stringify({ newHostId: Number(newHostId) })
+    });
+    return response.event || response;
   },
 
   mapEvent(row) {
@@ -237,7 +245,9 @@ const DB = {
       userId: row.USER_ID,
       userName: row.EMAIL || `User ${row.USER_ID}`,
       userEmail: row.EMAIL || "",
-      status: this.fromApiStatus(row.RSVP_STATUS)
+      status: this.fromApiStatus(row.RSVP_STATUS),
+      emailStatus: row.EMAIL_STATUS || row.INVITE_EMAIL_STATUS || "",
+      emailSentAt: row.EMAIL_SENT_AT || row.INVITE_EMAIL_SENT_AT || null
     }));
   },
 
@@ -248,18 +258,21 @@ const DB = {
 
   async inviteToEvent(eventId, userId) {
     const existing = await this.getRsvpFor(eventId, userId);
-    if (existing) return existing;
+    const invite = existing || await this.api("/api/invites", {
+        method: "POST",
+        body: JSON.stringify({ eventId, userId })
+      });
+    const inviteId = existing ? existing.id : invite.INVITE_ID;
 
-    const invite = await this.api("/api/invites", {
-      method: "POST",
-      body: JSON.stringify({ eventId, userId })
-    });
+    const emailResult = await this.api(`/api/invites/${inviteId}/send-email`, { method: "POST" });
 
     return {
-      id: invite.INVITE_ID,
+      id: inviteId,
       eventId,
       userId,
-      status: "pending"
+      status: "pending",
+      emailStatus: emailResult.emailStatus,
+      emailSentAt: emailResult.emailSentAt
     };
   },
 
