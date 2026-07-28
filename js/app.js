@@ -30,10 +30,10 @@ function renderTopbar() {
   if (!el) return;
   const user = DB.currentUser();
   el.innerHTML = `
-    <div class="brand">🎲 Board Night</div>
+    <div class="brand"><img class="brand-logo" src="css/design_elements/assets/logo_color.png" alt="">Board Night</div>
     <nav>
       <a href="dashboard.html">Dashboard</a>
-      <span class="subtle" style="margin-left:16px;color:#ffd9cf">${esc(user ? user.name : "")}</span>
+      <span class="topbar-user">${esc(user ? user.name : "")}</span>
       <button class="nav-signout" id="signOutBtn" type="button">Sign out</button>
     </nav>`;
 

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;background:#12151c;}
+  a{color:#8fb0c7;}
+  a:hover{color:#a9c4d6;}
+</style>
+</helmet>
+<div style="min-height:100vh;width:100%;box-sizing:border-box;padding:48px;background:#12151c;font-family:Tahoma,Geneva,sans-serif;color:#ece7da;">
+
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;">
+    <img src="assets/logo_color.png" style="width:48px;height:48px;object-fit:contain;" alt="Board Night logo"/>
+    <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:26px;">Board Night — Design Elements</div>
+  </div>
+  <div style="font-size:14px;color:rgba(236,231,218,0.55);margin-bottom:40px;">Colors, assets, and reusable UI patterns pulled from the app prototype (fonts excluded — see README).</div>
+
+  <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:0.5px;color:rgba(236,231,218,0.55);margin-bottom:14px;">Background &amp; Surface</div>
+  <div style="display:flex;flex-wrap:wrap;gap:16px;margin-bottom:36px;">
+    <sc-for list="{{ surfaceSwatches }}" as="s" hint-placeholder-count="4">
+      <div style="width:150px;">
+        <div style="height:80px;border-radius:12px;background:{{ s.hex }};border:1px solid rgba(236,231,218,0.12);box-shadow:0 4px 14px rgba(0,0,0,0.25);"></div>
+        <div style="margin-top:8px;font-size:12.5px;font-weight:700;">{{ s.name }}</div>
+        <div style="font-size:11.5px;color:rgba(236,231,218,0.5);">{{ s.hex }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:0.5px;color:rgba(236,231,218,0.55);margin-bottom:14px;">Brand / Accent Colors</div>
+  <div style="display:flex;flex-wrap:wrap;gap:16px;margin-bottom:36px;">
+    <sc-for list="{{ brandSwatches }}" as="s" hint-placeholder-count="6">
+      <div style="width:150px;">
+        <div style="height:80px;border-radius:12px;background:{{ s.hex }};box-shadow:0 4px 14px rgba(0,0,0,0.25);"></div>
+        <div style="margin-top:8px;font-size:12.5px;font-weight:700;">{{ s.name }}</div>
+        <div style="font-size:11.5px;color:rgba(236,231,218,0.5);">{{ s.hex }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:0.5px;color:rgba(236,231,218,0.55);margin-bottom:14px;">RSVP Status Colors</div>
+  <div style="display:flex;flex-wrap:wrap;gap:16px;margin-bottom:36px;">
+    <sc-for list="{{ rsvpSwatches }}" as="s" hint-placeholder-count="4">
+      <div style="width:150px;">
+        <div style="height:80px;border-radius:12px;background:{{ s.hex }};box-shadow:0 4px 14px rgba(0,0,0,0.25);"></div>
+        <div style="margin-top:8px;font-size:12.5px;font-weight:700;">{{ s.name }}</div>
+        <div style="font-size:11.5px;color:rgba(236,231,218,0.5);">{{ s.hex }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:0.5px;color:rgba(236,231,218,0.55);margin-bottom:14px;">Text Colors</div>
+  <div style="display:flex;flex-wrap:wrap;gap:16px;margin-bottom:36px;">
+    <div style="width:220px;padding:16px 18px;background:#262d3d;border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,0.25);">
+      <div style="font-weight:700;font-size:14px;color:#ece7da;">Primary text</div>
+      <div style="font-size:11.5px;color:rgba(236,231,218,0.5);margin-top:4px;">#ece7da</div>
+    </div>
+    <div style="width:220px;padding:16px 18px;background:#262d3d;border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,0.25);">
+      <div style="font-weight:700;font-size:14px;color:rgba(236,231,218,0.55);">Secondary text</div>
+      <div style="font-size:11.5px;color:rgba(236,231,218,0.5);margin-top:4px;">#ece7da @ 55% opacity</div>
+    </div>
+    <div style="width:220px;padding:16px 18px;background:#262d3d;border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,0.25);">
+      <div style="font-weight:700;font-size:14px;"><a href="#" onClick="{{ preventDefault }}">Link color</a></div>
+      <div style="font-size:11.5px;color:rgba(236,231,218,0.5);margin-top:4px;">#8fb0c7 (hover #a9c4d6)</div>
+    </div>
+  </div>
+
+  <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:0.5px;color:rgba(236,231,218,0.55);margin-bottom:14px;">Card Pattern</div>
+  <div style="width:320px;background:#262d3d;border-radius:16px;padding:16px 18px;margin-bottom:36px;box-shadow:0 4px 14px rgba(0,0,0,0.25);box-sizing:border-box;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:36px;height:36px;border-radius:10px;background:#36996f;flex-shrink:0;"></div>
+      <div style="flex:1;">
+        <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;">Card title</div>
+        <div style="font-size:12px;color:rgba(236,231,218,0.55);margin-top:1px;">Card subtitle</div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:rgba(236,231,218,0.4);margin-top:12px;">border-radius: 16px · padding: 16px 18px · shadow: 0 4px 14px rgba(0,0,0,0.25)</div>
+  </div>
+
+  <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:0.5px;color:rgba(236,231,218,0.55);margin-bottom:14px;">Buttons</div>
+  <div style="display:flex;flex-wrap:wrap;gap:14px;margin-bottom:36px;align-items:flex-start;">
+    <button style="border:none;border-radius:14px;background:#36996f;color:#ece7da;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;padding:14px 22px;cursor:pointer;">Primary action</button>
+    <button style="border:none;border-radius:10px;background:#1c2230;color:rgba(236,231,218,0.6);font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;padding:12px 20px;cursor:pointer;">Secondary / muted</button>
+    <button style="border:none;border-radius:12px;background:#9b3f45;color:#ece7da;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;padding:12px 20px;cursor:pointer;">Destructive</button>
+  </div>
+
+  <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:0.5px;color:rgba(236,231,218,0.55);margin-bottom:14px;">Inputs</div>
+  <div style="width:280px;margin-bottom:36px;">
+    <div style="font-size:11.5px;font-weight:700;color:rgba(236,231,218,0.5);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">Label</div>
+    <input placeholder="Placeholder text" style="width:100%;box-sizing:border-box;background:#1c2230;border:1px solid rgba(236,231,218,0.12);border-radius:9px;padding:10px 12px;color:#ece7da;font-size:14px;"/>
+  </div>
+
+  <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:0.5px;color:rgba(236,231,218,0.55);margin-bottom:14px;">Avatars</div>
+  <div style="display:flex;gap:10px;margin-bottom:36px;">
+    <sc-for list="{{ avatarColors }}" as="c" hint-placeholder-count="5">
+      <div style="width:36px;height:36px;border-radius:50%;background:{{ c }};"></div>
+    </sc-for>
+  </div>
+
+  <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:0.5px;color:rgba(236,231,218,0.55);margin-bottom:14px;">Logo Asset</div>
+  <img src="assets/logo_color.png" style="width:84px;height:84px;object-fit:contain;" alt="Board Night logo"/>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      preventDefault: (e) => e.preventDefault(),
+      surfaceSwatches: [
+        { name: 'App background', hex: '#12151c' },
+        { name: 'Card surface', hex: '#262d3d' },
+        { name: 'Input background', hex: '#1c2230' },
+        { name: 'Avatar placeholder', hex: '#2f3750' },
+      ],
+      brandSwatches: [
+        { name: 'Primary (teal-green)', hex: '#36996f' },
+        { name: 'Maroon', hex: '#9b3f45' },
+        { name: 'Navy/blue', hex: '#8fb0c7' },
+        { name: 'Orange', hex: '#e29314' },
+        { name: 'Red', hex: '#ce3b30' },
+        { name: 'Cream', hex: '#ece7da' },
+      ],
+      rsvpSwatches: [
+        { name: 'Yes', hex: '#327724' },
+        { name: 'Maybe', hex: '#e29314' },
+        { name: "Can't go", hex: '#ce3b30' },
+        { name: 'No response', hex: '#4b5164' },
+      ],
+      avatarColors: ['#ce3b30', '#e29314', '#8fb0c7', '#9b3f45', '#36996f'],
+    };
+  }
+}
+</script>
+</body>
+</html>
