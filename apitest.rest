@@ -1,4 +1,5 @@
 @baseUrl = https://board-night-server-594j5.ondigitalocean.app
+@authToken = replace-with-login-token
 
 ### API: Server health
 GET {{baseUrl}}/health
@@ -93,6 +94,23 @@ Content-Type: application/json
 
 ### INVITES: Send email for invite 1
 POST {{baseUrl}}/api/invites/1/send-email
+Authorization: Bearer {{authToken}}
+
+### INVITES: Read email status for invite 1
+GET {{baseUrl}}/api/invites/1/email-status
+Authorization: Bearer {{authToken}}
+
+### INVITES: Update email status for invite 1
+PUT {{baseUrl}}/api/invites/1/email-status
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "emailStatus": "SENT",
+  "emailSentAt": "2026-07-28T20:00:00Z",
+  "emailMessageId": "provider-message-id",
+  "emailError": null
+}
 
 ### RSVPS: Update invite 1 to GOING
 PUT {{baseUrl}}/api/invites/rsvp
