@@ -85,6 +85,11 @@ const DB = {
     });
   },
 
+  async register(email, password) {
+    await this.createUser(email, password);
+    return this.login(email, password);
+  },
+
   /* ---- groups ---- */
   async getGroups() {
     const groups = await this.api(`/api/groups/user/${this.currentUserId()}`);

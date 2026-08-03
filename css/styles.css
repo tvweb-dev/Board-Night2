@@ -148,6 +148,27 @@ textarea { min-height: 70px; resize: vertical; }
 .btn.small { padding: 5px 10px; font-size: .85rem; }
 .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 .btn:disabled { cursor: not-allowed; opacity: .6; }
+.auth-link { display: block; width: 100%; text-align: center; }
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 12px;
+  color: var(--muted);
+  font-size: .82rem;
+}
+.auth-divider::before, .auth-divider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: var(--line);
+}
+.form-error {
+  min-height: 1.5em;
+  margin: 10px 0 0;
+  color: #ff8d84;
+  font-size: .88rem;
+}
 
 .invite-members { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 14px; }
 .invite-members h3 { margin-bottom: 2px; }
