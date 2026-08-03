@@ -95,79 +95,6 @@
         status.style.display = message ? "block" : "none";
       }
 
-      function sendHubSpotInvite(member, invite) {
-        return new Promise(function (resolve, reject) {
-          const frame = document.createElement("iframe");
-          frame.hidden = true;
-          frame.tabIndex = -1;
-          frame.title = "";
-          frame.src = "emailinviteform.html";
-          document.body.appendChild(frame);
-
-          const timeout = window.setTimeout(function () {
-            cleanup();
-            reject(new Error("HubSpot invitation timed out."));
-          }, 30000);
-
-          function cleanup() {
-            window.clearTimeout(timeout);
-            window.removeEventListener("message", onMessage);
-            frame.remove();
-          }
-
-          function onMessage(messageEvent) {
-            if (messageEvent.origin !== window.location.origin || messageEvent.source !== frame.contentWindow) return;
-            const data = messageEvent.data || {};
-            if (data.source !== "board-night-hubspot-invite") return;
-
-            if (data.status === "ready") {
-              const nameParts = String(member.name || "").trim().split(/\s+/);
-              const firstName = nameParts.shift() || "Board Night guest";
-              const lastName = nameParts.join(" ");
-              const inviteLink = new URL("rsvp.html?event=" + encodeURIComponent(ev.id), window.location.href).href;
-              const eventSummary = [
-                ev.title,
-                [prettyDate(ev.date), ev.time].filter(Boolean).join(" at "),
-                ev.location,
-                inviteLink
-              ].filter(Boolean).join(" | ");
-              const eventDetails = [eventSummary, ev.description].filter(Boolean).join(" | ");
-              const eventDate = ev.date ? new Date(ev.date + "T00:00:00") : null;
-              const eventDateValue = eventDate && !isNaN(eventDate.getTime()) ? eventDate.getTime() : ev.date;
-
-              frame.contentWindow.postMessage({
-                type: "board-night-send-hubspot-invite",
-                payload: {
-                  inviteId: invite.id,
-                  eventId: ev.id,
-                  recipientFirstName: firstName,
-                  recipientLastName: lastName,
-                  recipientEmail: member.email,
-                  eventSummary,
-                  eventDetails,
-                  eventDateValue,
-                  eventTitle: ev.title,
-                  eventDate: ev.date,
-                  eventTime: ev.time,
-                  eventLocation: ev.location,
-                  eventDescription: ev.description,
-                  hostEmail: me.email,
-                  inviteLink
-                }
-              }, window.location.origin);
-            } else if (data.status === "submitted") {
-              cleanup();
-              resolve();
-            } else if (data.status === "error") {
-              cleanup();
-              reject(new Error(data.message || "HubSpot could not send the invitation."));
-            }
-          }
-
-          window.addEventListener("message", onMessage);
-        });
-      }
-
       document.getElementById("backLink").href = "group.html?group=" + encodeURIComponent(ev.groupId);
       document.getElementById("editBtn").href = "event-edit.html?event=" + encodeURIComponent(ev.id);
       document.getElementById("emailBtn").href = "rsvp.html?event=" + encodeURIComponent(ev.id);
@@ -371,13 +298,7 @@
             if (!member || !member.email) throw new Error("An invited member is missing an email address.");
 
             const invite = await DB.inviteToEvent(ev.id, input.value);
-            try {
-              await sendHubSpotInvite(member, invite);
-              await DB.updateInviteEmailStatus(invite.id, "SENT");
-            } catch (error) {
-              await DB.updateInviteEmailStatus(invite.id, "FAILED", error.message).catch(function () {});
-              throw error;
-            }
+            await DB.sendInviteEmail(invite.id);
           }));
           status.textContent = "Invitation sent successfully.";
           inviteSucceeded = true;

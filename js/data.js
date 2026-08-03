@@ -315,15 +315,9 @@ const DB = {
     };
   },
 
-  async updateInviteEmailStatus(inviteId, emailStatus, emailError = null) {
-    return this.api(`/api/invites/${inviteId}/email-status`, {
-      method: "PUT",
-      body: JSON.stringify({
-        emailStatus,
-        emailSentAt: emailStatus === "SENT" ? new Date().toISOString() : null,
-        emailMessageId: emailStatus === "SENT" ? `hubspot-form-${inviteId}` : null,
-        emailError
-      })
+  async sendInviteEmail(inviteId) {
+    return this.api(`/api/invites/${inviteId}/send-email`, {
+      method: "POST"
     });
   },
 
