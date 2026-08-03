@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Board Night — Mobile Prototype V2.0</title>
+<title>Board Night — Responsive Prototype V2.0</title>
 
 <!-- ================================================================
      ADOBE FONTS
@@ -120,16 +120,79 @@
   .resetbar a{color:var(--link);cursor:pointer;text-decoration:underline;}
   .resetbar a:hover{color:var(--link-hover);}
   .brand-logo{width:48px;height:48px;object-fit:contain;display:block;margin:0 auto 8px;}
+
+  /* Responsive shells based on the tablet and desktop V1.0 references. */
+  .shell-nav{display:none;background:#171c26;flex:0 0 auto;}
+  .shell-brand{display:flex;align-items:center;gap:10px;color:var(--ink);}
+  .shell-brand img{width:32px;height:32px;object-fit:contain;}
+  .shell-brand-name{font-family:"gambado-sans-forte",sans-serif;font-weight:700;}
+  .shell-link{appearance:none;border:0;background:transparent;color:var(--muted);font:inherit;
+    cursor:pointer;display:flex;align-items:center;border-radius:11px;}
+  .shell-link:hover,.shell-link:focus-visible,.shell-link.is-active{background:#1f2635;color:var(--ink);}
+  .shell-icon{font-size:1.25rem;line-height:1;}
+  .shell-user{margin-top:auto;background:var(--avatar);color:var(--ink);border:0;border-radius:50%;
+    display:grid;place-items:center;font-size:.78rem;font-weight:700;cursor:pointer;}
+
+  @media (min-width:768px){
+    body{padding:24px 16px;gap:14px;background:#202634;}
+    .page-head{max-width:720px;}
+    .page-head h1{font-size:1.55rem;}
+    .phone{width:min(1024px,calc(100vw - 32px));height:min(768px,calc(100vh - 116px));
+      min-height:620px;border-radius:20px;padding:0;display:flex;overflow:hidden;background:var(--bg);}
+    .notch{display:none;}
+    .shell-nav{width:88px;display:flex;flex-direction:column;align-items:center;padding:20px 8px;}
+    .shell-brand{margin-bottom:24px;}
+    .shell-brand-name,.shell-label{display:none;}
+    .shell-link{width:64px;min-height:58px;justify-content:center;margin-bottom:8px;}
+    .shell-user{width:36px;height:36px;}
+    .screen-wrap{flex:1;width:auto;height:auto;border-radius:0;}
+    .bar{padding:20px 28px 16px;min-height:69px;}
+    .bar .title{font-size:1.35rem;}
+    .body{padding:20px 28px 36px;}
+    .body>*{max-width:760px;margin-left:auto;margin-right:auto;}
+    .card{padding:18px 20px;}
+    .body>.btn{width:auto;min-width:180px;}
+  }
+
+  @media (min-width:1200px){
+    body{padding:22px 28px;}
+    .page-head{max-width:900px;}
+    .phone{width:min(1400px,calc(100vw - 56px));height:min(900px,calc(100vh - 112px));
+      min-height:680px;border-radius:18px;}
+    .shell-nav{width:232px;align-items:stretch;padding:24px 16px;}
+    .shell-brand{padding:0 8px 26px;}
+    .shell-brand-name,.shell-label{display:inline;}
+    .shell-link{width:100%;min-height:44px;justify-content:flex-start;gap:12px;
+      padding:11px 12px;margin-bottom:4px;font-weight:700;}
+    .shell-user{width:40px;height:40px;margin-left:8px;}
+    .bar{padding:26px 40px 18px;}
+    .bar .title{font-size:1.6rem;}
+    .body{padding:28px 40px 48px;}
+    .body>*{max-width:920px;}
+  }
 </style>
 </head>
 <body>
   <div class="page-head">
-    <h1>&#127922; Board Night &mdash; Mobile Prototype V2.0</h1>
-    <p>Tap through the MVP flow. Start at sign-in, create a group, make an event, and RSVP. Grey tags show which feature each screen covers.</p>
+    <h1>&#127922; Board Night &mdash; Responsive Prototype V2.0</h1>
+    <p>One shared MVP flow for mobile, tablet, and desktop. Sign in, create a group, make an event, and RSVP.</p>
   </div>
 
   <div class="phone">
     <div class="notch"></div>
+    <nav class="shell-nav" aria-label="Prototype navigation">
+      <div class="shell-brand">
+        <img src="css/design_elements/assets/logo_color.png" alt="" />
+        <span class="shell-brand-name">BOARD NIGHT</span>
+      </div>
+      <button class="shell-link is-active" type="button" onclick="go('dashboard')">
+        <span class="shell-icon" aria-hidden="true">&#9823;</span><span class="shell-label">Groups</span>
+      </button>
+      <button class="shell-link" type="button" onclick="go('dashboard')">
+        <span class="shell-icon" aria-hidden="true">&#9861;</span><span class="shell-label">Events</span>
+      </button>
+      <button class="shell-user" type="button" onclick="go('login')" title="Sign out">JD</button>
+    </nav>
     <div class="screen-wrap">
 
       <!-- LOGIN -->
