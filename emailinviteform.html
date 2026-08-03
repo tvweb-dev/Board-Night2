@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex,nofollow,noarchive" />
+  <title>Board Night invitation service</title>
+  <style>
+    html, body { position: fixed; width: 1px; height: 1px; margin: 0; overflow: hidden; opacity: 0; pointer-events: none; }
+  </style>
+</head>
+<body aria-hidden="true">
+  <div id="hubspotInviteForm"></div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      let pendingInvite = null;
+      let hubspotForm = null;
+      let submitted = false;
+
+      function notifyParent(status, message) {
+        if (window.parent === window) return;
+        window.parent.postMessage({
+          source: "board-night-hubspot-invite",
+          status,
+          inviteId: pendingInvite && pendingInvite.inviteId,
+          message: message || ""
+        }, window.location.origin);
+      }
+
+      function setField(form, names, value) {
+        if (value === undefined || value === null || value === "") return false;
+        for (const name of names) {
+          const field = form.querySelector(`[name="${name}"]`);
+          if (!field) continue;
+          field.value = String(value);
+          field.dispatchEvent(new Event("input", { bubbles: true }));
+          field.dispatchEvent(new Event("change", { bubbles: true }));
+          return true;
+        }
+        return false;
+      }
+
+      function submitInvite() {
+        if (!pendingInvite || !hubspotForm || submitted) return;
+
+        const emailWasSet = setField(hubspotForm, ["email"], pendingInvite.recipientEmail);
+        setField(hubspotForm, ["firstname"], pendingInvite.recipientFirstName);
+        setField(hubspotForm, ["lastname"], pendingInvite.recipientLastName);
+        setField(hubspotForm, ["company"], pendingInvite.eventTitle);
+        setField(hubspotForm, ["0-2/eventsevent_description"], pendingInvite.eventDetails);
+        setField(hubspotForm, ["eventsevent_date"], pendingInvite.eventDateValue);
+        setField(hubspotForm, ["event_name", "event_title", "event"], pendingInvite.eventTitle);
+        setField(hubspotForm, ["event_date", "date"], pendingInvite.eventDate);
+        setField(hubspotForm, ["event_time", "time"], pendingInvite.eventTime);
+        setField(hubspotForm, ["event_location", "location"], pendingInvite.eventLocation);
+        setField(hubspotForm, ["event_description", "description"], pendingInvite.eventDescription);
+        setField(hubspotForm, ["invite_link", "rsvp_link", "event_link"], pendingInvite.inviteLink);
+        setField(hubspotForm, ["invited_by", "host_name", "host_email"], pendingInvite.hostEmail);
+        setField(hubspotForm, ["invite_id"], pendingInvite.inviteId);
+        setField(hubspotForm, ["event_id"], pendingInvite.eventId);
+
+        if (!emailWasSet) {
+          notifyParent("error", "The HubSpot form does not contain an email field.");
+          return;
+        }
+
+        const submit = hubspotForm.querySelector('input[type="submit"], button[type="submit"]');
+        if (!submit) {
+          notifyParent("error", "The HubSpot form does not contain a submit button.");
+          return;
+        }
+
+        submitted = true;
+        submit.click();
+      }
+
+      window.addEventListener("message", function (event) {
+        if (event.origin !== window.location.origin || event.source !== window.parent) return;
+        if (!event.data || event.data.type !== "board-night-send-hubspot-invite") return;
+        pendingInvite = event.data.payload;
+        submitInvite();
+      });
+
+      window.boardNightHubSpotReady = function (form) {
+        hubspotForm = form && form.tagName === "FORM" ? form : (form && form[0] ? form[0] : form);
+        notifyParent("ready");
+        submitInvite();
+      };
+
+      window.boardNightHubSpotSubmitted = function () {
+        notifyParent("submitted");
+      };
+    })();
+  </script>
+  <script charset="utf-8" type="text/javascript" src="https://js-na3.hsforms.net/forms/embed/v2.js"></script>
+  <script>
+    hbspt.forms.create({
+      portalId: "343393890",
+      formId: "31977573-76ba-46d8-bb3f-f2902f07bb19",
+      region: "na3",
+      target: "#hubspotInviteForm",
+      onFormReady: window.boardNightHubSpotReady,
+      onFormSubmitted: window.boardNightHubSpotSubmitted
+    });
+  </script>
+</body>
+</html>

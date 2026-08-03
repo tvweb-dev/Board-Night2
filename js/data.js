@@ -300,16 +300,26 @@ const DB = {
       });
     const inviteId = existing ? existing.id : invite.INVITE_ID;
 
-    const emailResult = await this.api(`/api/invites/${inviteId}/send-email`, { method: "POST" });
-
     return {
       id: inviteId,
       eventId,
       userId,
       status: "pending",
-      emailStatus: emailResult.emailStatus,
-      emailSentAt: emailResult.emailSentAt
+      emailStatus: "PENDING",
+      emailSentAt: null
     };
+  },
+
+  async updateInviteEmailStatus(inviteId, emailStatus, emailError = null) {
+    return this.api(`/api/invites/${inviteId}/email-status`, {
+      method: "PUT",
+      body: JSON.stringify({
+        emailStatus,
+        emailSentAt: emailStatus === "SENT" ? new Date().toISOString() : null,
+        emailMessageId: emailStatus === "SENT" ? `hubspot-form-${inviteId}` : null,
+        emailError
+      })
+    });
   },
 
   async setRsvp(eventId, userId, status) {
