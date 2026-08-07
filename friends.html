@@ -12,7 +12,10 @@
   <header class="topbar" id="topbar"></header>
   <main class="container">
     <div class="page-heading"><div><h1>Friends</h1><p class="subtle">People who share groups with you.</p></div></div>
-    <input class="friend-search" id="friendSearch" type="search" placeholder="Search friends" />
+    <div class="friend-tools">
+      <input class="friend-search" id="friendSearch" type="search" placeholder="Search friends" />
+      <label class="show-all-friends"><input id="showAllFriends" type="checkbox" /> <span>Show all friends</span></label>
+    </div>
     <h2 class="section-label">All Friends</h2>
     <div id="friendList" class="grid"><p class="empty">Loading friends...</p></div>
   </main>
@@ -25,13 +28,34 @@
       try {
         const friends = await DB.getFriends();
         function renderFriends(query) {
-          const visible = friends.filter(function (friend) { return friend.name.toLowerCase().includes(query.toLowerCase()); });
+          const showAll = document.getElementById("showAllFriends").checked;
+          const visible = friends.filter(function (friend) {
+            return (showAll || !friend.hidden) && friend.name.toLowerCase().includes(query.toLowerCase());
+          });
           list.innerHTML = visible.length ? visible.map(function (friend, index) {
-          return `<article class="card friend-card">${avatarHtml(friend, "friend-avatar", `--avatar-color:${["#8fb0c7", "#e29314", "#36996f", "#ce3b30", "#9b3f45"][index % 5]}`)}<div><h3><a class="person-link" href="profile.html?user=${encodeURIComponent(friend.id)}">${esc(friend.name)}</a></h3><p class="subtle">${friend.groups.length} group${friend.groups.length === 1 ? "" : "s"} together</p></div></article>`;
-          }).join("") : `<p class="empty">${query ? `No friends match “${esc(query)}”.` : "No shared group members yet."}</p>`;
+            const since = friend.friendsSince ? prettyDate(String(friend.friendsSince).slice(0, 10)) : "Unknown";
+            const buttonLabel = friend.hidden ? "SHOW YOUR FRIEND" : "Hide friend";
+            return `<article class="card friend-card${friend.hidden ? " is-hidden-friend" : ""}">${avatarHtml(friend, "friend-avatar", `--avatar-color:${["#8fb0c7", "#e29314", "#36996f", "#ce3b30", "#9b3f45"][index % 5]}`)}<div class="friend-card-copy"><h3><a class="person-link" href="profile.html?user=${encodeURIComponent(friend.id)}">${esc(friend.name)}</a></h3><p class="subtle">${friend.sharedGroupCount} group${friend.sharedGroupCount === 1 ? "" : "s"} together</p><p class="friend-since">Friends Since: ${esc(since)}</p></div><button class="btn secondary small friend-visibility-button" type="button" data-friend-id="${esc(friend.id)}">${buttonLabel}</button></article>`;
+          }).join("") : `<p class="empty">${query ? `No friends match “${esc(query)}”.` : showAll ? "No shared group members yet." : "No visible friends. Select Show all friends to view hidden friends."}</p>`;
         }
         renderFriends("");
         document.getElementById("friendSearch").addEventListener("input", function (event) { renderFriends(event.target.value.trim()); });
+        document.getElementById("showAllFriends").addEventListener("change", function () { renderFriends(document.getElementById("friendSearch").value.trim()); });
+        list.addEventListener("click", async function (event) {
+          const button = event.target.closest(".friend-visibility-button");
+          if (!button) return;
+          const friend = friends.find(function (item) { return String(item.id) === String(button.dataset.friendId); });
+          if (!friend) return;
+          button.disabled = true;
+          try {
+            await DB.setFriendHidden(friend.id, !friend.hidden);
+            friend.hidden = !friend.hidden;
+            renderFriends(document.getElementById("friendSearch").value.trim());
+          } catch (error) {
+            alert(error.message);
+            button.disabled = false;
+          }
+        });
       } catch (error) { list.innerHTML = `<p class="empty">${esc(error.message)}</p>`; }
     });
   </script>

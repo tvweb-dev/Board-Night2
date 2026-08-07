@@ -179,27 +179,23 @@ const DB = {
   },
 
   async getFriends() {
-    const currentUserId = String(this.currentUserId());
-    const groups = await this.getGroups();
-    const memberships = await Promise.all(groups.map(async (group) => ({
-      group,
-      members: await this.getMembers(group.id)
-    })));
-    const friends = new Map();
+    const friends = await this.api("/api/friends");
+    return friends.map((row) => ({
+      id: row.USER_ID,
+      name: this.displayName(row),
+      email: row.EMAIL || "",
+      imageUrl: row.IMAGE_URL || "",
+      sharedGroupCount: Number(row.SHARED_GROUP_COUNT) || 0,
+      friendsSince: row.FRIENDS_SINCE || "",
+      hidden: Boolean(Number(row.IS_HIDDEN))
+    }));
+  },
 
-    memberships.forEach(({ group, members }) => {
-      members.forEach((member) => {
-        if (String(member.id) === currentUserId) return;
-        const key = String(member.id);
-        const existing = friends.get(key) || { ...member, groups: [] };
-        if (!existing.groups.some((item) => String(item.id) === String(group.id))) {
-          existing.groups.push({ id: group.id, name: group.name });
-        }
-        friends.set(key, existing);
-      });
+  async setFriendHidden(friendId, hidden) {
+    return this.api(`/api/friends/${friendId}/hidden`, {
+      method: "PATCH",
+      body: JSON.stringify({ hidden: Boolean(hidden) })
     });
-
-    return Array.from(friends.values()).sort((a, b) => a.name.localeCompare(b.name));
   },
 
   /* ---- profiles ---- */

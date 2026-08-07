@@ -321,10 +321,18 @@ footer.note {
 .calendar-event.is-cancelled .event-swatch { background: var(--red) !important; }
 .calendar-event small { display: block; color: var(--muted); margin-top: 2px; }
 .friend-search { width: 320px; max-width: 100%; margin-bottom: 22px; padding: 12px 14px; border: 0; border-radius: 12px; background: var(--card); }
+.friend-tools { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-bottom: 22px; }
+.friend-tools .friend-search { margin-bottom: 0; }
+.show-all-friends { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); cursor: pointer; }
+.show-all-friends input { width: 18px; height: 18px; accent-color: var(--green); }
 #friendList { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
 .friend-card { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
 .friend-card > div:last-child { min-width: 0; flex: 1; }
 .friend-card h3, .friend-card p { margin: 0; }
+.friend-card-copy { min-width: 0; flex: 1; }
+.friend-card .friend-since { margin-top: 3px; color: var(--ink); font-size: .82rem; }
+.friend-visibility-button { flex: 0 0 auto; max-width: 140px; white-space: normal; }
+.friend-card.is-hidden-friend { opacity: .72; border-style: dashed; }
 .friend-card h3 { overflow: hidden; }
 .friend-card .person-link { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .friend-avatar { width: 36px; height: 36px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; background: var(--avatar-color, var(--avatar)); color: var(--bg); font-size: .7rem; font-weight: 700; }
