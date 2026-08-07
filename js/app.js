@@ -23,6 +23,68 @@ function prettyDate(dateStr) {
 // Map an RSVP status to a label + pill class
 const STATUS_LABEL = { going: "Going", maybe: "Maybe", no: "Can't make it" };
 const STATUS_CLASS = { going: "going", maybe: "maybe", no: "no" };
+const NOTIFICATION_SEEN_KEY = "boardNightSeenNotifications";
+
+function startNotificationToasts() {
+  let dismissTimer = null;
+  const storageKey = `${NOTIFICATION_SEEN_KEY}:${DB.currentUserId()}`;
+
+  function seenIds() {
+    try { return new Set(JSON.parse(sessionStorage.getItem(storageKey) || "[]").map(String)); }
+    catch (_) { return new Set(); }
+  }
+
+  function remember(id) {
+    const seen = seenIds();
+    seen.add(String(id));
+    sessionStorage.setItem(storageKey, JSON.stringify(Array.from(seen).slice(-100)));
+  }
+
+  function dismiss(toast) {
+    if (dismissTimer) window.clearTimeout(dismissTimer);
+    toast.classList.add("is-leaving");
+    window.setTimeout(function () { toast.remove(); }, 180);
+  }
+
+  function show(item) {
+    const existing = document.getElementById("notificationToast");
+    if (existing) existing.remove();
+    const toast = document.createElement("aside");
+    toast.className = "notification-toast";
+    toast.id = "notificationToast";
+    toast.setAttribute("role", "status");
+    toast.setAttribute("aria-live", "polite");
+    toast.innerHTML = `
+      <span class="toast-indicator" aria-hidden="true"></span>
+      <a class="toast-copy" href="notifications.html">
+        <strong>${esc(item.TITLE || "New notification")}</strong>
+        <span>${esc(item.MESSAGE || "You have a new Board Night update.")}</span>
+      </a>
+      <button class="toast-close" type="button" aria-label="Close notification">&times;</button>`;
+    document.body.appendChild(toast);
+    toast.querySelector(".toast-close").addEventListener("click", function () { dismiss(toast); });
+    dismissTimer = window.setTimeout(function () { dismiss(toast); }, 10000);
+  }
+
+  async function check() {
+    try {
+      const items = await DB.getNotifications(true);
+      const count = document.getElementById("notificationCount");
+      if (count) {
+        count.textContent = items.length > 99 ? "99+" : String(items.length);
+        count.hidden = items.length === 0;
+      }
+      const seen = seenIds();
+      const newest = items.find(function (item) { return !seen.has(String(item.NOTIFICATION_ID)); });
+      if (!newest) return;
+      items.forEach(function (item) { remember(item.NOTIFICATION_ID); });
+      show(newest);
+    } catch (_) {}
+  }
+
+  check();
+  window.setInterval(check, 30000);
+}
 
 // Shared desktop application shell, based on the desktop standalone design.
 function renderTopbar() {
@@ -100,12 +162,7 @@ function renderTopbar() {
     window.location.href = "index.html";
   });
 
-  DB.getNotifications(true).then(function (items) {
-    const count = document.getElementById("notificationCount");
-    if (!count || !items.length) return;
-    count.textContent = items.length > 99 ? "99+" : String(items.length);
-    count.hidden = false;
-  }).catch(function () {});
+  startNotificationToasts();
 }
 
 function requireSession() {
