@@ -152,28 +152,15 @@ const DB = {
     }));
   },
 
-  async addMember(groupId, name, email) {
-    let userId = Number(name);
-
-    if (!userId) {
-      const created = await this.createUser(email || `${Date.now()}@board-night.local`, "password123");
-      userId = created.USER_ID;
-    }
-
-    await this.api("/api/groups/members", {
+  async addMember(groupId, memberQuery) {
+    return this.api("/api/groups/members", {
       method: "POST",
       body: JSON.stringify({
         groupId,
-        userId,
+        memberQuery,
         memberRole: "MEMBER"
       })
     });
-
-    return {
-      id: userId,
-      name: email || `User ${userId}`,
-      email: email || ""
-    };
   },
 
   /* ---- events ---- */

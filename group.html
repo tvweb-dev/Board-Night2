@@ -17,7 +17,7 @@
     <div class="group-title"><span class="group-title-swatch" id="groupTitleImage"></span><h1 id="groupName">Group</h1></div>
     <div class="group-detail-layout">
       <section class="group-events-column">
-        <div class="section-heading"><h2>Upcoming Events</h2><a class="btn small" id="newEventBtn" href="#">+ New Event</a></div>
+        <div class="section-heading"><h2>Events</h2><a class="btn small" id="newEventBtn" href="#">+ New Event</a></div>
         <div id="eventList"></div>
       </section>
       <aside class="group-members-column">
@@ -28,10 +28,8 @@
         <div class="card member-panel"><ul class="plain" id="memberList"></ul></div>
         <div class="card invite-panel">
       <h3>Add Member</h3>
-      <label for="memberName">Existing user ID or display name</label>
-      <input id="memberName" placeholder="e.g. 2" />
-      <label for="memberEmail">Email for new member</label>
-      <input id="memberEmail" type="email" placeholder="alex@example.com" />
+      <label for="memberName">Existing user ID, email, nickname, or full name</label>
+      <input id="memberName" placeholder="e.g. Dice Master" autocomplete="off" />
       <div class="btn-row">
         <button class="btn" id="addMemberBtn">Add member</button>
       </div>
@@ -96,10 +94,13 @@
           const going = (await DB.getRsvps(e.id)).filter(function (r) {
             return r.status === "going";
           }).length;
+          const displayState = eventDisplayState(e);
+          const stateLabel = displayState.cancelled ? "Canceled" : displayState.past ? "Past" : "Upcoming";
+          const stateClass = displayState.cancelled ? "cancelled" : displayState.past ? "past" : "active";
 
           return `<a class="card group-event-card" style="text-decoration:none;color:inherit;display:flex;"
                      href="event.html?event=${encodeURIComponent(e.id)}">
-                    <span class="group-event-swatch">${e.imageUrl ? `<img src="${esc(e.imageUrl)}" alt="">` : ""}</span><span><h3>${esc(e.title)}</h3><p class="subtle">${prettyDate(e.date)} · ${esc(e.time || "Time TBD")} · ${esc(e.location || "Location TBD")}</p><strong class="going-label">${going} going</strong></span>
+                    <span class="group-event-swatch">${e.imageUrl ? `<img src="${esc(e.imageUrl)}" alt="">` : ""}</span><span><h3>${esc(e.title)} <small class="pill ${stateClass}">${stateLabel}</small></h3><p class="subtle">${prettyDate(e.date)} · ${esc(e.time || "Time TBD")} · ${esc(e.location || "Location TBD")}</p><strong class="going-label">${going} going</strong></span>
                   </a>`;
         }));
 
@@ -113,17 +114,14 @@
 
       document.getElementById("addMemberBtn").addEventListener("click", async function () {
         const name = document.getElementById("memberName").value.trim();
-        const email = document.getElementById("memberEmail").value.trim();
-
-        if (!name && !email) {
-          alert("Please enter an existing user ID or an email.");
+        if (!name) {
+          alert("Please enter an existing user ID, email, nickname, or full name.");
           return;
         }
 
         try {
-          await DB.addMember(groupId, name, email);
+          await DB.addMember(groupId, name);
           document.getElementById("memberName").value = "";
-          document.getElementById("memberEmail").value = "";
           await renderMembers();
         } catch (error) {
           alert(error.message);
