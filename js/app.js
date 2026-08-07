@@ -74,6 +74,11 @@ function startNotificationToasts() {
         count.textContent = items.length > 99 ? "99+" : String(items.length);
         count.hidden = items.length === 0;
       }
+      const mobileCount = document.getElementById("mobileNotificationCount");
+      if (mobileCount) {
+        mobileCount.textContent = items.length > 99 ? "99+" : String(items.length);
+        mobileCount.hidden = items.length === 0;
+      }
       const seen = seenIds();
       const newest = items.find(function (item) { return !seen.has(String(item.NOTIFICATION_ID)); });
       if (!newest) return;
@@ -113,11 +118,18 @@ function renderTopbar() {
     ? user.name.split(/\s+/).filter(Boolean).slice(0, 2).map(function (part) { return part[0]; }).join("").toUpperCase()
     : "BN";
 
-  document.body.classList.add("app-shell");
+  document.body.classList.add("app-shell", `page-${path.replace(".html", "")}`);
   el.innerHTML = `
     <div class="mobile-bar">
       ${mobileBack}
-      <span class="mobile-title">${esc(mobileTitles[path] || "Board Night")}</span>
+      <a class="mobile-brand" href="dashboard.html" aria-label="Board Night home">
+        <img src="css/design_elements/BNlogo.svg" alt="">
+        <span>BOARD NIGHT</span>
+      </a>
+      <a class="mobile-notifications" href="notifications.html" aria-label="Notifications">
+        <span aria-hidden="true">●</span>
+        <span class="notification-count mobile-notification-count" id="mobileNotificationCount" hidden></span>
+      </a>
       <button class="mobile-account" id="mobileSignOutBtn" type="button" aria-label="Sign out">${esc(initials)}</button>
     </div>
     <a class="brand" href="dashboard.html" aria-label="Board Night home">
@@ -149,6 +161,17 @@ function renderTopbar() {
         <button class="nav-signout" id="signOutBtn" type="button">Sign out</button>
       </div>
     </div>`;
+
+  const mobileNav = document.createElement("nav");
+  mobileNav.className = "mobile-bottom-nav";
+  mobileNav.setAttribute("aria-label", "Mobile navigation");
+  mobileNav.innerHTML = `
+    <a class="mobile-nav-link ${groupsActive ? "is-active" : ""}" href="dashboard.html"><span aria-hidden="true">♟</span><small>Groups</small></a>
+    <a class="mobile-nav-link ${eventsActive ? "is-active" : ""}" href="events.html"><span aria-hidden="true">⚄</span><small>Events</small></a>
+    <a class="mobile-nav-home" href="dashboard.html" aria-label="Board Night home"><img src="css/design_elements/BNlogo.svg" alt=""></a>
+    <a class="mobile-nav-link ${calendarActive ? "is-active" : ""}" href="calendar.html"><span aria-hidden="true">□</span><small>Calendar</small></a>
+    <a class="mobile-nav-link ${friendsActive ? "is-active" : ""}" href="friends.html"><span aria-hidden="true">♡</span><small>Friends</small></a>`;
+  document.body.appendChild(mobileNav);
 
   document.getElementById("signOutBtn").addEventListener("click", function () {
     DB.reset();
