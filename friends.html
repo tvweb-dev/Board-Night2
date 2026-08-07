@@ -12,6 +12,8 @@
   <header class="topbar" id="topbar"></header>
   <main class="container">
     <div class="page-heading"><div><h1>Friends</h1><p class="subtle">People who share groups with you.</p></div></div>
+    <input class="friend-search" id="friendSearch" type="search" placeholder="Search friends" />
+    <h2 class="section-label">All Friends</h2>
     <div id="friendList" class="grid"><p class="empty">Loading friends...</p></div>
   </main>
   <script src="js/data.js"></script><script src="js/app.js"></script>
@@ -21,10 +23,15 @@
       const list = document.getElementById("friendList");
       try {
         const friends = await DB.getFriends();
-        list.innerHTML = friends.length ? friends.map(function (friend) {
+        function renderFriends(query) {
+          const visible = friends.filter(function (friend) { return friend.name.toLowerCase().includes(query.toLowerCase()); });
+          list.innerHTML = visible.length ? visible.map(function (friend, index) {
           const initials = friend.name.split(/\s+/).filter(Boolean).slice(0, 2).map(function (part) { return part[0]; }).join("").toUpperCase();
-          return `<article class="card friend-card"><div class="friend-avatar">${esc(initials)}</div><div><h3>${esc(friend.name)}</h3><p class="subtle">${esc(friend.email || "Board Night member")}</p><p>${friend.groups.map(function (group) { return `<a href="group.html?group=${encodeURIComponent(group.id)}">${esc(group.name)}</a>`; }).join(" · ")}</p></div></article>`;
-        }).join("") : '<p class="empty">No shared group members yet.</p>';
+          return `<article class="card friend-card"><div class="friend-avatar" style="--avatar-color:${["#8fb0c7", "#e29314", "#36996f", "#ce3b30", "#9b3f45"][index % 5]}">${esc(initials)}</div><div><h3>${esc(friend.name)}</h3><p class="subtle">${friend.groups.length} group${friend.groups.length === 1 ? "" : "s"} together</p></div></article>`;
+          }).join("") : `<p class="empty">${query ? `No friends match “${esc(query)}”.` : "No shared group members yet."}</p>`;
+        }
+        renderFriends("");
+        document.getElementById("friendSearch").addEventListener("input", function (event) { renderFriends(event.target.value.trim()); });
       } catch (error) { list.innerHTML = `<p class="empty">${esc(error.message)}</p>`; }
     });
   </script>

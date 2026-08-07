@@ -20,15 +20,29 @@
       renderTopbar();
       const list = document.getElementById("calendarList");
       try {
-        const events = await DB.getAllEvents();
-        const dated = events.filter(function (event) { return event.date; });
-        const groups = dated.reduce(function (result, event) {
-          (result[event.date] ||= []).push(event); return result;
-        }, {});
-        list.innerHTML = dated.length ? Object.keys(groups).map(function (date) {
-          return `<section class="calendar-day"><div class="calendar-date"><strong>${prettyDate(date)}</strong><span>${groups[date].length} event${groups[date].length === 1 ? "" : "s"}</span></div>
-            <div>${groups[date].map(function (event) { return `<a class="card calendar-event" href="event.html?event=${encodeURIComponent(event.id)}"><span class="event-dot"></span><span><strong>${esc(event.title)}</strong><small>${esc(event.time || "Time TBD")} · ${esc(event.groupName)} · ${esc(event.location || "Location TBD")}</small></span></a>`; }).join("")}</div></section>`;
-        }).join("") : '<p class="empty">No dated events to show yet.</p>';
+        const events = (await DB.getAllEvents()).filter(function (event) { return event.date; });
+        let viewDate = events.length ? new Date(events[0].date + "T00:00:00") : new Date();
+        let selectedDate = events.length ? events[0].date : new Date().toISOString().slice(0, 10);
+        function keyFor(year, month, day) { return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`; }
+        function renderCalendar() {
+          const year = viewDate.getFullYear(), month = viewDate.getMonth();
+          const firstDay = new Date(year, month, 1).getDay();
+          const days = new Date(year, month + 1, 0).getDate();
+          const cells = Array.from({ length: firstDay }, function () { return '<span class="calendar-cell is-empty"></span>'; });
+          for (let day = 1; day <= days; day += 1) {
+            const key = keyFor(year, month, day), count = events.filter(function (event) { return event.date === key; }).length;
+            cells.push(`<button class="calendar-cell ${key === selectedDate ? "is-selected" : ""}" data-date="${key}"><span>${day}</span><span class="calendar-dots">${count ? '<i></i>' : ""}</span></button>`);
+          }
+          const dayEvents = events.filter(function (event) { return event.date === selectedDate; });
+          list.innerHTML = `<div class="calendar-layout"><section class="month-calendar"><div class="month-nav"><button data-month="-1">‹</button><strong>${viewDate.toLocaleDateString(undefined, { month: "long", year: "numeric" })}</strong><button data-month="1">›</button></div><div class="weekday-row">${["S", "M", "T", "W", "T", "F", "S"].map(function (day) { return `<span>${day}</span>`; }).join("")}</div><div class="month-grid">${cells.join("")}</div></section>
+            <section class="selected-day"><h2>${prettyDate(selectedDate)}</h2><h3 class="section-label">Group Events</h3><div>${dayEvents.length ? dayEvents.map(function (event, index) { return `<a class="card calendar-event" href="event.html?event=${encodeURIComponent(event.id)}"><span class="event-swatch" style="--event-color:${["#36996f", "#9b3f45", "#8fb0c7", "#e29314"][index % 4]}"></span><span><strong>${esc(event.title)}</strong><small>${esc(event.time || "Time TBD")} · ${esc(event.groupName)}</small><small>${esc(event.location || "Location TBD")}</small></span></a>`; }).join("") : '<p class="empty">No group events this day.</p>'}</div></section></div>`;
+        }
+        list.addEventListener("click", function (event) {
+          const monthButton = event.target.closest("[data-month]");
+          if (monthButton) { viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + Number(monthButton.dataset.month), 1); selectedDate = keyFor(viewDate.getFullYear(), viewDate.getMonth(), 1); renderCalendar(); return; }
+          const dayButton = event.target.closest("[data-date]"); if (dayButton) { selectedDate = dayButton.dataset.date; renderCalendar(); }
+        });
+        renderCalendar();
       } catch (error) { list.innerHTML = `<p class="empty">${esc(error.message)}</p>`; }
     });
   </script>
