@@ -29,7 +29,8 @@
         <div class="card invite-panel">
       <h3>Add Member</h3>
       <label for="memberName">Existing user ID, email, nickname, or full name</label>
-      <input id="memberName" placeholder="e.g. Dice Master" autocomplete="off" />
+      <input id="memberName" list="friendOptions" placeholder="Search friends or enter user details" autocomplete="off" />
+      <datalist id="friendOptions"><option value="" label="Type to search friends"></option></datalist>
       <div class="btn-row">
         <button class="btn" id="addMemberBtn">Add member</button>
       </div>
@@ -81,6 +82,15 @@
         }).join("") : '<li class="empty">No members yet.</li>';
       }
 
+      async function renderFriendOptions() {
+        const friends = await DB.getFriends();
+        const options = friends.map(function (friend) {
+          const label = `${friend.name} [USER_ID #${friend.id}]`;
+          return `<option value="${esc(label)}"></option>`;
+        });
+        document.getElementById("friendOptions").innerHTML = '<option value="" label="Type to search friends"></option>' + options.join("");
+      }
+
       async function renderEvents() {
         const wrap = document.getElementById("eventList");
         const events = await DB.getEvents(groupId);
@@ -119,14 +129,16 @@
       }
 
       document.getElementById("addMemberBtn").addEventListener("click", async function () {
-        const name = document.getElementById("memberName").value.trim();
-        if (!name) {
+        const enteredValue = document.getElementById("memberName").value.trim();
+        if (!enteredValue) {
           alert("Please enter an existing user ID, email, nickname, or full name.");
           return;
         }
+        const selectedFriend = enteredValue.match(/\[USER_ID #(\d+)\]$/i);
+        const memberQuery = selectedFriend ? selectedFriend[1] : enteredValue;
 
         try {
-          await DB.addMember(groupId, name);
+          await DB.addMember(groupId, memberQuery);
           document.getElementById("memberName").value = "";
           await renderMembers();
         } catch (error) {
@@ -140,6 +152,7 @@
       });
 
       await renderMembers();
+      await renderFriendOptions();
       await renderEvents();
     });
   </script>
