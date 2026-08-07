@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;background:#12151c;height:auto;min-height:100%;overflow-y:auto;}
+  a{color:#8fb0c7;}
+  a:hover{color:#a9c4d6;}
+  ::-webkit-scrollbar{display:none;}
+</style>
+</helmet>
+<div style="min-height:100vh;width:100%;display:flex;justify-content:center;align-items:flex-start;padding:20px;background:#12151c;box-sizing:border-box;overflow-y:auto;">
+<div style="width:390px;height:844px;flex-shrink:0;">
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" width="390" height="844" dark="{{ true }}" hint-size="390,844">
+  <div style="height:100%;display:flex;flex-direction:column;background:#202634;font-family:Tahoma,Geneva,sans-serif;">
+
+  <sc-if value="{{ isSignedOut }}" hint-placeholder-val="{{ false }}">
+    <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:58px 32px 44px;box-sizing:border-box;">
+      <img src="assets/logo_color.png" style="width:84px;height:84px;object-fit:contain;margin-bottom:18px;" alt="Board Night logo"/>
+      <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:28px;color:#ece7da;margin-bottom:6px;">BOARD NIGHT</div>
+      <div style="font-size:14px;color:rgba(236,231,218,0.55);margin-bottom:36px;text-align:center;">Plan your next game night with friends</div>
+
+      <div style="width:100%;background:#262d3d;border-radius:16px;padding:16px 18px;margin-bottom:14px;box-shadow:0 4px 14px rgba(0,0,0,0.25);box-sizing:border-box;">
+        <div style="font-size:11.5px;font-weight:700;color:rgba(236,231,218,0.5);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">Email</div>
+        <input value="{{ signInEmail }}" onChange="{{ onSignInEmailChange }}" placeholder="you@email.com" style="width:100%;box-sizing:border-box;background:#1c2230;border:1px solid rgba(236,231,218,0.12);border-radius:9px;padding:10px 12px;color:#ece7da;font-size:14px;margin-bottom:14px;font-family:Tahoma,sans-serif;"/>
+        <div style="font-size:11.5px;font-weight:700;color:rgba(236,231,218,0.5);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">Password</div>
+        <input type="password" value="{{ signInPassword }}" onChange="{{ onSignInPasswordChange }}" placeholder="••••••••" style="width:100%;box-sizing:border-box;background:#1c2230;border:1px solid rgba(236,231,218,0.12);border-radius:9px;padding:10px 12px;color:#ece7da;font-size:14px;font-family:Tahoma,sans-serif;"/>
+      </div>
+
+      <button onClick="{{ onSignIn }}" style="width:100%;border:none;border-radius:14px;background:{{ primaryActionColor }};color:#ece7da;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;padding:14px 0;margin-bottom:14px;cursor:pointer;">Sign In</button>
+      <div style="font-size:13px;color:rgba(236,231,218,0.5);">New here? <a href="#" onClick="{{ onSignIn }}" style="font-weight:700;text-decoration:none;">Create an account</a></div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isSignedIn }}" hint-placeholder-val="{{ true }}">
+    <!-- Header -->
+    <div style="flex-shrink:0;padding:58px 22px 14px;display:flex;align-items:center;gap:10px;">
+      <img onClick="{{ onSignOut }}" src="assets/logo_color.png" style="width:30px;height:30px;object-fit:contain;cursor:pointer;" alt="Board Night logo">
+      <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;color:#ece7da;letter-spacing:0.2px;">BOARD NIGHT</div>
+      <div style="flex:1;"></div>
+      <div style="width:34px;height:34px;border-radius:50%;background:#2f3750;display:flex;align-items:center;justify-content:center;color:#ece7da;font-size:13px;font-weight:700;">JD</div>
+    </div>
+    <div style="flex-shrink:0;padding:0 22px 14px;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:30px;color:#ece7da;">{{ tabTitle }}</div>
+
+    <!-- Scrollable content -->
+    <div style="flex:1;overflow-y:auto;padding:0 20px 24px;">
+
+      <!-- GROUPS TAB -->
+      <sc-if value="{{ isGroupsList }}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{ openNewGroup }}" style="width:100%;border:none;border-radius:14px;background:{{ primaryActionColor }};color:#ece7da;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;padding:14px 0;margin-bottom:18px;cursor:pointer;">+ New Group</button>
+
+        <sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
+          <div onClick="{{ g.onOpen }}" style="background:#262d3d;border-radius:16px;padding:16px 18px;margin-bottom:14px;box-shadow:0 4px 14px rgba(0,0,0,0.25);box-sizing:border-box;cursor:pointer;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <div style="width:36px;height:36px;border-radius:10px;background:{{ g.color }};flex-shrink:0;"></div>
+              <div style="flex:1;">
+                <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;color:#ece7da;">{{ g.name }}</div>
+                <div style="font-size:12px;color:rgba(236,231,218,0.55);margin-top:1px;">{{ g.memberLabel }}</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:-6px;margin-bottom:12px;">
+              <sc-for list="{{ g.avatars }}" as="av" hint-placeholder-count="4">
+                <div style="width:26px;height:26px;border-radius:50%;background:{{ av }};border:2px solid #262d3d;margin-left:-8px;"></div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </sc-if>
+
+      <!-- GROUP DETAIL -->
+      <sc-if value="{{ isGroupDetail }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ backToGroups }}" style="display:flex;align-items:center;gap:6px;color:rgba(236,231,218,0.6);font-size:13px;font-weight:700;margin-bottom:14px;cursor:pointer;">‹ Back to Groups</div>
+        <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:20px;color:#ece7da;margin-bottom:16px;">{{ groupDetail.name }}</div>
+
+        <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;color:rgba(236,231,218,0.55);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Upcoming Events</div>
+        <sc-for list="{{ groupDetail.upcomingEvents }}" as="ue" hint-placeholder-count="1">
+          <div style="background:#262d3d;border-radius:16px;padding:16px 18px;margin-bottom:14px;box-shadow:0 4px 14px rgba(0,0,0,0.25);box-sizing:border-box;display:flex;align-items:center;gap:12px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:{{ ue.color }};flex-shrink:0;"></div>
+            <div style="flex:1;">
+              <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;color:#ece7da;">{{ ue.title }}</div>
+              <div style="font-size:12px;color:rgba(236,231,218,0.55);margin-top:1px;">{{ ue.when }} · {{ ue.location }}</div>
+            </div>
+          </div>
+        </sc-for>
+        <sc-if value="{{ groupDetail.noUpcomingEvents }}">
+          <div style="font-size:13px;color:rgba(236,231,218,0.4);padding:4px 0 4px;margin-bottom:8px;">No upcoming events yet.</div>
+        </sc-if>
+
+        <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;color:rgba(236,231,218,0.55);text-transform:uppercase;letter-spacing:0.5px;margin:22px 0 10px;">New Event Details</div>
+        <div style="background:#262d3d;border-radius:16px;padding:16px 18px;margin-bottom:22px;box-shadow:0 4px 14px rgba(0,0,0,0.25);box-sizing:border-box;">
+          <div style="font-size:11.5px;font-weight:700;color:rgba(236,231,218,0.5);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">Event name</div>
+          <input placeholder="Catan &amp; Snacks" style="width:100%;box-sizing:border-box;background:#1c2230;border:1px solid rgba(236,231,218,0.12);border-radius:9px;padding:10px 12px;color:#ece7da;font-size:14px;margin-bottom:14px;font-family:Tahoma,sans-serif;"/>
+          <div style="display:flex;gap:10px;margin-bottom:14px;">
+            <div style="flex:1;">
+              <div style="font-size:11.5px;font-weight:700;color:rgba(236,231,218,0.5);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">Date</div>
+              <input placeholder="Fri, Jul 17" style="width:100%;box-sizing:border-box;background:#1c2230;border:1px solid rgba(236,231,218,0.12);border-radius:9px;padding:10px 12px;color:#ece7da;font-size:14px;font-family:Tahoma,sans-serif;"/>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:11.5px;font-weight:700;color:rgba(236,231,218,0.5);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">Time</div>
+              <input placeholder="7:00 PM" style="width:100%;box-sizing:border-box;background:#1c2230;border:1px solid rgba(236,231,218,0.12);border-radius:9px;padding:10px 12px;color:#ece7da;font-size:14px;font-family:Tahoma,sans-serif;"/>
+            </div>
+          </div>
+          <div style="font-size:11.5px;font-weight:700;color:rgba(236,231,218,0.5);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">Location</div>
+          <input placeholder="Del's place" style="width:100%;box-sizing:border-box;background:#1c2230;border:1px solid rgba(236,231,218,0.12);border-radius:9px;padding:10px 12px;color:#ece7da;font-size:14px;margin-bottom:16px;font-family:Tahoma,sans-serif;"/>
+          <button style="width:100%;border:none;border-radius:10px;background:{{ primaryActionColor }};color:#ece7da;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;padding:12px 0;cursor:pointer;">Create Event</button>
+        </div>
+
+        <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;color:rgba(236,231,218,0.55);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Members</div>
+        <sc-for list="{{ groupDetail.members }}" as="m" hint-placeholder-count="4">
+          <div style="background:#262d3d;border-radius:16px;padding:16px 18px;margin-bottom:14px;box-shadow:0 4px 14px rgba(0,0,0,0.25);box-sizing:border-box;display:flex;align-items:center;gap:12px;">
+            <div style="width:36px;height:36px;border-radius:50%;background:{{ m.color }};flex-shrink:0;"></div>
+            <div style="flex:1;font-weight:700;font-size:14.5px;color:#ece7da;">{{ m.name }}</div>
+            <button onClick="{{ m.onAddFriend }}" style="{{ m.friendBtnStyle }}">{{ m.friendBtnLabel }}</button>
+          </div>
+        </sc-for>
+        <button style="width:100%;border:none;border-radius:12px;background:#9b3f45;color:#ece7da;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;padding:12px 0;margin-top:4px;cursor:pointer;">+ Add Member</button>
+      </sc-if>
+
+      <!-- NEW GROUP -->
+      <sc-if value="{{ isNewGroup }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ closeNewGroup }}" style="display:flex;align-items:center;gap:6px;color:rgba(236,231,218,0.6);font-size:13px;font-weight:700;margin-bottom:14px;cursor:pointer;">‹ Back to Groups</div>
+        <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:20px;color:#ece7da;margin-bottom:16px;">New Group</div>
+
+        <div style="background:#262d3d;border-radius:16px;padding:16px 18px;margin-bottom:22px;box-shadow:0 4px 14px rgba(0,0,0,0.25);box-sizing:border-box;">
+          <div style="font-size:11.5px;font-weight:700;color:rgba(236,231,218,0.5);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">Group name</div>
+          <input value="{{ newGroupName }}" onChange="{{ onNewGroupNameChange }}" placeholder="Sunday Boardgamers" style="width:100%;box-sizing:border-box;background:#1c2230;border:1px solid rgba(236,231,218,0.12);border-radius:9px;padding:10px 12px;color:#ece7da;font-size:14px;font-family:Tahoma,sans-serif;"/>
+        </div>
+
+        <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;color:rgba(236,231,218,0.55);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Add Members</div>
+        <sc-for list="{{ friendPickList }}" as="fp" hint-placeholder-count="5">
+          <div style="background:#262d3d;border-radius:16px;padding:16px 18px;margin-bottom:14px;box-shadow:0 4px 14px rgba(0,0,0,0.25);box-sizing:border-box;display:flex;align-items:center;gap:12px;">
+            <div style="width:36px;height:36px;border-radius:50%;background:{{ fp.color }};flex-shrink:0;"></div>
+            <div style="flex:1;font-weight:700;font-size:14.5px;color:#ece7da;">{{ fp.name }}</div>
+            <button onClick="{{ fp.onToggle }}" style="{{ fp.btnStyle }}">{{ fp.btnLabel }}</button>
+          </div>
+        </sc-for>
+
+        <button onClick="{{ createGroup }}" style="width:100%;border:none;border-radius:14px;background:{{ primaryActionColor }};color:#ece7da;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;padding:14px 0;margin-top:6px;cursor:pointer;">Create Group</button>
+      </sc-if>
+
+      <!-- EVENTS TAB -->
+      <sc-if value="{{ isEvents }}" hint-placeholder-val="{{ true }}">
+        <sc-for list="{{ events }}" as="ev" hint-placeholder-count="3">
+          <div style="background:#262d3d;border-radius:16px;padding:16px 18px;margin-bottom:14px;box-shadow:0 4px 14px rgba(0,0,0,0.25);box-sizing:border-box;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+              <div style="width:36px;height:36px;border-radius:10px;background:{{ ev.color }};flex-shrink:0;"></div>
+              <div style="flex:1;">
+                <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;color:#ece7da;">{{ ev.title }}</div>
+                <div style="font-size:12px;color:rgba(236,231,218,0.55);margin-top:1px;">{{ ev.groupName }} · {{ ev.when }}</div>
+              </div>
+            </div>
+            <div style="font-size:12.5px;color:rgba(236,231,218,0.6);margin-bottom:14px;">{{ ev.location }}</div>
+              <div style="display:flex;gap:8px;margin-bottom:12px;">
+                <button onClick="{{ ev.onYes }}" style="{{ ev.yesStyle }}">Yes</button>
+                <button onClick="{{ ev.onMaybe }}" style="{{ ev.maybeStyle }}">Maybe</button>
+                <button onClick="{{ ev.onNo }}" style="{{ ev.noStyle }}">No</button>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="display:flex;">
+                  <sc-for list="{{ ev.avatars }}" as="av" hint-placeholder-count="3">
+                    <div style="width:22px;height:22px;border-radius:50%;background:{{ av }};border:2px solid #262d3d;margin-left:-7px;"></div>
+                  </sc-for>
+                </div>
+                <a href="#" style="font-size:12.5px;font-weight:700;text-decoration:none;">{{ ev.goingCount }} going →</a>
+              </div>
+          </div>
+        </sc-for>
+      </sc-if>
+
+      <!-- CALENDAR TAB -->
+      <sc-if value="{{ isCalendar }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <div style="width:32px;height:32px;border-radius:10px;background:#262d3d;display:flex;align-items:center;justify-content:center;color:#ece7da;font-size:16px;">‹</div>
+          <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;color:#ece7da;">July 2026</div>
+          <div style="width:32px;height:32px;border-radius:10px;background:#262d3d;display:flex;align-items:center;justify-content:center;color:#ece7da;font-size:16px;">›</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px;">
+          <sc-for list="{{ weekdayLabels }}" as="wd" hint-placeholder-count="7">
+            <div style="text-align:center;font-size:11px;font-weight:700;color:rgba(236,231,218,0.4);padding-bottom:4px;">{{ wd }}</div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:22px;">
+          <sc-for list="{{ calendarCells }}" as="cell" hint-placeholder-count="35">
+            <div onClick="{{ cell.onClick }}" style="{{ cell.style }}">
+              <span>{{ cell.day }}</span>
+              <div style="display:flex;gap:3px;margin-top:2px;height:5px;">
+                <sc-if value="{{ cell.hasDot }}">
+                  <div style="width:5px;height:5px;border-radius:50%;background:{{ cell.dotColor }};"></div>
+                </sc-if>
+                <sc-if value="{{ cell.hasPersonalDot }}">
+                  <div style="width:5px;height:5px;border-radius:50%;background:#9099ab;"></div>
+                </sc-if>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;color:rgba(236,231,218,0.55);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">{{ selectedDayLabel }}</div>
+
+        <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;color:rgba(236,231,218,0.45);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Your Schedule</div>
+        <sc-for list="{{ personalDayEvents }}" as="pe" hint-placeholder-count="1">
+          <div style="background:#262d3d;border-radius:16px;padding:16px 18px;margin-bottom:14px;box-shadow:0 4px 14px rgba(0,0,0,0.25);box-sizing:border-box;display:flex;align-items:center;gap:12px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:#3a4053;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+              <div style="width:14px;height:14px;border-radius:4px;border:2px solid #9099ab;"></div>
+            </div>
+            <div style="flex:1;">
+              <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;color:#ece7da;">{{ pe.title }}</div>
+              <div style="font-size:12px;color:rgba(236,231,218,0.55);margin-top:1px;">{{ pe.time }} · {{ pe.owner }}</div>
+            </div>
+          </div>
+        </sc-for>
+
+        <sc-if value="{{ isAddingPersonal }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#262d3d;border-radius:16px;padding:16px 18px;margin-bottom:14px;box-shadow:0 4px 14px rgba(0,0,0,0.25);box-sizing:border-box;">
+            <div style="font-size:11.5px;font-weight:700;color:rgba(236,231,218,0.5);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">What's going on</div>
+            <input value="{{ personalTitle }}" onChange="{{ onPersonalTitleChange }}" placeholder="Dentist appointment" style="width:100%;box-sizing:border-box;background:#1c2230;border:1px solid rgba(236,231,218,0.12);border-radius:9px;padding:10px 12px;color:#ece7da;font-size:14px;margin-bottom:14px;font-family:Tahoma,sans-serif;"/>
+            <div style="font-size:11.5px;font-weight:700;color:rgba(236,231,218,0.5);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">Time</div>
+            <input value="{{ personalTime }}" onChange="{{ onPersonalTimeChange }}" placeholder="6:00 PM" style="width:100%;box-sizing:border-box;background:#1c2230;border:1px solid rgba(236,231,218,0.12);border-radius:9px;padding:10px 12px;color:#ece7da;font-size:14px;margin-bottom:16px;font-family:Tahoma,sans-serif;"/>
+            <div style="display:flex;gap:10px;">
+              <button onClick="{{ cancelPersonal }}" style="flex:1;border:none;border-radius:10px;background:#1c2230;color:rgba(236,231,218,0.6);font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;padding:12px 0;cursor:pointer;">Cancel</button>
+              <button onClick="{{ savePersonal }}" style="flex:1;border:none;border-radius:10px;background:{{ primaryActionColor }};color:#ece7da;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;padding:12px 0;cursor:pointer;">Save</button>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ isNotAddingPersonal }}" hint-placeholder-val="{{ true }}">
+          <button onClick="{{ openAddPersonal }}" style="width:100%;border:none;border-radius:12px;background:#2f3750;color:#ece7da;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;padding:12px 0;margin-bottom:18px;cursor:pointer;">+ Add to Your Schedule</button>
+        </sc-if>
+
+        <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;color:rgba(236,231,218,0.45);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Group Events</div>
+        <sc-for list="{{ selectedDayEvents }}" as="ev" hint-placeholder-count="1">
+          <div style="width:100%;background:#262d3d;border-radius:16px;padding:16px 18px;margin-bottom:14px;box-shadow:0 4px 14px rgba(0,0,0,0.25);box-sizing:border-box;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+              <div style="width:36px;height:36px;border-radius:10px;background:{{ ev.color }};flex-shrink:0;"></div>
+              <div style="flex:1;">
+                <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;color:#ece7da;">{{ ev.title }}</div>
+                <div style="font-size:12px;color:rgba(236,231,218,0.55);margin-top:1px;">{{ ev.when }}</div>
+              </div>
+            </div>
+            <div style="font-size:11.5px;font-weight:700;color:rgba(236,231,218,0.5);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">Who's going</div>
+            <sc-for list="{{ ev.attendees }}" as="att" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:10px;padding:6px 0;">
+                <div style="width:26px;height:26px;border-radius:50%;background:{{ att.color }};flex-shrink:0;"></div>
+                <div style="flex:1;font-size:13.5px;color:#ece7da;">{{ att.name }}</div>
+                <div style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:7px;background:{{ att.statusBg }};color:#ece7da;">{{ att.statusLabel }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+        <sc-if value="{{ noDayEvents }}">
+          <div style="font-size:13px;color:rgba(236,231,218,0.4);padding:6px 0;">No group events this day.</div>
+        </sc-if>
+      </sc-if>
+
+      <!-- FRIENDS TAB -->
+      <sc-if value="{{ isFriends }}" hint-placeholder-val="{{ true }}">
+        <input placeholder="Search friends" style="width:100%;box-sizing:border-box;background:#262d3d;border:none;border-radius:12px;padding:12px 14px;color:#ece7da;font-size:14px;margin-bottom:16px;font-family:Tahoma,sans-serif;"/>
+
+        <sc-if value="{{ hasPending }}" hint-placeholder-val="{{ true }}">
+          <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;color:rgba(236,231,218,0.55);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Requests</div>
+          <sc-for list="{{ pendingFriends }}" as="p" hint-placeholder-count="2">
+            <div style="background:#262d3d;border-radius:16px;padding:16px 18px;margin-bottom:14px;box-shadow:0 4px 14px rgba(0,0,0,0.25);box-sizing:border-box;display:flex;align-items:center;gap:12px;">
+              <div style="width:36px;height:36px;border-radius:50%;background:{{ p.color }};flex-shrink:0;"></div>
+              <div style="flex:1;font-weight:700;font-size:14.5px;color:#ece7da;">{{ p.name }}</div>
+              <button onClick="{{ p.onAccept }}" style="border:none;border-radius:8px;background:{{ primaryActionColor }};color:#ece7da;font-size:12px;font-weight:700;padding:7px 10px;cursor:pointer;">Accept</button>
+              <button onClick="{{ p.onDecline }}" style="border:none;border-radius:8px;background:#1c2230;color:rgba(236,231,218,0.6);font-size:12px;font-weight:700;padding:7px 10px;cursor:pointer;">Decline</button>
+            </div>
+          </sc-for>
+        </sc-if>
+
+        <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;color:rgba(236,231,218,0.55);text-transform:uppercase;letter-spacing:0.5px;margin:18px 0 10px;">All Friends</div>
+        <sc-for list="{{ friendsList }}" as="f" hint-placeholder-count="5">
+          <div style="background:#262d3d;border-radius:16px;padding:16px 18px;margin-bottom:14px;box-shadow:0 4px 14px rgba(0,0,0,0.25);box-sizing:border-box;display:flex;align-items:center;gap:12px;">
+            <div style="width:36px;height:36px;border-radius:50%;background:{{ f.color }};flex-shrink:0;"></div>
+            <div style="flex:1;">
+              <div style="font-weight:700;font-size:14.5px;color:#ece7da;">{{ f.name }}</div>
+              <div style="font-size:12px;color:rgba(236,231,218,0.5);">{{ f.mutual }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </sc-if>
+    </div>
+
+    <!-- Bottom nav -->
+    <div style="flex-shrink:0;position:relative;height:82px;padding-bottom:14px;box-sizing:content-box;">
+      <div style="position:absolute;inset:0 0 -14px 0;background:#171c26;border-radius:26px 26px 0 0;display:flex;align-items:center;padding:0 8px;"></div>
+      <div style="position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:84px;height:84px;border-radius:50%;background:#202634;"></div>
+      <div style="position:absolute;top:-22px;left:calc(50% - 4px);transform:translateX(-50%);width:62px;height:62px;display:flex;align-items:center;justify-content:center;">
+        <img src="assets/logo_color.png" style="width:48px;height:48px;object-fit:contain;filter:drop-shadow(0 4px 10px rgba(0,0,0,0.45));" alt="logo"/>
+      </div>
+      <div style="position:relative;height:100%;display:flex;align-items:center;">
+        <div onClick="{{ goGroups }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;color:{{ groupsColor }};">
+          <div style="width:24px;height:20px;position:relative;">
+            <div style="position:absolute;width:9px;height:9px;border-radius:50%;background:currentColor;left:2px;top:0;"></div>
+            <div style="position:absolute;width:9px;height:9px;border-radius:50%;background:currentColor;left:11px;top:2px;opacity:0.7;"></div>
+            <div style="position:absolute;width:14px;height:9px;border-radius:7px 7px 0 0;background:currentColor;left:0;top:10px;"></div>
+            <div style="position:absolute;width:12px;height:8px;border-radius:6px 6px 0 0;background:currentColor;left:10px;top:11px;opacity:0.7;"></div>
+          </div>
+          <div style="font-size:10.5px;font-weight:700;font-family:'Baloo 2',sans-serif;">Groups</div>
+        </div>
+        <div onClick="{{ goEvents }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;color:{{ eventsColor }};">
+          <div style="width:22px;height:22px;border:2px solid currentColor;border-radius:6px;position:relative;">
+            <div style="position:absolute;width:3.5px;height:3.5px;border-radius:50%;background:currentColor;top:2.5px;left:2.5px;"></div>
+            <div style="position:absolute;width:3.5px;height:3.5px;border-radius:50%;background:currentColor;top:2.5px;right:2.5px;"></div>
+            <div style="position:absolute;width:3.5px;height:3.5px;border-radius:50%;background:currentColor;top:7.2px;left:7.2px;"></div>
+            <div style="position:absolute;width:3.5px;height:3.5px;border-radius:50%;background:currentColor;bottom:2.5px;left:2.5px;"></div>
+            <div style="position:absolute;width:3.5px;height:3.5px;border-radius:50%;background:currentColor;bottom:2.5px;right:2.5px;"></div>
+          </div>
+          <div style="font-size:10.5px;font-weight:700;font-family:'Baloo 2',sans-serif;">Events</div>
+        </div>
+        <div style="width:70px;flex-shrink:0;"></div>
+        <div onClick="{{ goCalendar }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;color:{{ calendarColor }};">
+          <div style="width:22px;height:20px;border:2px solid currentColor;border-radius:5px;position:relative;">
+            <div style="position:absolute;top:-3px;left:4px;width:3px;height:6px;border-radius:2px;background:currentColor;"></div>
+            <div style="position:absolute;top:-3px;right:4px;width:3px;height:6px;border-radius:2px;background:currentColor;"></div>
+            <div style="position:absolute;top:5px;left:0;right:0;height:1.5px;background:currentColor;"></div>
+          </div>
+          <div style="font-size:10.5px;font-weight:700;font-family:'Baloo 2',sans-serif;">Calendar</div>
+        </div>
+        <div onClick="{{ goFriends }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;color:{{ friendsColor }};">
+          <div style="width:20px;height:18px;position:relative;">
+            <div style="position:absolute;width:11px;height:11px;border-radius:50%;background:currentColor;top:0;left:0;"></div>
+            <div style="position:absolute;width:11px;height:11px;border-radius:50%;background:currentColor;top:0;left:9px;"></div>
+            <div style="position:absolute;width:11px;height:11px;background:currentColor;transform:rotate(45deg);top:4px;left:4.5px;"></div>
+          </div>
+          <div style="font-size:10.5px;font-weight:700;font-family:'Baloo 2',sans-serif;">Friends</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+  </div>
+</x-import>
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: {&quot;width&quot;: 430, &quot;height&quot;: 900},
+  &quot;initialTab&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;groups&quot;, &quot;options&quot;: [&quot;groups&quot;, &quot;events&quot;, &quot;calendar&quot;, &quot;friends&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Behavior&quot;},
+  &quot;primaryActionColor&quot;: {&quot;editor&quot;: &quot;color&quot;, &quot;default&quot;: &quot;#36996f&quot;, &quot;options&quot;: [&quot;#36996f&quot;, &quot;#8fb0c7&quot;, &quot;#e29314&quot;, &quot;#9b3f45&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Theme&quot;},
+  &quot;showPendingRequests&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Behavior&quot;}
+}">
+
+class Component extends DCLogic {
+  state = {
+    activeTab: 'groups',
+    rsvp: { e1: 'yes', e2: null, e3: 'maybe' },
+    pendingFriends: [
+      { id: 1, name: 'Sam Rivera', color: '#8fb0c7' },
+      { id: 2, name: 'Priya Kapoor', color: '#e29314' },
+    ],
+    selectedDay: 17,
+    // ^ click any highlighted day (17,22,25,26) to see attendee RSVP statuses
+    selectedGroup: null,
+    addedFriends: {},
+    creatingGroup: false,
+    newGroupName: '',
+    newGroupMembers: {},
+    customGroups: [],
+    personalEvents: {
+      15: [{ title: 'Dentist appointment', time: '2:00 PM', owner: 'Priya Kapoor' }],
+      17: [{ title: 'Out of town', time: 'All day', owner: 'Marcus Lee' }],
+      22: [{ title: 'Work deadline', time: '9:00 AM', owner: 'Devon Brooks' }, { title: 'Kid\u2019s recital', time: '6:00 PM', owner: 'Elena Ortiz' }],
+      24: [{ title: 'Date night', time: '8:00 PM', owner: 'Sam Rivera' }],
+    },
+    addingPersonal: false,
+    personalTitle: '',
+    personalTime: '',
+    signedIn: false,
+    signInEmail: '',
+    signInPassword: '',
+  };
+
+  setTab(tab) { this.setState({ activeTab: tab }); }
+  signIn() { this.setState({ signedIn: true }); }
+  signOut() { this.setState({ signedIn: false }); }
+  setRsvp(id, val) { this.setState(s => ({ rsvp: { ...s.rsvp, [id]: s.rsvp[id] === val ? null : val } })); }
+  acceptFriend(id) {
+    this.setState(s => {
+      const p = s.pendingFriends.find(x => x.id === id);
+      return {
+        pendingFriends: s.pendingFriends.filter(x => x.id !== id),
+        friendsAdded: p ? [p] : [],
+      };
+    });
+  }
+  declineFriend(id) { this.setState(s => ({ pendingFriends: s.pendingFriends.filter(x => x.id !== id) })); }
+  setDay(d) { this.setState({ selectedDay: d, addingPersonal: false, personalTitle: '', personalTime: '' }); }
+  openAddPersonal() { this.setState({ addingPersonal: true }); }
+  cancelPersonal() { this.setState({ addingPersonal: false, personalTitle: '', personalTime: '' }); }
+  savePersonal() {
+    this.setState(s => {
+      const day = s.selectedDay;
+      const list = s.personalEvents[day] || [];
+      if (!s.personalTitle.trim()) return null;
+      return {
+        personalEvents: { ...s.personalEvents, [day]: [...list, { title: s.personalTitle.trim(), time: s.personalTime.trim() || 'All day', owner: 'You' }] },
+        addingPersonal: false,
+        personalTitle: '',
+        personalTime: '',
+      };
+    });
+  }
+  openGroup(id) { this.setState({ selectedGroup: id }); }
+  closeGroup() { this.setState({ selectedGroup: null }); }
+  toggleFriend(name) { this.setState(s => ({ addedFriends: { ...s.addedFriends, [name]: !s.addedFriends[name] } })); }
+  openNewGroup() { this.setState({ creatingGroup: true }); }
+  closeNewGroup() { this.setState({ creatingGroup: false, newGroupName: '', newGroupMembers: {} }); }
+  setNewGroupName(v) { this.setState({ newGroupName: v }); }
+  togglePick(name) { this.setState(s => ({ newGroupMembers: { ...s.newGroupMembers, [name]: !s.newGroupMembers[name] } })); }
+  createGroup() {
+    const swatches = ['#36996f', '#9b3f45', '#8fb0c7', '#e29314', '#327724'];
+    this.setState(s => {
+      const pickedNames = Object.keys(s.newGroupMembers).filter(n => s.newGroupMembers[n]);
+      const members = pickedNames.map((name, i) => ({ name, color: swatches[i % swatches.length] }));
+      const name = s.newGroupName.trim() || 'New Group';
+      const group = {
+        id: `custom-${Date.now()}`,
+        name,
+        memberLabel: `${members.length} member${members.length === 1 ? '' : 's'}`,
+        color: swatches[s.customGroups.length % swatches.length],
+        avatars: members.slice(0, 4).map(m => m.color),
+        members,
+      };
+      return {
+        customGroups: [...s.customGroups, group],
+        creatingGroup: false,
+        newGroupName: '',
+        newGroupMembers: {},
+      };
+    });
+  }
+
+  rsvpButtonStyle(active, base) {
+    const common = 'flex:1;border:none;border-radius:9px;font-family:Tahoma,sans-serif;font-weight:700;font-size:12.5px;padding:9px 0;cursor:pointer;';
+    return active
+      ? `${common}background:${base};color:#ece7da;`
+      : `${common}background:#1c2230;color:rgba(236,231,218,0.55);`;
+  }
+
+  renderVals() {
+    const primary = this.props.primaryActionColor ?? '#36996f';
+    const activeTab = this.state.activeTab || (this.props.initialTab ?? 'groups');
+    const groupsBase = [
+      { id: 'g1', name: 'The Meeple Squad', memberLabel: '6 members', color: '#36996f', avatars: ['#ce3b30', '#e29314', '#8fb0c7', '#9b3f45'],
+        members: [
+          { name: 'Sam Rivera', color: '#8fb0c7' },
+          { name: 'Priya Kapoor', color: '#e29314' },
+          { name: 'Marcus Lee', color: '#36996f' },
+          { name: 'Elena Ortiz', color: '#ce3b30' },
+        ] },
+      { id: 'g2', name: 'Family Game Night', memberLabel: '4 members', color: '#9b3f45', avatars: ['#327724', '#e29314', '#ece7da'],
+        members: [
+          { name: 'Devon Brooks', color: '#9b3f45' },
+          { name: 'Priya Kapoor', color: '#e29314' },
+          { name: 'Mom', color: '#ece7da' },
+        ] },
+      { id: 'g3', name: 'Work Crew', memberLabel: '9 members', color: '#8fb0c7', avatars: ['#ce3b30', '#36996f', '#e29314', '#9b3f45'],
+        members: [
+          { name: 'Elena Ortiz', color: '#ce3b30' },
+          { name: 'Marcus Lee', color: '#36996f' },
+          { name: 'Priya Kapoor', color: '#e29314' },
+          { name: 'Devon Brooks', color: '#9b3f45' },
+        ] },
+    ].concat(this.state.customGroups);
+    const groups = groupsBase.map(g => ({ ...g, onOpen: () => this.openGroup(g.id) }));
+
+    const activeGroupBase = groupsBase.find(g => g.id === this.state.selectedGroup);
+    const eventsForGroup = activeGroupBase
+      ? [
+          { id: 'e1', title: 'Monopoly Night', groupName: 'The Meeple Squad', when: 'Fri, Jul 24 · 7:00 PM', location: "Del's place", color: '#36996f' },
+          { id: 'e2', title: 'Clue Rematch', groupName: 'Work Crew', when: 'Sat, Jul 25 · 6:30 PM', location: 'The Green Room', color: '#9b3f45' },
+          { id: 'e3', title: 'Mastermind Face-off', groupName: 'Family Game Night', when: 'Sun, Jul 26 · 4:00 PM', location: "Mom's house", color: '#8fb0c7' },
+        ].filter(e => e.groupName === activeGroupBase.name)
+      : [];
+    const groupDetail = activeGroupBase ? {
+      name: activeGroupBase.name,
+      upcomingEvents: eventsForGroup,
+      noUpcomingEvents: eventsForGroup.length === 0,
+      members: activeGroupBase.members.map(m => {
+        const added = !!this.state.addedFriends[m.name];
+        return {
+          ...m,
+          friendBtnLabel: added ? 'Added' : '+ Add Friend',
+          friendBtnStyle: added
+            ? 'border:none;border-radius:8px;background:#1c2230;color:rgba(236,231,218,0.6);font-size:12px;font-weight:700;padding:7px 12px;cursor:pointer;'
+            : `border:none;border-radius:8px;background:${primary};color:#ece7da;font-size:12px;font-weight:700;padding:7px 12px;cursor:pointer;`,
+          onAddFriend: () => this.toggleFriend(m.name),
+        };
+      }),
+    } : null;
+
+    const eventsBase = [
+      { id: 'e1', title: 'Monopoly Night', groupName: 'The Meeple Squad', when: 'Fri, Jul 24 · 7:00 PM', location: "Del's place", color: '#36996f', avatars: ['#ce3b30', '#e29314', '#8fb0c7'], goingCount: 5 },
+      { id: 'e2', title: 'Clue Rematch', groupName: 'Work Crew', when: 'Sat, Jul 25 · 6:30 PM', location: 'The Green Room', color: '#9b3f45', avatars: ['#327724', '#ece7da'], goingCount: 3 },
+      { id: 'e3', title: 'Mastermind Face-off', groupName: 'Family Game Night', when: 'Sun, Jul 26 · 4:00 PM', location: "Mom's house", color: '#8fb0c7', avatars: ['#e29314', '#36996f', '#ce3b30'], goingCount: 4 },
+    ];
+    const events = eventsBase.map(ev => {
+      const r = this.state.rsvp[ev.id];
+      return {
+        ...ev,
+        onYes: () => this.setRsvp(ev.id, 'yes'),
+        onMaybe: () => this.setRsvp(ev.id, 'maybe'),
+        onNo: () => this.setRsvp(ev.id, 'no'),
+        yesStyle: this.rsvpButtonStyle(r === 'yes', '#327724'),
+        maybeStyle: this.rsvpButtonStyle(r === 'maybe', '#e29314'),
+        noStyle: this.rsvpButtonStyle(r === 'no', '#ce3b30'),
+      };
+    });
+
+    const friendsList = [
+      { name: 'Sam Rivera', mutual: '3 groups together', color: '#8fb0c7' },
+      { name: 'Priya Kapoor', mutual: '1 group together', color: '#e29314' },
+      { name: 'Marcus Lee', mutual: '2 groups together', color: '#36996f' },
+      { name: 'Elena Ortiz', mutual: '4 groups together', color: '#ce3b30' },
+      { name: 'Devon Brooks', mutual: '1 group together', color: '#9b3f45' },
+    ];
+
+    const pendingFriends = this.state.pendingFriends.map(p => ({
+      ...p,
+      onAccept: () => this.acceptFriend(p.id),
+      onDecline: () => this.declineFriend(p.id),
+    }));
+    const showPending = this.props.showPendingRequests ?? true;
+
+    // calendar
+    const eventDays = { 17: '#36996f', 22: '#9b3f45', 25: '#8fb0c7', 26: '#8fb0c7' };
+    const firstWeekday = 3; // July 2026 starts Wed
+    const daysInMonth = 31;
+    const cells = [];
+    for (let i = 0; i < firstWeekday; i++) cells.push({ day: '', hasDot: false, style: 'visibility:hidden;' });
+    for (let d = 1; d <= daysInMonth; d++) {
+      const selected = d === this.state.selectedDay;
+      const dot = eventDays[d];
+      cells.push({
+        day: d,
+        hasDot: !!dot,
+        dotColor: dot || 'transparent',
+        hasPersonalDot: !!(this.state.personalEvents[d] && this.state.personalEvents[d].length),
+        onClick: () => this.setDay(d),
+        style: `display:flex;flex-direction:column;align-items:center;justify-content:center;height:38px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:${selected ? 700 : 400};color:${selected ? '#202634' : '#ece7da'};background:${selected ? '#ece7da' : 'transparent'};`,
+      });
+    }
+
+    const statusMeta = {
+      yes: { label: 'Going', bg: '#327724' },
+      maybe: { label: 'Maybe', bg: '#e29314' },
+      no: { label: "Can't go", bg: '#ce3b30' },
+      none: { label: 'No response', bg: '#4b5164' },
+    };
+    const attendeesFor = (list) => list.map(a => ({ ...a, statusLabel: statusMeta[a.status].label, statusBg: statusMeta[a.status].bg }));
+
+    const dayEventsMap = {
+      17: [{ title: 'Monopoly Night', when: '7:00 PM · The Meeple Squad', color: '#36996f', attendees: attendeesFor([
+        { name: 'Sam Rivera', color: '#8fb0c7', status: 'yes' },
+        { name: 'Priya Kapoor', color: '#e29314', status: 'yes' },
+        { name: 'Marcus Lee', color: '#36996f', status: 'maybe' },
+        { name: 'Elena Ortiz', color: '#ce3b30', status: 'no' },
+        { name: 'Devon Brooks', color: '#9b3f45', status: 'none' },
+      ]) }],
+      22: [{ title: 'Board Game Cafe Meetup', when: '5:30 PM · Work Crew', color: '#9b3f45', attendees: attendeesFor([
+        { name: 'Devon Brooks', color: '#9b3f45', status: 'yes' },
+        { name: 'Priya Kapoor', color: '#e29314', status: 'maybe' },
+        { name: 'Elena Ortiz', color: '#ce3b30', status: 'none' },
+      ]) }],
+      25: [{ title: 'Clue Rematch', when: '6:30 PM · Work Crew', color: '#8fb0c7', attendees: attendeesFor([
+        { name: 'Marcus Lee', color: '#36996f', status: 'yes' },
+        { name: 'Elena Ortiz', color: '#ce3b30', status: 'yes' },
+      ]) }],
+      26: [{ title: 'Mastermind Face-off', when: '4:00 PM · Family Game Night', color: '#8fb0c7', attendees: attendeesFor([
+        { name: 'Sam Rivera', color: '#8fb0c7', status: 'yes' },
+        { name: 'Devon Brooks', color: '#9b3f45', status: 'maybe' },
+        { name: 'Marcus Lee', color: '#36996f', status: 'yes' },
+      ]) }],
+    };
+    const selectedDayEvents = dayEventsMap[this.state.selectedDay] || [];
+
+    const tabTitles = { groups: 'Groups', events: 'Events', calendar: 'Calendar', friends: 'Friends' };
+
+    const colorFor = (tab) => (activeTab === tab ? '#ece7da' : 'rgba(236,231,218,0.4)');
+
+    return {
+      primaryActionColor: primary,
+      isSignedOut: !this.state.signedIn,
+      isSignedIn: this.state.signedIn,
+      signInEmail: this.state.signInEmail,
+      signInPassword: this.state.signInPassword,
+      onSignInEmailChange: (e) => this.setState({ signInEmail: e.target.value }),
+      onSignInPasswordChange: (e) => this.setState({ signInPassword: e.target.value }),
+      onSignIn: () => this.signIn(),
+      onSignOut: () => this.signOut(),
+      isGroups: activeTab === 'groups',
+      isGroupsList: activeTab === 'groups' && !this.state.selectedGroup && !this.state.creatingGroup,
+      isGroupDetail: activeTab === 'groups' && !!this.state.selectedGroup && !this.state.creatingGroup,
+      isNewGroup: activeTab === 'groups' && this.state.creatingGroup,
+      groupDetail,
+      backToGroups: () => this.closeGroup(),
+      openNewGroup: () => this.openNewGroup(),
+      closeNewGroup: () => this.closeNewGroup(),
+      newGroupName: this.state.newGroupName,
+      onNewGroupNameChange: (e) => this.setNewGroupName(e.target.value),
+      createGroup: () => this.createGroup(),
+      friendPickList: friendsList.map(f => {
+        const picked = !!this.state.newGroupMembers[f.name];
+        return {
+          ...f,
+          btnLabel: picked ? 'Added' : '+ Add',
+          btnStyle: picked
+            ? 'border:none;border-radius:8px;background:#1c2230;color:rgba(236,231,218,0.6);font-size:12px;font-weight:700;padding:7px 12px;cursor:pointer;'
+            : `border:none;border-radius:8px;background:${primary};color:#ece7da;font-size:12px;font-weight:700;padding:7px 12px;cursor:pointer;`,
+          onToggle: () => this.togglePick(f.name),
+        };
+      }),
+      isEvents: activeTab === 'events',
+      isCalendar: activeTab === 'calendar',
+      isFriends: activeTab === 'friends',
+      tabTitle: tabTitles[activeTab],
+      hasPending: showPending && pendingFriends.length > 0,
+      groupsColor: colorFor('groups'),
+      eventsColor: colorFor('events'),
+      calendarColor: colorFor('calendar'),
+      friendsColor: colorFor('friends'),
+      goGroups: () => this.setTab('groups'),
+      goEvents: () => this.setTab('events'),
+      goCalendar: () => this.setTab('calendar'),
+      goFriends: () => this.setTab('friends'),
+      groups,
+      events,
+      friendsList,
+      pendingFriends,
+      weekdayLabels: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
+      calendarCells: cells,
+      selectedDayLabel: `July ${this.state.selectedDay}`,
+      selectedDayEvents,
+      noDayEvents: selectedDayEvents.length === 0,
+      personalDayEvents: this.state.personalEvents[this.state.selectedDay] || [],
+      isAddingPersonal: this.state.addingPersonal,
+      isNotAddingPersonal: !this.state.addingPersonal,
+      openAddPersonal: () => this.openAddPersonal(),
+      cancelPersonal: () => this.cancelPersonal(),
+      savePersonal: () => this.savePersonal(),
+      personalTitle: this.state.personalTitle,
+      personalTime: this.state.personalTime,
+      onPersonalTitleChange: (e) => this.setState({ personalTitle: e.target.value }),
+      onPersonalTimeChange: (e) => this.setState({ personalTime: e.target.value }),
+    };
+  }
+}
+
+</script>
+</body>
+</html>
