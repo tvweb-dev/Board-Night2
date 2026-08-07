@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Friends | Board Night</title>
+  <link rel="icon" type="image/svg+xml" href="css/design_elements/BNlogo.svg" />
+  <link rel="stylesheet" href="https://use.typekit.net/oga8xpj.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="topbar" id="topbar"></header>
+  <main class="container">
+    <div class="page-heading"><div><h1>Friends</h1><p class="subtle">People who share groups with you.</p></div></div>
+    <div id="friendList" class="grid"><p class="empty">Loading friends...</p></div>
+  </main>
+  <script src="js/data.js"></script><script src="js/app.js"></script>
+  <script>
+    ready(async function () {
+      renderTopbar();
+      const list = document.getElementById("friendList");
+      try {
+        const friends = await DB.getFriends();
+        list.innerHTML = friends.length ? friends.map(function (friend) {
+          const initials = friend.name.split(/\s+/).filter(Boolean).slice(0, 2).map(function (part) { return part[0]; }).join("").toUpperCase();
+          return `<article class="card friend-card"><div class="friend-avatar">${esc(initials)}</div><div><h3>${esc(friend.name)}</h3><p class="subtle">${esc(friend.email || "Board Night member")}</p><p>${friend.groups.map(function (group) { return `<a href="group.html?group=${encodeURIComponent(group.id)}">${esc(group.name)}</a>`; }).join(" · ")}</p></div></article>`;
+        }).join("") : '<p class="empty">No shared group members yet.</p>';
+      } catch (error) { list.innerHTML = `<p class="empty">${esc(error.message)}</p>`; }
+    });
+  </script>
+</body>
+</html>

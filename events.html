@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Events | Board Night</title>
+  <link rel="icon" type="image/svg+xml" href="css/design_elements/BNlogo.svg" />
+  <link rel="stylesheet" href="https://use.typekit.net/oga8xpj.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="topbar" id="topbar"></header>
+  <main class="container">
+    <div class="page-heading">
+      <div><h1>Events</h1><p class="subtle">Events from all of your groups.</p></div>
+    </div>
+    <div id="eventList" class="grid"><p class="empty">Loading events...</p></div>
+  </main>
+  <script src="js/data.js"></script><script src="js/app.js"></script>
+  <script>
+    ready(async function () {
+      renderTopbar();
+      const list = document.getElementById("eventList");
+      try {
+        const events = await DB.getAllEvents();
+        list.innerHTML = events.length ? events.map(function (event) {
+          return `<a class="card event-card" href="event.html?event=${encodeURIComponent(event.id)}">
+            <h3>${esc(event.title)} <span class="pill ${event.cancelled ? "cancelled" : "active"}">${esc(event.status)}</span></h3>
+            <p class="subtle">${prettyDate(event.date)} · ${esc(event.time || "Time TBD")}</p>
+            <p>${esc(event.groupName)} · ${esc(event.location || "Location TBD")}</p>
+          </a>`;
+        }).join("") : '<p class="empty">No events yet. Create one from a group.</p>';
+      } catch (error) { list.innerHTML = `<p class="empty">${esc(error.message)}</p>`; }
+    });
+  </script>
+</body>
+</html>

@@ -168,6 +168,39 @@ const DB = {
     return events.map(this.mapEvent);
   },
 
+  async getAllEvents() {
+    const groups = await this.getGroups();
+    const lists = await Promise.all(groups.map(async (group) => {
+      const events = await this.getEvents(group.id);
+      return events.map((event) => ({ ...event, groupName: group.name }));
+    }));
+    return lists.flat().sort((a, b) => `${a.date}T${a.time}`.localeCompare(`${b.date}T${b.time}`));
+  },
+
+  async getFriends() {
+    const currentUserId = String(this.currentUserId());
+    const groups = await this.getGroups();
+    const memberships = await Promise.all(groups.map(async (group) => ({
+      group,
+      members: await this.getMembers(group.id)
+    })));
+    const friends = new Map();
+
+    memberships.forEach(({ group, members }) => {
+      members.forEach((member) => {
+        if (String(member.id) === currentUserId) return;
+        const key = String(member.id);
+        const existing = friends.get(key) || { ...member, groups: [] };
+        if (!existing.groups.some((item) => String(item.id) === String(group.id))) {
+          existing.groups.push({ id: group.id, name: group.name });
+        }
+        friends.set(key, existing);
+      });
+    });
+
+    return Array.from(friends.values()).sort((a, b) => a.name.localeCompare(b.name));
+  },
+
   async getEvent(id) {
     const groups = await this.getGroups();
 

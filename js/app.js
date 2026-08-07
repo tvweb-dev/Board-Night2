@@ -31,9 +31,14 @@ function renderTopbar() {
   const user = DB.currentUser();
   const path = window.location.pathname.split("/").pop() || "dashboard.html";
   const groupsActive = ["dashboard.html", "group.html"].includes(path);
-  const eventsActive = ["event.html", "event-edit.html"].includes(path);
+  const eventsActive = ["events.html", "event.html", "event-edit.html"].includes(path);
+  const calendarActive = path === "calendar.html";
+  const friendsActive = path === "friends.html";
   const mobileTitles = {
     "dashboard.html": "Your Groups",
+    "events.html": "Events",
+    "calendar.html": "Calendar",
+    "friends.html": "Friends",
     "group.html": "Group",
     "event.html": "Event",
     "event-edit.html": qs("event") ? "Edit Event" : "Create Event"
@@ -59,15 +64,15 @@ function renderTopbar() {
       <a class="sidebar-link ${groupsActive ? "is-active" : ""}" href="dashboard.html">
         <span class="sidebar-icon" aria-hidden="true">♟</span><span>Groups</span>
       </a>
-      <a class="sidebar-link ${eventsActive ? "is-active" : ""}" href="${eventsActive ? path + window.location.search : "dashboard.html"}">
+      <a class="sidebar-link ${eventsActive ? "is-active" : ""}" href="events.html">
         <span class="sidebar-icon" aria-hidden="true">⚄</span><span>Events</span>
       </a>
-      <span class="sidebar-link is-disabled" aria-disabled="true" title="Calendar coming soon">
+      <a class="sidebar-link ${calendarActive ? "is-active" : ""}" href="calendar.html">
         <span class="sidebar-icon" aria-hidden="true">□</span><span>Calendar</span>
-      </span>
-      <span class="sidebar-link is-disabled" aria-disabled="true" title="Friends coming soon">
+      </a>
+      <a class="sidebar-link ${friendsActive ? "is-active" : ""}" href="friends.html">
         <span class="sidebar-icon" aria-hidden="true">♡</span><span>Friends</span>
-      </span>
+      </a>
     </nav>
     <div class="sidebar-account">
       <div class="account-avatar" aria-hidden="true">${esc(initials)}</div>

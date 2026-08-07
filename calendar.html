@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calendar | Board Night</title>
+  <link rel="icon" type="image/svg+xml" href="css/design_elements/BNlogo.svg" />
+  <link rel="stylesheet" href="https://use.typekit.net/oga8xpj.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="topbar" id="topbar"></header>
+  <main class="container">
+    <div class="page-heading"><div><h1>Calendar</h1><p class="subtle">Your group events organized by date.</p></div></div>
+    <div id="calendarList"><p class="empty">Loading calendar...</p></div>
+  </main>
+  <script src="js/data.js"></script><script src="js/app.js"></script>
+  <script>
+    ready(async function () {
+      renderTopbar();
+      const list = document.getElementById("calendarList");
+      try {
+        const events = await DB.getAllEvents();
+        const dated = events.filter(function (event) { return event.date; });
+        const groups = dated.reduce(function (result, event) {
+          (result[event.date] ||= []).push(event); return result;
+        }, {});
+        list.innerHTML = dated.length ? Object.keys(groups).map(function (date) {
+          return `<section class="calendar-day"><div class="calendar-date"><strong>${prettyDate(date)}</strong><span>${groups[date].length} event${groups[date].length === 1 ? "" : "s"}</span></div>
+            <div>${groups[date].map(function (event) { return `<a class="card calendar-event" href="event.html?event=${encodeURIComponent(event.id)}"><span class="event-dot"></span><span><strong>${esc(event.title)}</strong><small>${esc(event.time || "Time TBD")} · ${esc(event.groupName)} · ${esc(event.location || "Location TBD")}</small></span></a>`; }).join("")}</div></section>`;
+        }).join("") : '<p class="empty">No dated events to show yet.</p>';
+      } catch (error) { list.innerHTML = `<p class="empty">${esc(error.message)}</p>`; }
+    });
+  </script>
+</body>
+</html>
