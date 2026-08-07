@@ -84,6 +84,11 @@
       async function renderEvents() {
         const wrap = document.getElementById("eventList");
         const events = await DB.getEvents(groupId);
+        events.sort(function (a, b) {
+          const aDate = eventDateTime(a);
+          const bDate = eventDateTime(b);
+          return (bDate ? bDate.getTime() : 0) - (aDate ? aDate.getTime() : 0);
+        });
 
         if (!events.length) {
           wrap.innerHTML = '<p class="empty">No events yet.</p>';
@@ -97,8 +102,9 @@
           const displayState = eventDisplayState(e);
           const stateLabel = displayState.cancelled ? "Canceled" : displayState.past ? "Past" : "Upcoming";
           const stateClass = displayState.cancelled ? "cancelled" : displayState.past ? "past" : "active";
+          const borderClass = displayState.cancelled ? "is-cancelled" : displayState.past ? "is-past" : "is-upcoming";
 
-          return `<a class="card group-event-card" style="text-decoration:none;color:inherit;display:flex;"
+          return `<a class="card group-event-card ${borderClass}" style="text-decoration:none;color:inherit;display:flex;"
                      href="event.html?event=${encodeURIComponent(e.id)}">
                     <span class="group-event-swatch">${e.imageUrl ? `<img src="${esc(e.imageUrl)}" alt="">` : ""}</span><span><h3>${esc(e.title)} <small class="pill ${stateClass}">${stateLabel}</small></h3><p class="subtle">${prettyDate(e.date)} · ${esc(e.time || "Time TBD")} · ${esc(e.location || "Location TBD")}</p><strong class="going-label">${going} going</strong></span>
                   </a>`;

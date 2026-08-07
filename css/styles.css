@@ -389,6 +389,9 @@ footer.note {
 .section-heading h2, .group-members-column > h2 { margin: 0; color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .5px; }
 .group-members-column > h2 { margin: 12px 0; }
 .group-event-card { align-items: center; gap: 12px; padding: 16px 18px; }
+.group-event-card.is-upcoming { border-color: rgba(54,153,111,.72); }
+.group-event-card.is-past { border-color: rgba(226,147,20,.72); }
+.group-event-card.is-cancelled { border-color: rgba(206,59,48,.75); }
 .group-event-card h3, .group-event-card p { margin: 0; }
 .group-event-swatch { width: 38px; height: 38px; flex: 0 0 auto; border-radius: 10px; background: var(--accent); }
 .going-label { display: block; margin-top: 5px; color: rgba(236,231,218,.7); font-size: .75rem; }
