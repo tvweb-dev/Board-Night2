@@ -307,6 +307,13 @@ const DB = {
     return this.mapEvent(updated);
   },
 
+  async updateEventImage(eventId, eventImageUrl) {
+    return this.api(`/api/events/${eventId}/image`, {
+      method: "PATCH",
+      body: JSON.stringify({ eventImageUrl })
+    });
+  },
+
   async cancelEvent(eventId) {
     const response = await this.api(`/api/events/${eventId}/cancel`, { method: "PATCH" });
     return response.event || response;

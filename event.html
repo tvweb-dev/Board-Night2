@@ -53,6 +53,13 @@
         <a class="btn secondary" id="emailBtn" href="#">Open RSVP link</a>
         <button class="btn danger" id="cancelEventBtn">Cancel event</button>
       </div>
+      <div class="host-image-control">
+        <h3>Event image</h3>
+        <label for="hostEventImageUrl">Image URL</label>
+        <input id="hostEventImageUrl" type="url" maxlength="500" placeholder="https://example.com/game-night.jpg">
+        <img class="media-url-preview" id="hostEventImagePreview" alt="Event image preview" hidden>
+        <div class="btn-row"><button class="btn secondary" id="saveEventImageBtn" type="button">Save image</button></div>
+      </div>
       <div class="invite-members">
         <h3>Invite group members</h3>
         <p class="subtle">Select members to add to this event. They will appear as invited until they RSVP.</p>
@@ -185,6 +192,10 @@
 
         box.style.display = "block";
         document.getElementById("hostOnlyNotice").style.display = "none";
+        document.getElementById("hostEventImageUrl").value = ev.imageUrl || "";
+        const hostImagePreview = document.getElementById("hostEventImagePreview");
+        hostImagePreview.src = ev.imageUrl || "";
+        hostImagePreview.hidden = !ev.imageUrl;
 
         const cancelButton = document.getElementById("cancelEventBtn");
         cancelButton.disabled = ev.cancelled;
@@ -249,6 +260,21 @@
         } finally {
           hostActionPending = false;
         }
+      });
+
+      const hostImageInput = document.getElementById("hostEventImageUrl");
+      const hostImagePreview = document.getElementById("hostEventImagePreview");
+      hostImageInput.addEventListener("input", function () { hostImagePreview.src = hostImageInput.value.trim(); hostImagePreview.hidden = !hostImageInput.value.trim(); });
+      hostImagePreview.addEventListener("error", function () { hostImagePreview.hidden = true; });
+      document.getElementById("saveEventImageBtn").addEventListener("click", async function () {
+        const button = this; button.disabled = true; button.textContent = "Saving...";
+        try {
+          const saved = await DB.updateEventImage(ev.id, hostImageInput.value.trim());
+          ev.imageUrl = saved.EVENT_IMAGE_URL || "";
+          renderHeader();
+          showHostStatus(ev.imageUrl ? "Event image updated successfully." : "Event image removed successfully.");
+        } catch (error) { showHostStatus(error.message); }
+        finally { button.disabled = false; button.textContent = "Save image"; }
       });
 
       document.getElementById("changeHostBtn").addEventListener("click", async function () {
