@@ -33,10 +33,12 @@ function eventDateTime(event) {
 }
 
 function eventDisplayState(event, now = new Date()) {
-  const cancelled = Boolean(event && event.cancelled) || ["CANCELED", "CANCELLED"].includes(String(event && event.status || "").toUpperCase());
+  const databaseState = String(event && event.displayStatus || "").toUpperCase();
+  const cancelled = databaseState === "CANCELED" || Boolean(event && event.cancelled) || ["CANCELED", "CANCELLED"].includes(String(event && event.status || "").toUpperCase());
   const startsAt = eventDateTime(event);
-  const past = Boolean(startsAt && now > startsAt);
-  return { cancelled: cancelled, past: past, upcoming: !cancelled && !past };
+  const past = databaseState === "PAST" || (!databaseState && Boolean(startsAt && now > startsAt));
+  const upcoming = databaseState === "UPCOMING" || (!databaseState && !cancelled && !past);
+  return { cancelled: cancelled, past: past, upcoming: upcoming };
 }
 
 // Map an RSVP status to a label + pill class

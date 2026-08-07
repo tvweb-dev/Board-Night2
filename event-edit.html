@@ -132,6 +132,7 @@
             saved = await DB.updateEvent(existing.id, fields);
           } else {
             fields.groupId = rehostSource ? rehostSource.groupId : groupId;
+            fields.rehostedFromEventId = rehostSource ? rehostSource.id : null;
             saved = await DB.createEvent(fields);
           }
 

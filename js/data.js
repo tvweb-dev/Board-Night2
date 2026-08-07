@@ -264,7 +264,8 @@ const DB = {
         eventDate: ev.date || "",
         eventTime: ev.time || "",
         eventLocation: ev.location || "",
-        eventImageUrl: ev.imageUrl || ""
+        eventImageUrl: ev.imageUrl || "",
+        rehostedFromEventId: ev.rehostedFromEventId || null
       })
     });
 
@@ -288,6 +289,8 @@ const DB = {
       description: created.EVENT_DESCRIPTION || ev.description || "",
       status: created.EVENT_STATUS || "ACTIVE",
       cancelled: ["CANCELED", "CANCELLED"].includes(created.EVENT_STATUS),
+      displayStatus: created.DISPLAY_STATUS || "UPCOMING",
+      rehostedFromEventId: created.REHOSTED_FROM_EVENT_ID || ev.rehostedFromEventId || null,
       hostRsvpStatus
     };
   },
@@ -343,7 +346,9 @@ const DB = {
       EVENT_DESCRIPTION: row.EVENT_DESCRIPTION ?? null,
       description: row.EVENT_DESCRIPTION || "",
       status: row.EVENT_STATUS || "ACTIVE",
-      cancelled: ["CANCELED", "CANCELLED"].includes(row.EVENT_STATUS)
+      cancelled: ["CANCELED", "CANCELLED"].includes(row.EVENT_STATUS),
+      displayStatus: row.DISPLAY_STATUS || "",
+      rehostedFromEventId: row.REHOSTED_FROM_EVENT_ID || null
     };
   },
 
