@@ -24,20 +24,67 @@ function prettyDate(dateStr) {
 const STATUS_LABEL = { going: "Going", maybe: "Maybe", no: "Can't make it" };
 const STATUS_CLASS = { going: "going", maybe: "maybe", no: "no" };
 
-// Shared top navigation bar
+// Shared desktop application shell, based on the desktop standalone design.
 function renderTopbar() {
   const el = document.getElementById("topbar");
   if (!el) return;
   const user = DB.currentUser();
+  const path = window.location.pathname.split("/").pop() || "dashboard.html";
+  const groupsActive = ["dashboard.html", "group.html"].includes(path);
+  const eventsActive = ["event.html", "event-edit.html"].includes(path);
+  const mobileTitles = {
+    "dashboard.html": "Your Groups",
+    "group.html": "Group",
+    "event.html": "Event",
+    "event-edit.html": qs("event") ? "Edit Event" : "Create Event"
+  };
+  const mobileBack = path === "dashboard.html" ? "" :
+    `<button class="mobile-back" type="button" aria-label="Go back">‹</button>`;
+  const initials = user && user.name
+    ? user.name.split(/\s+/).filter(Boolean).slice(0, 2).map(function (part) { return part[0]; }).join("").toUpperCase()
+    : "BN";
+
+  document.body.classList.add("app-shell");
   el.innerHTML = `
-    <div class="brand"><img class="brand-logo" src="css/design_elements/assets/logo_color.png" alt="">Board Night</div>
-    <nav>
-      <a href="dashboard.html">Dashboard</a>
-      <span class="topbar-user">${esc(user ? user.name : "")}</span>
-      <button class="nav-signout" id="signOutBtn" type="button">Sign out</button>
-    </nav>`;
+    <div class="mobile-bar">
+      ${mobileBack}
+      <span class="mobile-title">${esc(mobileTitles[path] || "Board Night")}</span>
+      <button class="mobile-account" id="mobileSignOutBtn" type="button" aria-label="Sign out">${esc(initials)}</button>
+    </div>
+    <a class="brand" href="dashboard.html" aria-label="Board Night home">
+      <img class="brand-logo" src="css/design_elements/BNlogo.svg" alt="">
+      <span>BOARD NIGHT</span>
+    </a>
+    <nav class="sidebar-nav" aria-label="Main navigation">
+      <a class="sidebar-link ${groupsActive ? "is-active" : ""}" href="dashboard.html">
+        <span class="sidebar-icon" aria-hidden="true">♟</span><span>Groups</span>
+      </a>
+      <a class="sidebar-link ${eventsActive ? "is-active" : ""}" href="${eventsActive ? path + window.location.search : "dashboard.html"}">
+        <span class="sidebar-icon" aria-hidden="true">⚄</span><span>Events</span>
+      </a>
+      <span class="sidebar-link is-disabled" aria-disabled="true" title="Calendar coming soon">
+        <span class="sidebar-icon" aria-hidden="true">□</span><span>Calendar</span>
+      </span>
+      <span class="sidebar-link is-disabled" aria-disabled="true" title="Friends coming soon">
+        <span class="sidebar-icon" aria-hidden="true">♡</span><span>Friends</span>
+      </span>
+    </nav>
+    <div class="sidebar-account">
+      <div class="account-avatar" aria-hidden="true">${esc(initials)}</div>
+      <div class="account-copy">
+        <span class="topbar-user">${esc(user ? user.name : "")}</span>
+        <button class="nav-signout" id="signOutBtn" type="button">Sign out</button>
+      </div>
+    </div>`;
 
   document.getElementById("signOutBtn").addEventListener("click", function () {
+    DB.reset();
+    window.location.href = "index.html";
+  });
+
+  const mobileBackButton = el.querySelector(".mobile-back");
+  if (mobileBackButton) mobileBackButton.addEventListener("click", function () { window.history.back(); });
+  document.getElementById("mobileSignOutBtn").addEventListener("click", function () {
     DB.reset();
     window.location.href = "index.html";
   });

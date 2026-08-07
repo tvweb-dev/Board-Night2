@@ -3,7 +3,7 @@
 
 :root {
   color-scheme: dark;
-  --bg: #12151c;
+  --bg: #202634;
   --card: #262d3d;
   --input: #1c2230;
   --avatar: #2f3750;
@@ -50,35 +50,44 @@ select:focus-visible, textarea:focus-visible {
 
 /* Layout */
 .topbar {
-  background: var(--input);
+  background: #171c26;
   color: var(--ink);
-  padding: 12px max(20px, calc((100vw - 820px) / 2 + 16px));
+  padding: 24px 16px;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: var(--shadow);
-  border-bottom: 1px solid var(--line);
-  gap: 20px;
+  flex-direction: column;
+  align-items: stretch;
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 232px;
+  z-index: 20;
 }
-.topbar .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.2rem; letter-spacing: .3px; }
+.topbar .brand { display: flex; align-items: center; gap: 11px; color: var(--ink); font-weight: 700; font-size: 1rem; letter-spacing: .2px; text-decoration: none; margin: 0 8px 28px; }
+.mobile-bar { display: none; }
 .brand-logo { width: 36px; height: 36px; object-fit: contain; flex: 0 0 auto; }
-.topbar a { color: var(--link); text-decoration: none; margin-left: 16px; font-size: .95rem; }
-.topbar a:hover { text-decoration: underline; }
-.topbar nav { display: flex; align-items: center; }
-.topbar-user { margin-left: 16px; color: var(--muted); }
+.sidebar-nav { display: flex; flex-direction: column; gap: 4px; }
+.sidebar-link { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 10px 12px; border-radius: 11px; color: rgba(236,231,218,.48); text-decoration: none; font-family: "gambado-sans-forte", sans-serif; font-weight: 700; font-size: .92rem; }
+.sidebar-link:hover { color: var(--ink); background: rgba(31,38,53,.6); }
+.sidebar-link.is-active { color: var(--ink); background: #1f2635; }
+.sidebar-link.is-disabled { cursor: default; opacity: .62; }
+.sidebar-link.is-disabled:hover { color: rgba(236,231,218,.48); background: transparent; }
+.sidebar-icon { width: 20px; text-align: center; font-family: Tahoma, sans-serif; font-size: 20px; line-height: 1; }
+.sidebar-account { display: flex; align-items: center; gap: 10px; margin-top: auto; padding: 12px 8px 0; border-top: 1px solid rgba(236,231,218,.08); }
+.account-avatar { width: 36px; height: 36px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; background: var(--avatar); font-size: .75rem; font-weight: 700; }
+.account-copy { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; }
+.topbar-user { max-width: 135px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); font-size: .8rem; font-weight: 700; }
 .nav-signout {
-  margin-left: 16px;
-  padding: 5px 10px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  padding: 0;
+  border: 0;
   background: transparent;
-  color: var(--ink);
+  color: var(--muted);
   font: inherit;
-  font-size: .85rem;
+  font-size: .74rem;
   cursor: pointer;
 }
-.nav-signout:hover { background: var(--avatar); }
+.nav-signout:hover { color: var(--ink); }
 
+.app-shell { padding-left: 232px; }
+.app-shell .container { max-width: 1240px; margin: 0 auto; padding: 28px 40px 48px; }
 .container { max-width: 820px; margin: 24px auto; padding: 0 16px; }
 .login-container { max-width: 420px; margin-top: 8vh; }
 .login-brand { display: flex; align-items: center; justify-content: center; gap: 12px; }
@@ -101,7 +110,7 @@ h2 { font-size: 1.2rem; margin: 24px 0 8px; }
 .card h3 { margin: 0 0 6px; }
 a.card:hover { border-color: rgba(143,176,199,.45); transform: translateY(-1px); }
 
-.grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+.grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 
 /* Forms */
 label { display: block; font-size: .76rem; font-weight: 700; color: var(--muted);
@@ -221,10 +230,168 @@ footer.note {
   margin: 30px 0;
 }
 
-@media (max-width: 640px) {
-  .topbar { align-items: flex-start; padding: 10px 14px; }
-  .topbar nav { flex-wrap: wrap; justify-content: flex-end; row-gap: 6px; }
-  .topbar-user { width: 100%; text-align: right; }
-  .container { margin-top: 18px; }
-  .btn { min-height: 44px; }
+/* Tablet shell — follows the compact icon rail in the tablet standalone. */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .app-shell { padding-left: 88px; }
+
+  .topbar {
+    width: 88px;
+    padding: 20px 8px;
+    align-items: center;
+  }
+
+  .topbar .brand {
+    margin: 0 0 24px;
+  }
+
+  .topbar .brand span { display: none; }
+  .topbar .brand-logo { width: 30px; height: 30px; }
+
+  .sidebar-nav {
+    width: 100%;
+    align-items: center;
+    gap: 0;
+  }
+
+  .sidebar-link {
+    width: 64px;
+    min-height: 58px;
+    padding: 9px 4px;
+    margin-bottom: 8px;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    font-size: .68rem;
+    line-height: 1;
+  }
+
+  .sidebar-icon { font-size: 19px; }
+
+  .sidebar-account {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 0 0;
+  }
+
+  .account-copy { display: none; }
+
+  .account-avatar {
+    width: 36px;
+    height: 36px;
+    cursor: default;
+  }
+
+  .app-shell .container {
+    max-width: none;
+    padding: 20px 28px 36px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (max-width: 767px) {
+  body { background: #12151c; }
+  .app-shell { padding: 61px 0 0; }
+
+  .topbar {
+    inset: 0 0 auto;
+    width: auto;
+    height: 61px;
+    padding: 0;
+    display: block;
+    background: var(--input);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .topbar .brand, .sidebar-nav, .sidebar-account { display: none; }
+
+  .mobile-bar {
+    height: 60px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .mobile-title {
+    font-family: "gambado-sans-forte", sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: .2px;
+  }
+
+  .mobile-back {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: 1.65rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .mobile-account {
+    width: 32px;
+    height: 32px;
+    margin-left: auto;
+    border: 0;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--avatar);
+    color: var(--ink);
+    font: inherit;
+    font-size: .68rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .app-shell .container {
+    max-width: none;
+    margin: 0;
+    padding: 14px 14px 32px;
+  }
+
+  .app-shell .container > h1 { font-size: 1.08rem; margin-top: 4px; }
+  .app-shell .container > h2 { font-size: 1.08rem; margin: 18px 0 10px; }
+  .app-shell .container > p:first-child { margin-top: 0; }
+
+  .grid { display: block; }
+  .card { padding: 16px 18px; margin-bottom: 11px; }
+  .card h3 { font-size: .98rem; }
+  .subtle { font-size: .8rem; }
+
+  input, select, textarea { padding: 10px 12px; font-size: .9rem; }
+  textarea { min-height: 54px; }
+
+  .btn {
+    display: block;
+    width: 100%;
+    min-height: 48px;
+    padding: 13px 18px;
+    text-align: center;
+  }
+
+  .btn.small { min-height: 40px; }
+  .btn-row { flex-direction: column; gap: 8px; }
+  .btn-row .btn { margin: 0; }
+
+  ul.plain li { padding: 9px 0; font-size: .9rem; gap: 10px; }
+  footer.note { margin: 24px 0 8px; }
+
+  .login-container {
+    max-width: none;
+    min-height: 100vh;
+    margin: 0;
+    padding: 42px 20px 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .login-brand .brand-logo { width: 48px; height: 48px; }
 }
