@@ -260,6 +260,9 @@ footer.note {
 .page-heading h1, .page-heading p { margin: 0; }
 #eventList { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
 .event-card { display: block; padding: 18px 20px; color: inherit; }
+.event-card.is-past { border-color: rgba(226,147,20,.55); background: #302c27; }
+.event-card.is-past .event-swatch { background: #e29314; }
+.event-card.is-past .event-card-image { filter: saturate(.55); opacity: .72; }
 .event-card-image, .group-card-image { width: 100%; aspect-ratio: 16 / 7; margin-bottom: 14px; display: block; border-radius: 6px; object-fit: cover; background: var(--input); }
 .event-card-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
 .event-card-head > div { min-width: 0; }
@@ -326,6 +329,16 @@ footer.note {
 .profile-form { margin-top: 28px; }
 .profile-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 20px; }
 .profile-field-wide { grid-column: 1 / -1; }
+.favorite-games-fieldset { margin: 20px 0 0; padding: 0; border: 0; }
+.favorite-games-fieldset legend { color: var(--muted); font-size: .76rem; font-weight: 700; text-transform: uppercase; }
+.favorite-games-fieldset > .subtle { margin: 3px 0 10px; }
+.favorite-game-options { max-height: 280px; overflow-y: auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding-right: 4px; }
+.favorite-game-option { min-height: 54px; margin: 0; padding: 9px 11px; display: flex; align-items: center; gap: 9px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink); cursor: pointer; text-transform: none; }
+.favorite-game-option:has(input:checked) { border-color: var(--accent); background: rgba(54,153,111,.1); }
+.favorite-game-option input { width: 17px; height: 17px; flex: 0 0 auto; accent-color: var(--accent); }
+.favorite-game-option span, .favorite-game-option strong, .favorite-game-option small { min-width: 0; display: block; }
+.favorite-game-option strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .86rem; }
+.favorite-game-option small { color: var(--muted); font-size: .7rem; }
 .group-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 .group-card { display: block; padding: 20px 20px 18px; color: inherit; text-decoration: none; }
 .group-card-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
@@ -595,6 +608,7 @@ footer.note {
   .profile-form { margin-top: 20px; }
   .profile-form-grid { grid-template-columns: 1fr; }
   .profile-field-wide { grid-column: auto; }
+  .favorite-game-options { grid-template-columns: 1fr; }
   .event-detail-image, .group-cover-image { max-height: 220px; aspect-ratio: 16 / 8; margin-bottom: 16px; }
 
   .app-shell .container > h1 { font-size: 1.08rem; margin-top: 4px; }

@@ -227,6 +227,21 @@ const DB = {
     });
   },
 
+  async getGames() {
+    return this.api("/api/games");
+  },
+
+  async getFavoriteGames(userId) {
+    return this.api(`/api/games/favorites/${userId}`);
+  },
+
+  async replaceFavoriteGames(userId, gameIds) {
+    return this.api(`/api/games/favorites/${userId}`, {
+      method: "PUT",
+      body: JSON.stringify({ gameIds })
+    });
+  },
+
   async getEvent(id) {
     const groups = await this.getGroups();
 
