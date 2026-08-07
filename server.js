@@ -219,7 +219,7 @@ async function renderDashboard(reqUrl, html) {
     ogType: "website"
   };
 
-  const withCards = html.replace('<div id="groupList" class="grid"></div>', `<div id="groupList" class="grid">${ssrCards}</div>`);
+  const withCards = html.replace('<div id="groupList" class="grid group-grid"></div>', `<div id="groupList" class="grid group-grid">${ssrCards}</div>`);
   return applySeo(withCards, meta);
 }
 

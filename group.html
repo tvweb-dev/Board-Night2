@@ -11,12 +11,19 @@
 <body>
   <header class="topbar" id="topbar"></header>
 
-  <div class="container">
-    <p><a href="dashboard.html">&larr; Back to dashboard</a></p>
-    <h1 id="groupName">Group</h1>
-
-    <div class="card">
-      <h3>Invite a member</h3>
+  <main class="container">
+    <p class="back-link"><a href="dashboard.html">‹ Back to Groups</a></p>
+    <div class="group-title"><span class="group-title-swatch"></span><h1 id="groupName">Group</h1></div>
+    <div class="group-detail-layout">
+      <section class="group-events-column">
+        <div class="section-heading"><h2>Upcoming Events</h2><a class="btn small" id="newEventBtn" href="#">+ New Event</a></div>
+        <div id="eventList"></div>
+      </section>
+      <aside class="group-members-column">
+        <h2>Members</h2>
+        <div class="card member-panel"><ul class="plain" id="memberList"></ul></div>
+        <div class="card invite-panel">
+      <h3>Add Member</h3>
       <label for="memberName">Existing user ID or display name</label>
       <input id="memberName" placeholder="e.g. 2" />
       <label for="memberEmail">Email for new member</label>
@@ -24,17 +31,10 @@
       <div class="btn-row">
         <button class="btn" id="addMemberBtn">Add member</button>
       </div>
+        </div>
+      </aside>
     </div>
-
-    <h2>Members</h2>
-    <div class="card"><ul class="plain" id="memberList"></ul></div>
-
-    <h2>Events</h2>
-    <p><a class="btn" id="newEventBtn" href="#">+ Create event</a></p>
-    <div id="eventList"></div>
-
-    <footer class="note">Connected to the Board Night Express API.</footer>
-  </div>
+  </main>
 
   <script src="js/data.js"></script>
   <script src="js/app.js"></script>
@@ -60,8 +60,7 @@
 
         ul.innerHTML = members.length ? members.map(function (m) {
           const isHost = String(m.id) === String(group.hostId);
-          return `<li><span>${esc(m.name)} ${isHost ? '<span class="subtle">(host)</span>' : ""}</span>
-                      <span class="subtle">${esc(m.email || "")}</span></li>`;
+          return `<li class="member-row"><span class="member-avatar">${esc(m.name.charAt(0).toUpperCase())}</span><span><strong>${esc(m.name)}</strong>${isHost ? '<small>Host</small>' : '<small>Member</small>'}</span></li>`;
         }).join("") : '<li class="empty">No members yet.</li>';
       }
 
@@ -79,13 +78,9 @@
             return r.status === "going";
           }).length;
 
-          return `<a class="card" style="text-decoration:none;color:inherit;display:block;"
+          return `<a class="card group-event-card" style="text-decoration:none;color:inherit;display:flex;"
                      href="event.html?event=${encodeURIComponent(e.id)}">
-                    <h3>${esc(e.title)} <span class="pill ${e.cancelled ? "cancelled" : "active"}">${esc(e.status)}</span></h3>
-                    <p class="subtle">${prettyDate(e.date)} - ${esc(e.time || "")} - ${esc(e.location || "")}</p>
-                    ${e.description ? `<p class="event-description-preview" data-event-description="${encodeURIComponent(String(e.id))}"></p>` : ""}
-                    <p><span class="count-badge">${going}</span> going</p>
-                    <span class="subtle">View details</span>
+                    <span class="group-event-swatch"></span><span><h3>${esc(e.title)}</h3><p class="subtle">${prettyDate(e.date)} · ${esc(e.time || "Time TBD")} · ${esc(e.location || "Location TBD")}</p><strong class="going-label">${going} going</strong></span>
                   </a>`;
         }));
 

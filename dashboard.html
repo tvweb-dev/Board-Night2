@@ -11,23 +11,22 @@
 <body>
   <header class="topbar" id="topbar"></header>
 
-  <div class="container">
-    <h1>Your Groups</h1>
-    <p class="subtle">Create a group. It appears below from the production API.</p>
+  <main class="container">
+    <div class="page-heading"><div><h1>Groups</h1><p class="subtle">Your board game groups and players.</p></div><button class="btn" id="openGroupModal">+ New Group</button></div>
+    <div id="groupList" class="grid group-grid"></div>
+    <footer class="note">Connected to the Board Night Express API.</footer>
+  </main>
 
-    <div class="card">
-      <h3>Create a board game group</h3>
+  <div class="modal-backdrop" id="groupModal" hidden>
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="newGroupTitle">
+      <h2 id="newGroupTitle">New Group</h2>
       <label for="groupName">Group name</label>
-      <input id="groupName" placeholder="e.g. Friday Night Catan" />
+      <input id="groupName" placeholder="Sunday Boardgamers" />
       <div class="btn-row">
+        <button class="btn secondary" id="closeGroupModal">Cancel</button>
         <button class="btn" id="createGroupBtn">Create group</button>
       </div>
-    </div>
-
-    <h2>Groups</h2>
-    <div id="groupList" class="grid"></div>
-
-    <footer class="note">Connected to the Board Night Express API.</footer>
+    </section>
   </div>
 
   <script src="js/data.js"></script>
@@ -46,15 +45,12 @@
           return;
         }
 
-        const cards = await Promise.all(groups.map(async function (g) {
-          const memberCount = (await DB.getMembers(g.id)).length;
+        const cards = await Promise.all(groups.map(async function (g, groupIndex) {
+          const members = await DB.getMembers(g.id);
+          const memberCount = members.length;
           const eventCount = (await DB.getEvents(g.id)).length;
-
-          return `<a class="card" style="text-decoration:none;color:inherit;display:block;"
-                     href="group.html?group=${encodeURIComponent(g.id)}">
-                    <h3>${esc(g.name)}</h3>
-                    <p class="subtle">${memberCount} member(s) - ${eventCount} event(s)</p>
-                  </a>`;
+          const color = ["#36996f", "#9b3f45", "#8fb0c7", "#e29314"][groupIndex % 4];
+          return `<a class="card group-card" style="--group-color:${color}" href="group.html?group=${encodeURIComponent(g.id)}"><div class="group-card-head"><span class="group-swatch"></span><div><h3>${esc(g.name)}</h3><p class="subtle">${memberCount} member${memberCount === 1 ? "" : "s"} · ${eventCount} event${eventCount === 1 ? "" : "s"}</p></div></div><div class="group-avatars">${members.slice(0, 4).map(function (member, index) { return `<span style="--avatar-color:${["#ce3b30", "#e29314", "#8fb0c7", "#36996f"][index % 4]}">${esc(member.name.charAt(0).toUpperCase())}</span>`; }).join("")}</div></a>`;
         }));
 
         list.innerHTML = cards.join("");
@@ -70,11 +66,16 @@
         try {
           await DB.createGroup(name);
           document.getElementById("groupName").value = "";
+          document.getElementById("groupModal").hidden = true;
           await renderGroups();
         } catch (error) {
           alert(error.message);
         }
       });
+      const modal = document.getElementById("groupModal");
+      document.getElementById("openGroupModal").addEventListener("click", function () { modal.hidden = false; document.getElementById("groupName").focus(); });
+      document.getElementById("closeGroupModal").addEventListener("click", function () { modal.hidden = true; });
+      modal.addEventListener("click", function (event) { if (event.target === modal) modal.hidden = true; });
 
       renderGroups().catch(function (error) {
         document.getElementById("groupList").innerHTML =
