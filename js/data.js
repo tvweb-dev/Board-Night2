@@ -8,7 +8,8 @@ const DB = {
 
   async api(path, options = {}) {
     const rawSession = localStorage.getItem(this.SESSION_KEY);
-    const session = rawSession ? JSON.parse(rawSession) : null;
+    let session = null;
+    try { session = rawSession ? JSON.parse(rawSession) : null; } catch (_) { this.reset(); }
     const response = await fetch(API_BASE_URL + path, {
       headers: {
         "Content-Type": "application/json",
@@ -43,20 +44,18 @@ const DB = {
 
   currentUserId() {
     const user = this.currentUser();
-    return user ? user.id : 1;
+    return user ? user.id : null;
   },
 
   currentUser() {
     const raw = localStorage.getItem(this.SESSION_KEY);
     if (!raw) {
-      return {
-        id: 1,
-        name: "User 1",
-        email: ""
-      };
+      return null;
     }
 
-    const session = JSON.parse(raw);
+    let session;
+    try { session = JSON.parse(raw); } catch (_) { this.reset(); return null; }
+    if (!session.USER_ID || !session.token) return null;
     return {
       id: session.USER_ID,
       name: session.EMAIL || `User ${session.USER_ID}`,
@@ -244,17 +243,23 @@ const DB = {
       EVENT_DESCRIPTION: created.EVENT_DESCRIPTION ?? null,
       description: created.EVENT_DESCRIPTION || ev.description || "",
       status: created.EVENT_STATUS || "ACTIVE",
-      cancelled: created.EVENT_STATUS === "CANCELED",
+      cancelled: ["CANCELED", "CANCELLED"].includes(created.EVENT_STATUS),
       hostRsvpStatus
     };
   },
 
   async updateEvent(id, fields) {
-    alert("Editing existing events is not in the MVP API yet.");
-    return {
-      id,
-      ...fields
-    };
+    const updated = await this.api(`/api/events/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({
+        eventTitle: fields.title,
+        eventDescription: fields.description || "",
+        eventDate: fields.date,
+        eventTime: fields.time,
+        eventLocation: fields.location
+      })
+    });
+    return this.mapEvent(updated);
   },
 
   async cancelEvent(eventId) {
@@ -283,7 +288,7 @@ const DB = {
       EVENT_DESCRIPTION: row.EVENT_DESCRIPTION ?? null,
       description: row.EVENT_DESCRIPTION || "",
       status: row.EVENT_STATUS || "ACTIVE",
-      cancelled: row.EVENT_STATUS === "CANCELED"
+      cancelled: ["CANCELED", "CANCELLED"].includes(row.EVENT_STATUS)
     };
   },
 
@@ -354,14 +359,14 @@ const DB = {
     });
   },
 
-  async setRsvp(eventId, userId, status) {
+  async setRsvp(eventId, userId, status, knownInviteId = null) {
     const existing = await this.getRsvpFor(eventId, userId);
-    const invite = existing || await this.api("/api/invites", {
+    const invite = (existing || knownInviteId) ? null : await this.api("/api/invites", {
       method: "POST",
       body: JSON.stringify({ eventId, userId })
     });
 
-    const inviteId = existing ? existing.id : invite.INVITE_ID;
+    const inviteId = knownInviteId || (existing ? existing.id : invite.INVITE_ID);
 
     await this.api("/api/invites/rsvp", {
       method: "PUT",

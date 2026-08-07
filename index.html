@@ -46,7 +46,8 @@
 
         try {
           await DB.login(email, password);
-          window.location.href = "dashboard.html";
+          const next = qs("next");
+          window.location.href = next && !next.startsWith("http") && !next.startsWith("//") ? next : "dashboard.html";
         } catch (error) {
           alert(error.message);
         }

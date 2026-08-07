@@ -33,6 +33,7 @@
   <script src="js/app.js"></script>
   <script>
     ready(function () {
+      if (!requireSession()) return;
       renderTopbar();
 
       async function renderGroups() {

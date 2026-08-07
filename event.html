@@ -73,6 +73,7 @@
   <script src="js/app.js"></script>
   <script>
     ready(async function () {
+      if (!requireSession()) return;
       renderTopbar();
       const eventId = qs("event");
       const ev = await DB.getEvent(eventId);

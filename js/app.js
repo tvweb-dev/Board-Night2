@@ -95,6 +95,13 @@ function renderTopbar() {
   });
 }
 
+function requireSession() {
+  if (DB.currentUser()) return true;
+  const next = window.location.pathname.split("/").pop() + window.location.search;
+  window.location.replace("index.html?next=" + encodeURIComponent(next));
+  return false;
+}
+
 // Run a function once the DOM is ready
 function ready(fn) {
   if (document.readyState !== "loading") fn();

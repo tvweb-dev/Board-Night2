@@ -26,7 +26,9 @@
   <script src="js/app.js"></script>
   <script>
     ready(async function () {
+      if (!requireSession()) return;
       const eventId = qs("event");
+      const inviteId = qs("invite");
       const ev = await DB.getEvent(eventId);
       const card = document.getElementById("card");
 
@@ -73,7 +75,7 @@
 
       document.getElementById("saveBtn").addEventListener("click", async function () {
         try {
-          await DB.setRsvp(ev.id, me.id, document.getElementById("rsvpSelect").value);
+          await DB.setRsvp(ev.id, me.id, document.getElementById("rsvpSelect").value, inviteId);
           card.innerHTML = '<div class="notice"><strong>Thanks - your RSVP is in!</strong></div>' +
             '<div class="btn-row"><a class="btn" href="event.html?event=' +
             encodeURIComponent(ev.id) + '">See who is coming</a></div>';

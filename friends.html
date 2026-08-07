@@ -19,6 +19,7 @@
   <script src="js/data.js"></script><script src="js/app.js"></script>
   <script>
     ready(async function () {
+      if (!requireSession()) return;
       renderTopbar();
       const list = document.getElementById("friendList");
       try {

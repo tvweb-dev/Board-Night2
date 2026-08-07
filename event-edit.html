@@ -44,6 +44,7 @@
   <script src="js/app.js"></script>
   <script>
     ready(async function () {
+      if (!requireSession()) return;
       renderTopbar();
       const groupId = qs("group");
       const eventId = qs("event");
@@ -82,8 +83,8 @@
           description: descriptionInput.value.trim()
         };
 
-        if (!fields.title || !fields.date || !fields.location) {
-          alert("Please fill in at least a title, date and location.");
+        if (!fields.title || !fields.date || !fields.time || !fields.location) {
+          alert("Please fill in a title, date, time and location.");
           return;
         }
 
