@@ -320,6 +320,7 @@ footer.note {
 .profile-avatar { width: 112px; height: 112px; display: grid; place-items: center; overflow: hidden; border: 3px solid var(--card); border-radius: 50%; background: var(--accent); color: var(--ink); font-family: "gambado-sans-forte", sans-serif; font-size: 2.5rem; font-weight: 700; box-shadow: var(--shadow); }
 .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .profile-heading { min-width: 0; }
+.profile-header > #editProfileBtn[hidden] { display: none; }
 .profile-heading h1, .profile-heading p { margin: 0; overflow-wrap: anywhere; }
 .profile-heading .section-label { margin-bottom: 5px; }
 .profile-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; margin-top: 28px; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: var(--line); }
