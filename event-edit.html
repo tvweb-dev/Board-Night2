@@ -52,25 +52,39 @@
       renderTopbar();
       const groupId = qs("group");
       const eventId = qs("event");
+      const rehostId = qs("rehost");
       const existing = eventId ? await DB.getEvent(eventId) : null;
+      const rehostSource = rehostId ? await DB.getEvent(rehostId) : null;
+      const source = existing || rehostSource;
 
-      const back = existing
-        ? "event.html?event=" + encodeURIComponent(existing.id)
+      if ((eventId || rehostId) && !source) {
+        document.querySelector(".container").innerHTML = '<p class="notice">Event not found.</p>';
+        return;
+      }
+
+      if (rehostSource && String(rehostSource.hostId) !== String(DB.currentUserId())) {
+        document.querySelector(".container").innerHTML = '<p class="notice">Only the original host can host this event again.</p>';
+        return;
+      }
+
+      const back = source
+        ? "event.html?event=" + encodeURIComponent(source.id)
         : (groupId ? "group.html?group=" + encodeURIComponent(groupId) : "dashboard.html");
 
       document.getElementById("backLink").href = back;
       document.getElementById("cancelBtn").href = back;
 
-      if (existing) {
-        document.getElementById("pageTitle").textContent = "Edit event";
-        document.getElementById("title").value = existing.title;
-        document.getElementById("date").value = existing.date;
-        document.getElementById("time").value = existing.time;
-        document.getElementById("location").value = existing.location;
-        document.getElementById("description").value = existing.description || "";
-        document.getElementById("imageUrl").value = existing.imageUrl || "";
-        document.getElementById("descriptionCounter").textContent = (existing.description || "").length + " / 2000";
+      if (source) {
+        document.getElementById("pageTitle").textContent = rehostSource ? "Host event again" : "Edit event";
+        document.getElementById("title").value = source.title;
+        document.getElementById("date").value = rehostSource ? "" : source.date;
+        document.getElementById("time").value = source.time;
+        document.getElementById("location").value = source.location;
+        document.getElementById("description").value = source.description || "";
+        document.getElementById("imageUrl").value = source.imageUrl || "";
+        document.getElementById("descriptionCounter").textContent = (source.description || "").length + " / 2000";
       }
+      if (rehostSource) document.getElementById("date").min = new Date().toLocaleDateString("en-CA");
 
       const descriptionInput = document.getElementById("description");
       const descriptionCounter = document.getElementById("descriptionCounter");
@@ -105,6 +119,11 @@
           return;
         }
 
+        if (rehostSource && (fields.date === rehostSource.date || eventDateTime(fields) <= new Date())) {
+          alert("Choose a new upcoming date and time before hosting this event again.");
+          return;
+        }
+
         saveButton.disabled = true;
         saveButton.textContent = "Saving...";
         try {
@@ -112,7 +131,7 @@
           if (existing) {
             saved = await DB.updateEvent(existing.id, fields);
           } else {
-            fields.groupId = groupId;
+            fields.groupId = rehostSource ? rehostSource.groupId : groupId;
             saved = await DB.createEvent(fields);
           }
 
@@ -122,7 +141,7 @@
           document.getElementById("location").value = "";
           descriptionInput.value = "";
           descriptionCounter.textContent = "0 / 2000";
-          alert(existing ? "Event updated successfully." : "Event created successfully.");
+          alert(existing ? "Event updated successfully." : rehostSource ? "A new event was created. The original remains in event history." : "Event created successfully.");
           window.location.href = "event.html?event=" + encodeURIComponent(saved.id);
         } catch (error) {
           alert(error.message);

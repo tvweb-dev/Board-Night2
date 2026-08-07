@@ -20,6 +20,25 @@ function prettyDate(dateStr) {
   return d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" });
 }
 
+function eventDateTime(event) {
+  const dateParts = String(event && event.date || "").match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!dateParts) return null;
+  const timeParts = String(event.time || "").trim().match(/^(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?$/i);
+  let hour = timeParts ? Number(timeParts[1]) : 23;
+  const minute = timeParts ? Number(timeParts[2]) : 59;
+  const meridiem = timeParts && timeParts[3] ? timeParts[3].toUpperCase() : "";
+  if (meridiem === "PM" && hour < 12) hour += 12;
+  if (meridiem === "AM" && hour === 12) hour = 0;
+  return new Date(Number(dateParts[1]), Number(dateParts[2]) - 1, Number(dateParts[3]), hour, minute, timeParts ? 0 : 59);
+}
+
+function eventDisplayState(event, now = new Date()) {
+  const cancelled = Boolean(event && event.cancelled) || ["CANCELED", "CANCELLED"].includes(String(event && event.status || "").toUpperCase());
+  const startsAt = eventDateTime(event);
+  const past = Boolean(startsAt && now > startsAt);
+  return { cancelled: cancelled, past: past, upcoming: !cancelled && !past };
+}
+
 // Map an RSVP status to a label + pill class
 const STATUS_LABEL = { going: "Going", maybe: "Maybe", no: "Can't make it" };
 const STATUS_CLASS = { going: "going", maybe: "maybe", no: "no" };

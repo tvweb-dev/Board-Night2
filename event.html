@@ -21,7 +21,7 @@
     <p class="subtle" id="eventMeta"></p>
     <p class="event-description" id="eventDesc" hidden></p>
 
-    <div class="card">
+    <div class="card" id="rsvpBox">
       <h3>Your RSVP</h3>
       <label for="rsvpSelect">Are you going?</label>
       <select id="rsvpSelect">
@@ -45,6 +45,12 @@
     <p class="notice" id="hostOnlyNotice" style="display:none;">Only this event's host can invite members or change event settings.</p>
 
     <p class="notice" id="hostActionStatus" role="status" aria-live="polite" style="display:none;"></p>
+
+    <div class="card historic-host-box" id="rehostBox" style="display:none;">
+      <h3>Host this event again</h3>
+      <p class="subtle">Create a new upcoming event from these details. You will need to choose a new date and can update the other details before publishing.</p>
+      <a class="btn" id="rehostBtn" href="#">Host again</a>
+    </div>
 
     <div class="card" id="hostBox" style="display:none;">
       <h3>Host controls</h3>
@@ -108,13 +114,16 @@
       document.getElementById("backLink").href = "group.html?group=" + encodeURIComponent(ev.groupId);
       document.getElementById("editBtn").href = "event-edit.html?event=" + encodeURIComponent(ev.id);
       document.getElementById("emailBtn").href = "rsvp.html?event=" + encodeURIComponent(ev.id);
+      document.getElementById("rehostBtn").href = "event-edit.html?rehost=" + encodeURIComponent(ev.id);
 
       function renderHeader() {
+        const displayState = eventDisplayState(ev);
         const eventImage = document.getElementById("eventImage"); eventImage.src = ev.imageUrl || ""; eventImage.hidden = !ev.imageUrl;
         document.getElementById("eventTitle").textContent = ev.title;
         const eventStatus = document.getElementById("eventStatus");
-        eventStatus.textContent = ev.status;
-        eventStatus.className = "pill " + (ev.cancelled ? "cancelled" : "active");
+        eventStatus.textContent = displayState.cancelled ? "CANCELED" : displayState.past ? "PAST" : "ACTIVE";
+        eventStatus.className = "pill " + (displayState.cancelled ? "cancelled" : displayState.past ? "past" : "active");
+        document.getElementById("rsvpBox").style.display = displayState.upcoming ? "block" : "none";
         document.getElementById("eventMeta").textContent =
           prettyDate(ev.date) + " - " + (ev.time || "") + " - " + (ev.location || "");
         const description = document.getElementById("eventDesc");
@@ -176,21 +185,26 @@
 
       async function renderHostControls() {
         const box = document.getElementById("hostBox");
+        const rehostBox = document.getElementById("rehostBox");
         if (!amHost()) {
           box.style.display = "none";
+          rehostBox.style.display = "none";
           document.getElementById("hostOnlyNotice").style.display = "block";
           return;
         }
 
-        if (ev.cancelled) {
+        const displayState = eventDisplayState(ev);
+        if (!displayState.upcoming) {
           box.style.display = "none";
+          rehostBox.style.display = "block";
           const notice = document.getElementById("hostOnlyNotice");
-          notice.textContent = "Host actions are unavailable because this event is cancelled.";
+          notice.textContent = displayState.cancelled ? "This event is cancelled. You can host it again as a new event." : "This event has passed. You can host it again as a new event.";
           notice.style.display = "block";
           return;
         }
 
         box.style.display = "block";
+        rehostBox.style.display = "none";
         document.getElementById("hostOnlyNotice").style.display = "none";
         document.getElementById("hostEventImageUrl").value = ev.imageUrl || "";
         const hostImagePreview = document.getElementById("hostEventImagePreview");

@@ -12,6 +12,7 @@
   <header class="topbar" id="topbar"></header>
   <main class="container">
     <div class="page-heading"><div><h1>Calendar</h1><p class="subtle">Your group events organized by date.</p></div></div>
+    <div class="calendar-legend"><span><i class="is-upcoming"></i> Upcoming</span><span><i class="is-past"></i> Past</span><span><i class="is-cancelled"></i> Cancelled</span></div>
     <div id="calendarList"><p class="empty">Loading calendar...</p></div>
   </main>
   <script src="js/data.js"></script><script src="js/app.js"></script>
@@ -22,21 +23,28 @@
       const list = document.getElementById("calendarList");
       try {
         const events = (await DB.getAllEvents()).filter(function (event) { return event.date; });
-        let viewDate = events.length ? new Date(events[0].date + "T00:00:00") : new Date();
-        let selectedDate = events.length ? events[0].date : new Date().toISOString().slice(0, 10);
+        const today = new Date();
+        let viewDate = new Date(today.getFullYear(), today.getMonth(), 1);
+        let selectedDate = keyFor(today.getFullYear(), today.getMonth(), today.getDate());
         function keyFor(year, month, day) { return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`; }
+        function stateClass(event) {
+          const state = eventDisplayState(event);
+          return state.cancelled ? "is-cancelled" : state.past ? "is-past" : "is-upcoming";
+        }
         function renderCalendar() {
           const year = viewDate.getFullYear(), month = viewDate.getMonth();
           const firstDay = new Date(year, month, 1).getDay();
           const days = new Date(year, month + 1, 0).getDate();
           const cells = Array.from({ length: firstDay }, function () { return '<span class="calendar-cell is-empty"></span>'; });
           for (let day = 1; day <= days; day += 1) {
-            const key = keyFor(year, month, day), count = events.filter(function (event) { return event.date === key; }).length;
-            cells.push(`<button class="calendar-cell ${key === selectedDate ? "is-selected" : ""}" data-date="${key}"><span>${day}</span><span class="calendar-dots">${count ? '<i></i>' : ""}</span></button>`);
+            const key = keyFor(year, month, day);
+            const dotClasses = Array.from(new Set(events.filter(function (event) { return event.date === key; }).map(stateClass)));
+            const dots = dotClasses.map(function (className) { return `<i class="${className}"></i>`; }).join("");
+            cells.push(`<button class="calendar-cell ${key === selectedDate ? "is-selected" : ""}" data-date="${key}"><span>${day}</span><span class="calendar-dots">${dots}</span></button>`);
           }
           const dayEvents = events.filter(function (event) { return event.date === selectedDate; });
           list.innerHTML = `<div class="calendar-layout"><section class="month-calendar"><div class="month-nav"><button data-month="-1">‹</button><strong>${viewDate.toLocaleDateString(undefined, { month: "long", year: "numeric" })}</strong><button data-month="1">›</button></div><div class="weekday-row">${["S", "M", "T", "W", "T", "F", "S"].map(function (day) { return `<span>${day}</span>`; }).join("")}</div><div class="month-grid">${cells.join("")}</div></section>
-            <section class="selected-day"><h2>${prettyDate(selectedDate)}</h2><h3 class="section-label">Group Events</h3><div>${dayEvents.length ? dayEvents.map(function (event, index) { return `<a class="card calendar-event" href="event.html?event=${encodeURIComponent(event.id)}"><span class="event-swatch" style="--event-color:${["#36996f", "#9b3f45", "#8fb0c7", "#e29314"][index % 4]}"></span><span><strong>${esc(event.title)}</strong><small>${esc(event.time || "Time TBD")} · ${esc(event.groupName)}</small><small>${esc(event.location || "Location TBD")}</small></span></a>`; }).join("") : '<p class="empty">No group events this day.</p>'}</div></section></div>`;
+            <section class="selected-day"><h2>${prettyDate(selectedDate)}</h2><h3 class="section-label">Group Events</h3><div>${dayEvents.length ? dayEvents.map(function (event, index) { const state = eventDisplayState(event); const label = state.cancelled ? "Cancelled" : state.past ? "Past" : "Upcoming"; return `<a class="card calendar-event ${stateClass(event)}" href="event.html?event=${encodeURIComponent(event.id)}"><span class="event-swatch" style="--event-color:${["#36996f", "#9b3f45", "#8fb0c7", "#e29314"][index % 4]}"></span><span><strong>${esc(event.title)}</strong><small>${esc(event.time || "Time TBD")} · ${esc(event.groupName)}</small><small>${esc(event.location || "Location TBD")} · ${label}</small></span></a>`; }).join("") : '<p class="empty">No group events this day.</p>'}</div></section></div>`;
         }
         list.addEventListener("click", function (event) {
           const monthButton = event.target.closest("[data-month]");

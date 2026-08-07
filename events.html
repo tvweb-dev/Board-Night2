@@ -13,6 +13,7 @@
   <main class="container">
     <div class="page-heading">
       <div><h1>Events</h1><p class="subtle">Events from all of your groups.</p></div>
+      <label class="show-all-events"><input id="showAllEvents" type="checkbox"> Show all events</label>
     </div>
     <div id="eventList" class="grid"><p class="empty">Loading events...</p></div>
   </main>
@@ -22,46 +23,37 @@
       if (!requireSession()) return;
       renderTopbar();
       const list = document.getElementById("eventList");
+      const showAllInput = document.getElementById("showAllEvents");
       try {
         const events = await DB.getAllEvents();
-        const now = new Date();
-        function eventTiming(event) {
-          const dateParts = String(event.date || "").match(/^(\d{4})-(\d{2})-(\d{2})/);
-          if (!dateParts) return { isPast: false, isVisible: true };
 
-          const year = Number(dateParts[1]);
-          const month = Number(dateParts[2]) - 1;
-          const day = Number(dateParts[3]);
-          const timeParts = String(event.time || "").trim().match(/^(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?$/i);
-          let hour = timeParts ? Number(timeParts[1]) : 23;
-          const minute = timeParts ? Number(timeParts[2]) : 59;
-          const meridiem = timeParts && timeParts[3] ? timeParts[3].toUpperCase() : "";
-          if (meridiem === "PM" && hour < 12) hour += 12;
-          if (meridiem === "AM" && hour === 12) hour = 0;
-
-          const eventDateTime = new Date(year, month, day, hour, minute, timeParts ? 0 : 59);
-          const hideAt = new Date(year, month, day + 4);
-          return { isPast: now > eventDateTime, isVisible: now < hideAt };
+        async function renderEvents() {
+          const visibleEvents = events.filter(function (event) {
+            return showAllInput.checked || eventDisplayState(event).upcoming;
+          });
+          const cards = await Promise.all(visibleEvents.map(async function (event, index) {
+            const state = eventDisplayState(event);
+            const rsvps = await DB.getRsvps(event.id);
+            const mine = rsvps.find(function (rsvp) { return String(rsvp.userId) === String(DB.currentUserId()); });
+            const going = rsvps.filter(function (rsvp) { return rsvp.status === "going"; });
+            const statusClass = state.cancelled ? " is-cancelled" : state.past ? " is-past" : "";
+            const statusLabel = state.cancelled ? "Cancelled" : state.past ? "Past" : "Upcoming";
+            const canRehost = String(event.hostId) === String(DB.currentUserId()) && !state.upcoming;
+            const actions = state.upcoming
+              ? `<div class="rsvp-segments" data-event-id="${esc(event.id)}">${["going", "maybe", "no"].map(function (status) { return `<button class="${mine && mine.status === status ? "is-selected " : ""}${status}" data-status="${status}">${status === "going" ? "Yes" : status === "maybe" ? "Maybe" : "No"}</button>`; }).join("")}</div>`
+              : `<div class="historic-event-actions"><span class="event-state-label">${statusLabel}</span>${canRehost ? `<a class="btn secondary small" href="event-edit.html?rehost=${encodeURIComponent(event.id)}">Host again</a>` : ""}</div>`;
+            return `<article class="card event-card${statusClass}" style="--event-color:${["#36996f", "#9b3f45", "#8fb0c7", "#e29314"][index % 4]}">
+              ${event.imageUrl ? `<img class="event-card-image" src="${esc(event.imageUrl)}" alt="">` : ""}<div class="event-card-head"><span class="event-swatch">${event.imageUrl ? `<img src="${esc(event.imageUrl)}" alt="">` : ""}</span><div><a href="event.html?event=${encodeURIComponent(event.id)}"><h3>${esc(event.title)}</h3></a><p class="subtle">${esc(event.groupName)} · ${prettyDate(event.date)} · ${esc(event.time || "Time TBD")}</p></div></div>
+              <p class="event-location">${esc(event.location || "Location TBD")}</p>
+              ${actions}
+              <div class="event-attendance"><span class="avatar-stack">${going.slice(0, 4).map(function (person, avatarIndex) { return avatarHtml(person, "attendance-avatar", `--avatar-color:${["#ce3b30", "#e29314", "#8fb0c7", "#36996f"][avatarIndex % 4]}`); }).join("")}</span><strong>${going.length} going</strong></div>
+            </article>`;
+          }));
+          list.innerHTML = cards.length ? cards.join("") : '<p class="empty">No upcoming events. Select “Show all events” to view past and cancelled events.</p>';
         }
 
-        const visibleEvents = events.map(function (event) {
-          return { event: event, timing: eventTiming(event) };
-        }).filter(function (item) { return item.timing.isVisible; });
-
-        const cards = await Promise.all(visibleEvents.map(async function (item, index) {
-          const event = item.event;
-          const isPast = item.timing.isPast;
-          const rsvps = await DB.getRsvps(event.id);
-          const mine = rsvps.find(function (rsvp) { return String(rsvp.userId) === String(DB.currentUserId()); });
-          const going = rsvps.filter(function (rsvp) { return rsvp.status === "going"; });
-          return `<article class="card event-card${isPast ? " is-past" : ""}" style="--event-color:${["#36996f", "#9b3f45", "#8fb0c7", "#e29314"][index % 4]}">
-            ${event.imageUrl ? `<img class="event-card-image" src="${esc(event.imageUrl)}" alt="">` : ""}<div class="event-card-head"><span class="event-swatch">${event.imageUrl ? `<img src="${esc(event.imageUrl)}" alt="">` : ""}</span><div><a href="event.html?event=${encodeURIComponent(event.id)}"><h3>${esc(event.title)}</h3></a><p class="subtle">${esc(event.groupName)} · ${prettyDate(event.date)} · ${esc(event.time || "Time TBD")}</p></div></div>
-            <p class="event-location">${esc(event.location || "Location TBD")}</p>
-            <div class="rsvp-segments" data-event-id="${esc(event.id)}">${["going", "maybe", "no"].map(function (status) { return `<button class="${mine && mine.status === status ? "is-selected " : ""}${status}" data-status="${status}">${status === "going" ? "Yes" : status === "maybe" ? "Maybe" : "No"}</button>`; }).join("")}</div>
-            <div class="event-attendance"><span class="avatar-stack">${going.slice(0, 4).map(function (person, avatarIndex) { return avatarHtml(person, "attendance-avatar", `--avatar-color:${["#ce3b30", "#e29314", "#8fb0c7", "#36996f"][avatarIndex % 4]}`); }).join("")}</span><strong>${going.length} going</strong></div>
-          </article>`;
-        }));
-        list.innerHTML = cards.length ? cards.join("") : '<p class="empty">No upcoming or recent events.</p>';
+        await renderEvents();
+        showAllInput.addEventListener("change", renderEvents);
         list.addEventListener("click", async function (clickEvent) {
           const button = clickEvent.target.closest(".rsvp-segments button"); if (!button) return;
           const segments = button.closest(".rsvp-segments");

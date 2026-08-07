@@ -231,6 +231,7 @@ ul.plain li:last-child { border-bottom: none; }
 .pill.no { background: var(--red); }
 .pill.active { background: var(--green); }
 .pill.cancelled { background: var(--pending); }
+.pill.past { background: var(--amber); color: var(--bg); }
 
 .count-badge {
   display: inline-block;
@@ -261,10 +262,18 @@ footer.note {
 .page-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
 .page-heading h1, .page-heading p { margin: 0; }
 #eventList { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
+.show-all-events { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: .84rem; text-transform: none; cursor: pointer; }
+.show-all-events input { width: 17px; height: 17px; margin: 0; accent-color: var(--accent); }
 .event-card { display: block; padding: 18px 20px; color: inherit; }
 .event-card.is-past { border-color: rgba(226,147,20,.55); background: #302c27; }
 .event-card.is-past .event-swatch { background: #e29314; }
 .event-card.is-past .event-card-image { filter: saturate(.55); opacity: .72; }
+.event-card.is-cancelled { border-color: rgba(206,59,48,.62); background: #312528; }
+.event-card.is-cancelled .event-swatch { background: var(--red); }
+.event-card.is-cancelled .event-card-image { filter: grayscale(.45); opacity: .62; }
+.historic-event-actions { min-height: 38px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.event-state-label { color: var(--muted); font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .45px; }
+.historic-host-box { margin: 18px 0; border-color: rgba(226,147,20,.45); }
 .event-card-image, .group-card-image { width: 100%; aspect-ratio: 16 / 7; margin-bottom: 14px; display: block; border-radius: 6px; object-fit: cover; background: var(--input); }
 .event-card-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
 .event-card-head > div { min-width: 0; }
@@ -297,11 +306,19 @@ footer.note {
 .calendar-cell:hover { background: var(--card); }
 .calendar-cell.is-selected { background: var(--ink); color: var(--bg); font-weight: 700; }
 .calendar-cell.is-empty { visibility: hidden; }
-.calendar-dots { height: 5px; margin-top: 2px; }
-.calendar-dots i { display: block; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+.calendar-legend { margin: -10px 0 18px; display: flex; flex-wrap: wrap; gap: 14px; color: var(--muted); font-size: .74rem; }
+.calendar-legend span { display: flex; align-items: center; gap: 5px; }
+.calendar-legend i, .calendar-dots i { display: block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.calendar-legend i.is-past, .calendar-dots i.is-past { background: var(--amber); }
+.calendar-legend i.is-cancelled, .calendar-dots i.is-cancelled { background: var(--red); }
+.calendar-dots { height: 6px; margin-top: 2px; display: flex; gap: 2px; }
 .selected-day h2 { margin: 0 0 18px; font-size: 1.12rem; }
 .section-label { margin: 0 0 12px; color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .5px; }
 .calendar-event { display: flex; align-items: center; gap: 12px; color: inherit; text-decoration: none; padding: 13px 16px; }
+.calendar-event.is-past { border-color: rgba(226,147,20,.5); }
+.calendar-event.is-past .event-swatch { background: var(--amber) !important; }
+.calendar-event.is-cancelled { border-color: rgba(206,59,48,.55); }
+.calendar-event.is-cancelled .event-swatch { background: var(--red) !important; }
 .calendar-event small { display: block; color: var(--muted); margin-top: 2px; }
 .friend-search { width: 320px; max-width: 100%; margin-bottom: 22px; padding: 12px 14px; border: 0; border-radius: 12px; background: var(--card); }
 #friendList { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
