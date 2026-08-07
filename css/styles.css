@@ -71,6 +71,9 @@ select:focus-visible, textarea:focus-visible {
 .sidebar-link.is-disabled { cursor: default; opacity: .62; }
 .sidebar-link.is-disabled:hover { color: rgba(236,231,218,.48); background: transparent; }
 .sidebar-icon { width: 20px; text-align: center; font-family: Tahoma, sans-serif; font-size: 20px; line-height: 1; }
+.notification-bell { color: var(--amber); font-size: 12px; }
+.notification-count { min-width: 20px; height: 20px; margin-left: auto; padding: 0 6px; display: grid; place-items: center; border-radius: 10px; background: var(--maroon); color: #fff; font-family: Tahoma, sans-serif; font-size: 11px; font-weight: 700; }
+.notification-count[hidden] { display: none; }
 .sidebar-account { display: flex; align-items: center; gap: 10px; margin-top: auto; padding: 12px 8px 0; border-top: 1px solid rgba(236,231,218,.08); }
 .account-avatar { width: 36px; height: 36px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; background: var(--avatar); font-size: .75rem; font-weight: 700; }
 .account-copy { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; }
@@ -109,6 +112,17 @@ h2 { font-size: 1.2rem; margin: 24px 0 8px; }
 }
 .card h3 { margin: 0 0 6px; }
 a.card:hover { border-color: rgba(143,176,199,.45); transform: translateY(-1px); }
+
+.notification-toolbar { display: flex; align-items: center; gap: 12px; }
+.notification-list { border-top: 1px solid var(--line); }
+.notification-item { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; gap: 14px; align-items: start; padding: 18px 4px; border-bottom: 1px solid var(--line); }
+.notification-item.is-read { opacity: .58; }
+.notification-dot { width: 8px; height: 8px; margin-top: 8px; border-radius: 50%; background: var(--accent); }
+.notification-item.is-read .notification-dot { background: transparent; border: 1px solid var(--muted); }
+.notification-copy h2 { margin: 0 0 3px; font-family: Tahoma, sans-serif; font-size: .96rem; }
+.notification-copy p { margin: 0; color: var(--muted); font-size: .88rem; overflow-wrap: anywhere; }
+.notification-copy time { display: block; margin-top: 7px; color: rgba(236,231,218,.38); font-size: .74rem; }
+.notification-empty { padding: 48px 0; color: var(--muted); text-align: center; }
 
 .grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 

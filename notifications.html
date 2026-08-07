@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Board Night - Notifications</title>
+  <link rel="icon" type="image/svg+xml" href="css/design_elements/BNlogo.svg" />
+  <link rel="stylesheet" href="https://use.typekit.net/oga8xpj.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="topbar" id="topbar"></header>
+  <main class="container">
+    <div class="page-heading">
+      <div><h1>Notifications</h1><p class="subtle" id="notificationSummary">Group and event updates.</p></div>
+      <div class="notification-toolbar"><button class="btn secondary" id="markAllRead" type="button">Mark all read</button></div>
+    </div>
+    <div class="notification-list" id="notificationList" aria-live="polite"></div>
+  </main>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    ready(async function () {
+      if (!requireSession()) return;
+      renderTopbar();
+      const list = document.getElementById("notificationList");
+      const summary = document.getElementById("notificationSummary");
+      const markAll = document.getElementById("markAllRead");
+
+      function formatTime(value) {
+        const date = new Date(value);
+        return Number.isNaN(date.getTime()) ? "" : date.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+      }
+
+      async function load() {
+        list.innerHTML = '<p class="notification-empty">Loading notifications...</p>';
+        try {
+          const notifications = await DB.getNotifications();
+          const unread = notifications.filter(function (item) { return !item.IS_READ; }).length;
+          summary.textContent = unread ? `${unread} unread update${unread === 1 ? "" : "s"}.` : "You are all caught up.";
+          markAll.disabled = unread === 0;
+          list.innerHTML = notifications.length ? notifications.map(function (item) {
+            return `<article class="notification-item ${item.IS_READ ? "is-read" : ""}" data-id="${Number(item.NOTIFICATION_ID)}">
+              <span class="notification-dot" aria-hidden="true"></span>
+              <div class="notification-copy"><h2>${esc(item.TITLE)}</h2><p>${esc(item.MESSAGE)}</p><time datetime="${esc(item.CREATED_AT)}">${esc(formatTime(item.CREATED_AT))}</time></div>
+              ${item.IS_READ ? "" : '<button class="btn secondary mark-read" type="button">Mark read</button>'}
+            </article>`;
+          }).join("") : '<p class="notification-empty">No notifications yet.</p>';
+        } catch (error) {
+          list.innerHTML = `<p class="notification-empty">${esc(error.message)}</p>`;
+        }
+      }
+
+      list.addEventListener("click", async function (event) {
+        const button = event.target.closest(".mark-read");
+        if (!button) return;
+        button.disabled = true;
+        await DB.markNotificationRead(button.closest(".notification-item").dataset.id);
+        await load();
+      });
+      markAll.addEventListener("click", async function () { markAll.disabled = true; await DB.markAllNotificationsRead(); await load(); });
+      await load();
+    });
+  </script>
+</body>
+</html>

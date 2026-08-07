@@ -399,5 +399,18 @@ const DB = {
       NOT_GOING: "no",
       PENDING: "pending"
     }[status] || "pending";
+  },
+
+  /* ---- notifications ---- */
+  async getNotifications(unreadOnly = false) {
+    return this.api(`/api/notifications${unreadOnly ? "?unread=true" : ""}`);
+  },
+
+  async markNotificationRead(notificationId) {
+    return this.api(`/api/notifications/${notificationId}/read`, { method: "PATCH" });
+  },
+
+  async markAllNotificationsRead() {
+    return this.api("/api/notifications/read-all", { method: "PATCH" });
   }
 };

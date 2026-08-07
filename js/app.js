@@ -34,11 +34,13 @@ function renderTopbar() {
   const eventsActive = ["events.html", "event.html", "event-edit.html"].includes(path);
   const calendarActive = path === "calendar.html";
   const friendsActive = path === "friends.html";
+  const notificationsActive = path === "notifications.html";
   const mobileTitles = {
     "dashboard.html": "Your Groups",
     "events.html": "Events",
     "calendar.html": "Calendar",
     "friends.html": "Friends",
+    "notifications.html": "Notifications",
     "group.html": "Group",
     "event.html": "Event",
     "event-edit.html": qs("event") ? "Edit Event" : "Create Event"
@@ -73,6 +75,10 @@ function renderTopbar() {
       <a class="sidebar-link ${friendsActive ? "is-active" : ""}" href="friends.html">
         <span class="sidebar-icon" aria-hidden="true">♡</span><span>Friends</span>
       </a>
+      <a class="sidebar-link ${notificationsActive ? "is-active" : ""}" href="notifications.html">
+        <span class="sidebar-icon notification-bell" aria-hidden="true">●</span><span>Notifications</span>
+        <span class="notification-count" id="notificationCount" hidden></span>
+      </a>
     </nav>
     <div class="sidebar-account">
       <div class="account-avatar" aria-hidden="true">${esc(initials)}</div>
@@ -93,6 +99,13 @@ function renderTopbar() {
     DB.reset();
     window.location.href = "index.html";
   });
+
+  DB.getNotifications(true).then(function (items) {
+    const count = document.getElementById("notificationCount");
+    if (!count || !items.length) return;
+    count.textContent = items.length > 99 ? "99+" : String(items.length);
+    count.hidden = false;
+  }).catch(function () {});
 }
 
 function requireSession() {
