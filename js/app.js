@@ -25,6 +25,17 @@ const STATUS_LABEL = { going: "Going", maybe: "Maybe", no: "Can't make it" };
 const STATUS_CLASS = { going: "going", maybe: "maybe", no: "no" };
 const NOTIFICATION_SEEN_KEY = "boardNightSeenNotifications";
 
+function initialsFor(name) {
+  return String(name || "BN").split(/\s+/).filter(Boolean).slice(0, 2).map(function (part) { return part[0]; }).join("").toUpperCase();
+}
+
+function avatarHtml(person, className, style = "") {
+  const name = person && (person.name || person.userName) || "Board Night player";
+  const imageUrl = person && person.imageUrl;
+  const image = imageUrl ? `<img src="${esc(imageUrl)}" alt="">` : `<span>${esc(initialsFor(name))}</span>`;
+  return `<span class="${esc(className)}"${style ? ` style="${esc(style)}"` : ""} aria-hidden="true">${image}</span>`;
+}
+
 function startNotificationToasts() {
   let dismissTimer = null;
   const storageKey = `${NOTIFICATION_SEEN_KEY}:${DB.currentUserId()}`;
@@ -186,6 +197,17 @@ function renderTopbar() {
   const mobileBackButton = el.querySelector(".mobile-back");
   if (mobileBackButton) mobileBackButton.addEventListener("click", function () { window.history.back(); });
   startNotificationToasts();
+
+  DB.getProfile(user.id).then(function (profile) {
+    const name = DB.displayName(profile);
+    const imageUrl = profile.IMAGE_URL || "";
+    const desktopAvatar = el.querySelector(".account-avatar");
+    const mobileAvatar = el.querySelector(".mobile-account");
+    const userName = el.querySelector(".topbar-user");
+    if (desktopAvatar) desktopAvatar.innerHTML = imageUrl ? `<img src="${esc(imageUrl)}" alt="">` : `<span>${esc(initialsFor(name))}</span>`;
+    if (mobileAvatar) mobileAvatar.innerHTML = imageUrl ? `<img src="${esc(imageUrl)}" alt="">` : `<span>${esc(initialsFor(name))}</span>`;
+    if (userName) userName.textContent = name;
+  }).catch(function () {});
 }
 
 function requireSession() {

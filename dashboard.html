@@ -51,7 +51,7 @@
           const memberCount = members.length;
           const eventCount = (await DB.getEvents(g.id)).length;
           const color = ["#36996f", "#9b3f45", "#8fb0c7", "#e29314"][groupIndex % 4];
-          return `<a class="card group-card" style="--group-color:${color}" href="group.html?group=${encodeURIComponent(g.id)}"><div class="group-card-head"><span class="group-swatch"></span><div><h3>${esc(g.name)}</h3><p class="subtle">${memberCount} member${memberCount === 1 ? "" : "s"} · ${eventCount} event${eventCount === 1 ? "" : "s"}</p></div></div><div class="group-avatars">${members.slice(0, 4).map(function (member, index) { return `<span style="--avatar-color:${["#ce3b30", "#e29314", "#8fb0c7", "#36996f"][index % 4]}">${esc(member.name.charAt(0).toUpperCase())}</span>`; }).join("")}</div></a>`;
+          return `<a class="card group-card" style="--group-color:${color}" href="group.html?group=${encodeURIComponent(g.id)}"><div class="group-card-head"><span class="group-swatch"></span><div><h3>${esc(g.name)}</h3><p class="subtle">${memberCount} member${memberCount === 1 ? "" : "s"} · ${eventCount} event${eventCount === 1 ? "" : "s"}</p></div></div><div class="group-avatars">${members.slice(0, 4).map(function (member, index) { return avatarHtml(member, "group-avatar", `--avatar-color:${["#ce3b30", "#e29314", "#8fb0c7", "#36996f"][index % 4]}`); }).join("")}</div></a>`;
         }));
 
         list.innerHTML = cards.join("");

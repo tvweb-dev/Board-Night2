@@ -27,8 +27,7 @@
         function renderFriends(query) {
           const visible = friends.filter(function (friend) { return friend.name.toLowerCase().includes(query.toLowerCase()); });
           list.innerHTML = visible.length ? visible.map(function (friend, index) {
-          const initials = friend.name.split(/\s+/).filter(Boolean).slice(0, 2).map(function (part) { return part[0]; }).join("").toUpperCase();
-          return `<article class="card friend-card"><div class="friend-avatar" style="--avatar-color:${["#8fb0c7", "#e29314", "#36996f", "#ce3b30", "#9b3f45"][index % 5]}">${esc(initials)}</div><div><h3><a class="person-link" href="profile.html?user=${encodeURIComponent(friend.id)}">${esc(friend.name)}</a></h3><p class="subtle">${friend.groups.length} group${friend.groups.length === 1 ? "" : "s"} together</p></div></article>`;
+          return `<article class="card friend-card">${avatarHtml(friend, "friend-avatar", `--avatar-color:${["#8fb0c7", "#e29314", "#36996f", "#ce3b30", "#9b3f45"][index % 5]}`)}<div><h3><a class="person-link" href="profile.html?user=${encodeURIComponent(friend.id)}">${esc(friend.name)}</a></h3><p class="subtle">${friend.groups.length} group${friend.groups.length === 1 ? "" : "s"} together</p></div></article>`;
           }).join("") : `<p class="empty">${query ? `No friends match “${esc(query)}”.` : "No shared group members yet."}</p>`;
         }
         renderFriends("");

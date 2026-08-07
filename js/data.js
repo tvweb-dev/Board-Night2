@@ -84,6 +84,11 @@ const DB = {
     });
   },
 
+  displayName(row) {
+    const fullName = [row.FIRST_NAME, row.LAST_NAME].filter(Boolean).join(" ");
+    return row.NICKNAME || fullName || row.EMAIL || `User ${row.USER_ID}`;
+  },
+
   async register(email, password) {
     await this.createUser(email, password);
     return this.login(email, password);
@@ -131,8 +136,9 @@ const DB = {
     const members = await this.api(`/api/groups/${groupId}/members`);
     return members.map((row) => ({
       id: row.USER_ID,
-      name: row.EMAIL || `User ${row.USER_ID}`,
+      name: this.displayName(row),
       email: row.EMAIL || "",
+      imageUrl: row.IMAGE_URL || "",
       role: row.MEMBER_ROLE
     }));
   },
@@ -293,6 +299,8 @@ const DB = {
       groupId: row.GROUP_ID,
       hostId: row.HOST_ID,
       hostEmail: row.HOST_EMAIL,
+      hostName: row.HOST_NICKNAME || [row.HOST_FIRST_NAME, row.HOST_LAST_NAME].filter(Boolean).join(" ") || row.HOST_EMAIL,
+      hostImageUrl: row.HOST_IMAGE_URL || "",
       title: row.EVENT_TITLE,
       date: row.EVENT_DATE ? String(row.EVENT_DATE).slice(0, 10) : "",
       time: row.EVENT_TIME || "",
@@ -311,8 +319,9 @@ const DB = {
       id: row.INVITE_ID,
       eventId: row.EVENT_ID,
       userId: row.USER_ID,
-      userName: row.EMAIL || `User ${row.USER_ID}`,
+      userName: this.displayName(row),
       userEmail: row.EMAIL || "",
+      imageUrl: row.IMAGE_URL || "",
       status: this.fromApiStatus(row.RSVP_STATUS),
       emailStatus: row.EMAIL_STATUS || row.INVITE_EMAIL_STATUS || "",
       emailSentAt: row.EMAIL_SENT_AT || row.INVITE_EMAIL_SENT_AT || null
@@ -332,6 +341,7 @@ const DB = {
         userId: createdRsvp.userId,
         userName: host.name,
         userEmail: host.email,
+        imageUrl: "",
         status: createdRsvp.status,
         emailStatus: "",
         emailSentAt: null

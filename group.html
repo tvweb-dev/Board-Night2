@@ -61,7 +61,7 @@
 
         ul.innerHTML = members.length ? members.map(function (m) {
           const isHost = String(m.id) === String(group.hostId);
-          return `<li class="member-row"><span class="member-avatar">${esc(m.name.charAt(0).toUpperCase())}</span><span><a class="person-link" href="profile.html?user=${encodeURIComponent(m.id)}"><strong>${esc(m.name)}</strong></a>${isHost ? '<small>Host</small>' : '<small>Member</small>'}</span></li>`;
+          return `<li class="member-row">${avatarHtml(m, "member-avatar")}<span><a class="person-link" href="profile.html?user=${encodeURIComponent(m.id)}"><strong>${esc(m.name)}</strong></a>${isHost ? '<small>Host</small>' : '<small>Member</small>'}</span></li>`;
         }).join("") : '<li class="empty">No members yet.</li>';
       }
 
