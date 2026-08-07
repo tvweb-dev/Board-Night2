@@ -33,6 +33,10 @@
       <textarea id="description" maxlength="2000" placeholder="Tell your group what the event is about..."></textarea>
       <p class="character-counter" id="descriptionCounter">0 / 2000</p>
 
+      <label for="imageUrl">Event image URL</label>
+      <input id="imageUrl" type="url" maxlength="500" placeholder="https://example.com/game-night.jpg" />
+      <img class="media-url-preview" id="imagePreview" alt="Event image preview" hidden />
+
       <div class="btn-row">
         <button class="btn" id="saveBtn">Save event</button>
         <a class="btn secondary" id="cancelBtn" href="dashboard.html">Cancel</a>
@@ -64,6 +68,7 @@
         document.getElementById("time").value = existing.time;
         document.getElementById("location").value = existing.location;
         document.getElementById("description").value = existing.description || "";
+        document.getElementById("imageUrl").value = existing.imageUrl || "";
         document.getElementById("descriptionCounter").textContent = (existing.description || "").length + " / 2000";
       }
 
@@ -72,6 +77,12 @@
       descriptionInput.addEventListener("input", function () {
         descriptionCounter.textContent = descriptionInput.value.length + " / 2000";
       });
+      const imageInput = document.getElementById("imageUrl");
+      const imagePreview = document.getElementById("imagePreview");
+      function previewImage() { imagePreview.src = imageInput.value.trim(); imagePreview.hidden = !imageInput.value.trim(); }
+      imageInput.addEventListener("input", previewImage);
+      imagePreview.addEventListener("error", function () { imagePreview.hidden = true; });
+      previewImage();
 
       document.getElementById("saveBtn").addEventListener("click", async function () {
         const saveButton = document.getElementById("saveBtn");
@@ -80,7 +91,8 @@
           date: document.getElementById("date").value,
           time: document.getElementById("time").value,
           location: document.getElementById("location").value.trim(),
-          description: descriptionInput.value.trim()
+          description: descriptionInput.value.trim(),
+          imageUrl: imageInput.value.trim()
         };
 
         if (!fields.title || !fields.date || !fields.time || !fields.location) {

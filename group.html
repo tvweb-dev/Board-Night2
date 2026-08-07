@@ -13,13 +13,17 @@
 
   <main class="container">
     <p class="back-link"><a href="dashboard.html">‹ Back to Groups</a></p>
-    <div class="group-title"><span class="group-title-swatch"></span><h1 id="groupName">Group</h1></div>
+    <img class="group-cover-image" id="groupCoverImage" alt="" hidden>
+    <div class="group-title"><span class="group-title-swatch" id="groupTitleImage"></span><h1 id="groupName">Group</h1></div>
     <div class="group-detail-layout">
       <section class="group-events-column">
         <div class="section-heading"><h2>Upcoming Events</h2><a class="btn small" id="newEventBtn" href="#">+ New Event</a></div>
         <div id="eventList"></div>
       </section>
       <aside class="group-members-column">
+        <div class="card group-image-settings" id="groupImageSettings" hidden>
+          <h3>Group image</h3><label for="groupImageUrl">Image URL</label><input id="groupImageUrl" type="url" maxlength="500" placeholder="https://example.com/group.jpg"><div class="btn-row"><button class="btn small" id="saveGroupImageBtn">Save image</button></div>
+        </div>
         <h2>Members</h2>
         <div class="card member-panel"><ul class="plain" id="memberList"></ul></div>
         <div class="card invite-panel">
@@ -52,6 +56,20 @@
       }
 
       document.getElementById("groupName").textContent = group.name;
+      const groupCover = document.getElementById("groupCoverImage");
+      const groupTitleImage = document.getElementById("groupTitleImage");
+      function renderGroupImage() { groupCover.src = group.imageUrl || ""; groupCover.hidden = !group.imageUrl; groupTitleImage.innerHTML = group.imageUrl ? `<img src="${esc(group.imageUrl)}" alt="">` : ""; }
+      renderGroupImage();
+      if (String(group.hostId) === String(DB.currentUserId())) {
+        document.getElementById("groupImageSettings").hidden = false;
+        document.getElementById("groupImageUrl").value = group.imageUrl || "";
+        document.getElementById("saveGroupImageBtn").addEventListener("click", async function () {
+          const button = this; button.disabled = true;
+          try { const saved = await DB.updateGroupImage(group.id, document.getElementById("groupImageUrl").value.trim()); group.imageUrl = saved.GROUP_IMAGE_URL || ""; renderGroupImage(); }
+          catch (error) { alert(error.message); }
+          finally { button.disabled = false; }
+        });
+      }
       document.getElementById("newEventBtn").href =
         "event-edit.html?group=" + encodeURIComponent(groupId);
 
@@ -81,7 +99,7 @@
 
           return `<a class="card group-event-card" style="text-decoration:none;color:inherit;display:flex;"
                      href="event.html?event=${encodeURIComponent(e.id)}">
-                    <span class="group-event-swatch"></span><span><h3>${esc(e.title)}</h3><p class="subtle">${prettyDate(e.date)} · ${esc(e.time || "Time TBD")} · ${esc(e.location || "Location TBD")}</p><strong class="going-label">${going} going</strong></span>
+                    <span class="group-event-swatch">${e.imageUrl ? `<img src="${esc(e.imageUrl)}" alt="">` : ""}</span><span><h3>${esc(e.title)}</h3><p class="subtle">${prettyDate(e.date)} · ${esc(e.time || "Time TBD")} · ${esc(e.location || "Location TBD")}</p><strong class="going-label">${going} going</strong></span>
                   </a>`;
         }));
 

@@ -15,6 +15,7 @@
     <p><a id="backLink" href="dashboard.html">&larr; Back to group</a></p>
 
     <div id="cancelledBanner"></div>
+    <img class="event-detail-image" id="eventImage" alt="" hidden>
 
     <h1><span id="eventTitle">Event</span> <span class="pill active" id="eventStatus">ACTIVE</span></h1>
     <p class="subtle" id="eventMeta"></p>
@@ -102,6 +103,7 @@
       document.getElementById("emailBtn").href = "rsvp.html?event=" + encodeURIComponent(ev.id);
 
       function renderHeader() {
+        const eventImage = document.getElementById("eventImage"); eventImage.src = ev.imageUrl || ""; eventImage.hidden = !ev.imageUrl;
         document.getElementById("eventTitle").textContent = ev.title;
         const eventStatus = document.getElementById("eventStatus");
         eventStatus.textContent = ev.status;

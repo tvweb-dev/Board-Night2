@@ -105,19 +105,20 @@ const DB = {
     return groups.find((g) => String(g.id) === String(id)) || null;
   },
 
-  async createGroup(name) {
+  async createGroup(name, imageUrl = "") {
     const created = await this.api("/api/groups", {
       method: "POST",
       body: JSON.stringify({
         groupName: name,
-        createdBy: this.currentUserId()
+        groupImageUrl: imageUrl
       })
     });
 
     return {
       id: created.GROUP_ID,
       name,
-      hostId: this.currentUserId()
+      hostId: this.currentUserId(),
+      imageUrl: created.GROUP_IMAGE_URL || imageUrl
     };
   },
 
@@ -127,8 +128,16 @@ const DB = {
       name: row.GROUP_NAME,
       hostId: row.CREATED_BY,
       memberRole: row.MEMBER_ROLE,
+      imageUrl: row.GROUP_IMAGE_URL || "",
       createdAt: row.CREATED_AT
     };
+  },
+
+  async updateGroupImage(groupId, groupImageUrl) {
+    return this.api(`/api/groups/${groupId}/image`, {
+      method: "PATCH",
+      body: JSON.stringify({ groupImageUrl })
+    });
   },
 
   /* ---- members ---- */
@@ -239,7 +248,8 @@ const DB = {
         eventDescription: ev.description || "",
         eventDate: ev.date || "",
         eventTime: ev.time || "",
-        eventLocation: ev.location || ""
+        eventLocation: ev.location || "",
+        eventImageUrl: ev.imageUrl || ""
       })
     });
 
@@ -258,6 +268,7 @@ const DB = {
       date: ev.date || "",
       time: ev.time || "",
       location: ev.location || "",
+      imageUrl: created.EVENT_IMAGE_URL || ev.imageUrl || "",
       EVENT_DESCRIPTION: created.EVENT_DESCRIPTION ?? null,
       description: created.EVENT_DESCRIPTION || ev.description || "",
       status: created.EVENT_STATUS || "ACTIVE",
@@ -274,7 +285,8 @@ const DB = {
         eventDescription: fields.description || "",
         eventDate: fields.date,
         eventTime: fields.time,
-        eventLocation: fields.location
+        eventLocation: fields.location,
+        eventImageUrl: fields.imageUrl || ""
       })
     });
     return this.mapEvent(updated);
@@ -305,6 +317,7 @@ const DB = {
       date: row.EVENT_DATE ? String(row.EVENT_DATE).slice(0, 10) : "",
       time: row.EVENT_TIME || "",
       location: row.EVENT_LOCATION || "",
+      imageUrl: row.EVENT_IMAGE_URL || "",
       EVENT_DESCRIPTION: row.EVENT_DESCRIPTION ?? null,
       description: row.EVENT_DESCRIPTION || "",
       status: row.EVENT_STATUS || "ACTIVE",
