@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile | Board Night</title>
+  <link rel="icon" type="image/svg+xml" href="css/design_elements/BNlogo.svg" />
+  <link rel="stylesheet" href="https://use.typekit.net/oga8xpj.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="topbar" id="topbar"></header>
+  <main class="container profile-page">
+    <div id="profileStatus" class="profile-loading">Loading profile...</div>
+    <section id="profileContent" hidden>
+      <header class="profile-header">
+        <div class="profile-avatar" id="profileAvatar"></div>
+        <div class="profile-heading"><p class="section-label" id="profileEyebrow">Player profile</p><h1 id="profileName">Player</h1><p class="subtle" id="profileEmail"></p></div>
+        <button class="btn secondary" id="editProfileBtn" type="button" hidden>Edit profile</button>
+      </header>
+
+      <div class="profile-details" id="profileDetails"></div>
+
+      <form class="profile-form" id="profileForm" hidden>
+        <div class="profile-form-grid">
+          <div><label for="firstName">First name</label><input id="firstName" maxlength="100"></div>
+          <div><label for="lastName">Last name</label><input id="lastName" maxlength="100"></div>
+          <div><label for="nickname">Nickname</label><input id="nickname" maxlength="100"></div>
+          <div class="profile-field-wide"><label for="imageUrl">Profile image URL</label><input id="imageUrl" type="url" maxlength="500" placeholder="https://example.com/photo.jpg"></div>
+          <div><label for="birthday">Birthday</label><input id="birthday" type="date"></div>
+          <div><label for="city">City</label><input id="city" maxlength="100"></div>
+          <div><label for="province">Province / State</label><input id="province" maxlength="100"></div>
+          <div><label for="country">Country</label><input id="country" maxlength="100"></div>
+          <div><label for="favoriteFood">Favorite food</label><input id="favoriteFood" maxlength="100"></div>
+          <div><label for="favoriteDrink">Favorite drink</label><input id="favoriteDrink" maxlength="100"></div>
+          <div class="profile-field-wide"><label for="allergies">Allergies</label><input id="allergies" maxlength="255"></div>
+        </div>
+        <p class="form-error" id="profileError" role="alert"></p>
+        <div class="btn-row"><button class="btn" type="submit">Save profile</button><button class="btn secondary" id="cancelProfileBtn" type="button">Cancel</button></div>
+      </form>
+    </section>
+  </main>
+  <script src="js/data.js"></script><script src="js/app.js"></script>
+  <script>
+    ready(async function () {
+      if (!requireSession()) return;
+      renderTopbar();
+      const me = DB.currentUser();
+      const userId = qs("user") || me.id;
+      const isOwner = String(userId) === String(me.id);
+      const status = document.getElementById("profileStatus");
+      const content = document.getElementById("profileContent");
+      const form = document.getElementById("profileForm");
+      const details = document.getElementById("profileDetails");
+      const fields = ["firstName", "lastName", "nickname", "imageUrl", "birthday", "favoriteFood", "favoriteDrink", "allergies", "city", "province", "country"];
+      const keys = { firstName: "FIRST_NAME", lastName: "LAST_NAME", nickname: "NICKNAME", imageUrl: "IMAGE_URL", birthday: "BIRTHDAY", favoriteFood: "FAVORITE_FOOD", favoriteDrink: "FAVORITE_DRINK", allergies: "ALLERGIES", city: "CITY", province: "PROVINCE", country: "COUNTRY" };
+      let profile;
+
+      function value(key) { return profile[key] == null ? "" : String(profile[key]); }
+      function displayName() { return value("NICKNAME") || [value("FIRST_NAME"), value("LAST_NAME")].filter(Boolean).join(" ") || value("EMAIL") || `User ${userId}`; }
+      function renderAvatar() {
+        const avatar = document.getElementById("profileAvatar");
+        const image = value("IMAGE_URL");
+        avatar.innerHTML = image ? `<img src="${esc(image)}" alt="${esc(displayName())}">` : `<span>${esc(displayName().charAt(0).toUpperCase())}</span>`;
+      }
+      function detail(label, text) { return text ? `<div class="profile-detail"><span>${esc(label)}</span><strong>${esc(text)}</strong></div>` : ""; }
+      function render() {
+        document.getElementById("profileName").textContent = displayName();
+        document.getElementById("profileEmail").textContent = value("EMAIL");
+        document.getElementById("profileEyebrow").textContent = isOwner ? "Your player profile" : "Player profile";
+        renderAvatar();
+        const location = [value("CITY"), value("PROVINCE"), value("COUNTRY")].filter(Boolean).join(", ");
+        const birthday = value("BIRTHDAY") ? prettyDate(value("BIRTHDAY").slice(0, 10)) : "";
+        details.innerHTML = detail("Name", [value("FIRST_NAME"), value("LAST_NAME")].filter(Boolean).join(" ")) + detail("Nickname", value("NICKNAME")) + detail("Location", location) + detail("Birthday", birthday) + detail("Favorite food", value("FAVORITE_FOOD")) + detail("Favorite drink", value("FAVORITE_DRINK")) + detail("Allergies", value("ALLERGIES"));
+        if (!details.innerHTML) details.innerHTML = `<p class="empty">${isOwner ? "Add some details so your group can get to know you." : "This player has not added profile details yet."}</p>`;
+        document.getElementById("editProfileBtn").hidden = !isOwner;
+      }
+      function beginEdit() {
+        fields.forEach(function (field) { const raw = value(keys[field]); document.getElementById(field).value = field === "birthday" ? raw.slice(0, 10) : raw; });
+        details.hidden = true; form.hidden = false; document.getElementById("editProfileBtn").hidden = true;
+      }
+      function cancelEdit() { form.hidden = true; details.hidden = false; document.getElementById("editProfileBtn").hidden = false; document.getElementById("profileError").textContent = ""; renderAvatar(); }
+
+      try {
+        profile = await DB.getProfile(userId);
+        status.hidden = true; content.hidden = false; render();
+        if (isOwner && !profile.FIRST_NAME && !profile.NICKNAME && !profile.IMAGE_URL) beginEdit();
+      } catch (error) { status.textContent = error.message; status.className = "notice"; return; }
+
+      document.getElementById("editProfileBtn").addEventListener("click", beginEdit);
+      document.getElementById("cancelProfileBtn").addEventListener("click", cancelEdit);
+      document.getElementById("imageUrl").addEventListener("input", function (event) { profile.IMAGE_URL = event.target.value.trim(); renderAvatar(); });
+      form.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        const error = document.getElementById("profileError"); error.textContent = "";
+        const payload = {}; fields.forEach(function (field) { payload[field] = document.getElementById(field).value.trim(); });
+        try { profile = await DB.saveProfile(userId, payload); form.hidden = true; details.hidden = false; render(); }
+        catch (saveError) { error.textContent = saveError.message; }
+      });
+    });
+  </script>
+</body>
+</html>

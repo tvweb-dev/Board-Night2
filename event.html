@@ -137,7 +137,7 @@
           const ul = document.getElementById(id);
           ul.innerHTML = entries.length
             ? entries.map(function (entry) {
-              return "<li>" + esc(entry.userName || entry.userEmail || `User ${entry.userId}`) + "</li>";
+              return '<li><a class="person-link" href="profile.html?user=' + encodeURIComponent(entry.userId) + '">' + esc(entry.userName || entry.userEmail || `User ${entry.userId}`) + "</a></li>";
             }).join("")
             : '<li class="empty">Nobody yet</li>';
         }
@@ -152,7 +152,7 @@
             const sent = emailStatus === "SENT"
               ? '<span class="subtle">Email sent' + (entry.emailSentAt ? " " + esc(new Date(entry.emailSentAt).toLocaleString()) : "") + "</span>"
               : '<span class="subtle">' + (emailStatus === "FAILED" ? "Email failed" : "Email pending") + "</span>";
-            return "<li><span>" + esc(entry.userName || entry.userEmail || `User ${entry.userId}`) + "</span>" + sent + "</li>";
+            return '<li><a class="person-link" href="profile.html?user=' + encodeURIComponent(entry.userId) + '">' + esc(entry.userName || entry.userEmail || `User ${entry.userId}`) + "</a>" + sent + "</li>";
           }).join("")
           : '<li class="empty">Nobody yet</li>';
         document.getElementById("goingCount").textContent = buckets.going.length;

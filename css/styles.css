@@ -78,7 +78,7 @@ select:focus-visible, textarea:focus-visible {
 .sidebar-account { display: flex; align-items: center; gap: 10px; margin-top: auto; padding: 12px 8px 0; border-top: 1px solid rgba(236,231,218,.08); }
 .account-avatar { width: 36px; height: 36px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; background: var(--avatar); font-size: .75rem; font-weight: 700; }
 .account-copy { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; }
-.topbar-user { max-width: 135px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); font-size: .8rem; font-weight: 700; }
+.topbar-user { max-width: 135px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); font-size: .8rem; font-weight: 700; text-decoration: none; }
 .nav-signout {
   padding: 0;
   border: 0;
@@ -292,8 +292,31 @@ footer.note {
 .friend-search { width: 320px; max-width: 100%; margin-bottom: 22px; padding: 12px 14px; border: 0; border-radius: 12px; background: var(--card); }
 #friendList { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
 .friend-card { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
+.friend-card > div:last-child { min-width: 0; flex: 1; }
 .friend-card h3, .friend-card p { margin: 0; }
+.friend-card h3 { overflow: hidden; }
+.friend-card .person-link { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .friend-avatar { width: 36px; height: 36px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; background: var(--avatar-color, var(--avatar)); color: var(--bg); font-size: .7rem; font-weight: 700; }
+.person-link { color: inherit; text-decoration: none; }
+.person-link:hover { color: var(--link-hover); }
+
+.profile-page { max-width: 940px !important; }
+.profile-loading { padding: 40px 0; color: var(--muted); }
+.profile-header { min-height: 148px; display: grid; grid-template-columns: 112px minmax(0, 1fr) auto; gap: 24px; align-items: center; padding: 24px 0 28px; border-bottom: 1px solid var(--line); }
+.profile-avatar { width: 112px; height: 112px; display: grid; place-items: center; overflow: hidden; border: 3px solid var(--card); border-radius: 50%; background: var(--accent); color: var(--ink); font-family: "gambado-sans-forte", sans-serif; font-size: 2.5rem; font-weight: 700; box-shadow: var(--shadow); }
+.profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.profile-heading { min-width: 0; }
+.profile-heading h1, .profile-heading p { margin: 0; overflow-wrap: anywhere; }
+.profile-heading .section-label { margin-bottom: 5px; }
+.profile-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; margin-top: 28px; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: var(--line); }
+.profile-detail { min-height: 82px; padding: 17px 19px; background: var(--card); }
+.profile-detail span, .profile-detail strong { display: block; }
+.profile-detail span { margin-bottom: 4px; color: var(--muted); font-size: .72rem; font-weight: 700; text-transform: uppercase; }
+.profile-detail strong { overflow-wrap: anywhere; font-size: .94rem; }
+.profile-details > .empty { grid-column: 1 / -1; margin: 0; padding: 32px; background: var(--card); text-align: center; }
+.profile-form { margin-top: 28px; }
+.profile-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 20px; }
+.profile-field-wide { grid-column: 1 / -1; }
 .group-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 .group-card { display: block; padding: 20px 20px 18px; color: inherit; text-decoration: none; }
 .group-card-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
@@ -545,6 +568,15 @@ footer.note {
   .page-dashboard .page-heading { display: block; }
   .page-dashboard .page-heading .btn { width: 100%; margin-top: 18px; }
   .page-dashboard footer.note { display: none; }
+
+  .profile-header { min-height: 0; grid-template-columns: 76px minmax(0, 1fr); gap: 15px; padding: 14px 0 22px; }
+  .profile-avatar { width: 76px; height: 76px; font-size: 1.7rem; }
+  .profile-heading h1 { font-size: 1.3rem; }
+  .profile-header > .btn { grid-column: 1 / -1; width: 100%; }
+  .profile-details { grid-template-columns: 1fr; margin-top: 20px; }
+  .profile-form { margin-top: 20px; }
+  .profile-form-grid { grid-template-columns: 1fr; }
+  .profile-field-wide { grid-column: auto; }
 
   .app-shell .container > h1 { font-size: 1.08rem; margin-top: 4px; }
   .app-shell .container > h2 { font-size: 1.08rem; margin: 18px 0 10px; }

@@ -102,12 +102,14 @@ function renderTopbar() {
   const calendarActive = path === "calendar.html";
   const friendsActive = path === "friends.html";
   const notificationsActive = path === "notifications.html";
+  const profileActive = path === "profile.html";
   const mobileTitles = {
     "dashboard.html": "Your Groups",
     "events.html": "Events",
     "calendar.html": "Calendar",
     "friends.html": "Friends",
     "notifications.html": "Notifications",
+    "profile.html": "Profile",
     "group.html": "Group",
     "event.html": "Event",
     "event-edit.html": qs("event") ? "Edit Event" : "Create Event"
@@ -130,7 +132,7 @@ function renderTopbar() {
         <span aria-hidden="true">●</span>
         <span class="notification-count mobile-notification-count" id="mobileNotificationCount" hidden></span>
       </a>
-      <button class="mobile-account" id="mobileSignOutBtn" type="button" aria-label="Sign out">${esc(initials)}</button>
+      <a class="mobile-account" href="profile.html?user=${encodeURIComponent(user.id)}" aria-label="View your profile">${esc(initials)}</a>
     </div>
     <a class="brand" href="dashboard.html" aria-label="Board Night home">
       <img class="brand-logo" src="css/design_elements/BNlogo.svg" alt="">
@@ -153,11 +155,14 @@ function renderTopbar() {
         <span class="sidebar-icon notification-bell" aria-hidden="true">●</span><span>Notifications</span>
         <span class="notification-count" id="notificationCount" hidden></span>
       </a>
+      <a class="sidebar-link ${profileActive ? "is-active" : ""}" href="profile.html?user=${encodeURIComponent(user.id)}">
+        <span class="sidebar-icon" aria-hidden="true">◎</span><span>Profile</span>
+      </a>
     </nav>
     <div class="sidebar-account">
       <div class="account-avatar" aria-hidden="true">${esc(initials)}</div>
       <div class="account-copy">
-        <span class="topbar-user">${esc(user ? user.name : "")}</span>
+        <a class="topbar-user" href="profile.html?user=${encodeURIComponent(user.id)}">${esc(user ? user.name : "")}</a>
         <button class="nav-signout" id="signOutBtn" type="button">Sign out</button>
       </div>
     </div>`;
@@ -180,11 +185,6 @@ function renderTopbar() {
 
   const mobileBackButton = el.querySelector(".mobile-back");
   if (mobileBackButton) mobileBackButton.addEventListener("click", function () { window.history.back(); });
-  document.getElementById("mobileSignOutBtn").addEventListener("click", function () {
-    DB.reset();
-    window.location.href = "index.html";
-  });
-
   startNotificationToasts();
 }
 

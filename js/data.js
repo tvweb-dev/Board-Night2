@@ -200,6 +200,18 @@ const DB = {
     return Array.from(friends.values()).sort((a, b) => a.name.localeCompare(b.name));
   },
 
+  /* ---- profiles ---- */
+  async getProfile(userId) {
+    return this.api(`/api/profiles/${userId}`);
+  },
+
+  async saveProfile(userId, profile) {
+    return this.api(`/api/profiles/${userId}`, {
+      method: "PUT",
+      body: JSON.stringify(profile)
+    });
+  },
+
   async getEvent(id) {
     const groups = await this.getGroups();
 
