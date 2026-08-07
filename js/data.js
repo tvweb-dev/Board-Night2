@@ -170,12 +170,8 @@ const DB = {
   },
 
   async getAllEvents() {
-    const groups = await this.getGroups();
-    const lists = await Promise.all(groups.map(async (group) => {
-      const events = await this.getEvents(group.id);
-      return events.map((event) => ({ ...event, groupName: group.name }));
-    }));
-    return lists.flat().sort((a, b) => `${a.date}T${a.time}`.localeCompare(`${b.date}T${b.time}`));
+    const events = await this.api("/api/events");
+    return events.map((row) => ({ ...this.mapEvent(row), groupName: row.GROUP_NAME || "Group" }));
   },
 
   async getFriends() {
