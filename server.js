@@ -204,7 +204,8 @@ async function renderDashboard(reqUrl, html) {
       description = `View ${groups.length} Board Night groups, including members and upcoming events.`;
       const cards = await Promise.all(groups.slice(0, 8).map(async (group) => {
         const [members, events] = await Promise.all([getMembers(group.id), getEvents(group.id)]);
-        return `<article class="card"><h3>${escapeHtml(group.name)}</h3><p class="subtle">${members.length} member(s) · ${events.length} event(s)</p></article>`;
+        const creatorTag = String(group.hostId) === String(userId) ? ' <span class="creator-tag">Creator</span>' : "";
+        return `<article class="card"><h3>${escapeHtml(group.name)}${creatorTag}</h3><p class="subtle">${members.length} member(s) · ${events.length} event(s)</p></article>`;
       }));
       ssrCards = cards.join("\n");
     }
