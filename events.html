@@ -30,6 +30,20 @@
         async function renderEvents() {
           const visibleEvents = events.filter(function (event) {
             return showAllInput.checked || eventDisplayState(event).upcoming;
+          }).sort(function (a, b) {
+            const aState = eventDisplayState(a);
+            const bState = eventDisplayState(b);
+            if (aState.upcoming !== bState.upcoming) return aState.upcoming ? -1 : 1;
+
+            const aDate = eventDateTime(a);
+            const bDate = eventDateTime(b);
+            const aTime = aDate ? aDate.getTime() : null;
+            const bTime = bDate ? bDate.getTime() : null;
+            if (aTime === null && bTime === null) return 0;
+            if (aTime === null) return 1;
+            if (bTime === null) return -1;
+
+            return aState.upcoming ? aTime - bTime : bTime - aTime;
           });
           const cards = await Promise.all(visibleEvents.map(async function (event, index) {
             const state = eventDisplayState(event);
