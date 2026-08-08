@@ -61,26 +61,21 @@ const PLACEHOLDER_IMAGE = {
 };
 
 let siteLoadingCount = 0;
-let loadingCursor = null;
+let loadingIndicator = null;
 
-function ensureLoadingCursor() {
-  if (loadingCursor || !document.body) return;
-  loadingCursor = document.createElement("img");
-  loadingCursor.className = "loading-cursor";
-  loadingCursor.src = "css/design_elements/BN-LOGO-LOADING.gif";
-  loadingCursor.alt = "";
-  loadingCursor.setAttribute("aria-hidden", "true");
-  document.body.appendChild(loadingCursor);
-  document.addEventListener("pointermove", function (event) {
-    loadingCursor.style.left = `${event.clientX}px`;
-    loadingCursor.style.top = `${event.clientY}px`;
-    loadingCursor.classList.add("has-position");
-  }, { passive: true });
+function ensureLoadingIndicator() {
+  if (loadingIndicator || !document.body) return;
+  loadingIndicator = document.createElement("img");
+  loadingIndicator.className = "loading-indicator";
+  loadingIndicator.src = "css/design_elements/BN-LOGO-LOADING.gif";
+  loadingIndicator.alt = "";
+  loadingIndicator.setAttribute("aria-hidden", "true");
+  document.body.appendChild(loadingIndicator);
 }
 
 function beginSiteLoading() {
   siteLoadingCount += 1;
-  ensureLoadingCursor();
+  ensureLoadingIndicator();
   document.documentElement.classList.add("site-loading");
 }
 
