@@ -315,13 +315,25 @@ footer.note {
 .calendar-dots { height: 6px; margin-top: 2px; display: flex; gap: 2px; }
 .selected-day h2 { margin: 0 0 18px; font-size: 1.12rem; }
 .section-label { margin: 0 0 12px; color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .5px; }
-.calendar-event { display: flex; align-items: center; gap: 12px; color: inherit; text-decoration: none; padding: 13px 16px; }
+.calendar-event { display: block; color: inherit; padding: 13px 16px; }
+.calendar-event-link { display: flex; align-items: center; gap: 12px; color: inherit; text-decoration: none; }
 .calendar-event-title { display: flex; align-items: center; gap: 7px; }
 .calendar-event.is-past { border-color: rgba(226,147,20,.5); }
 .calendar-event.is-past .event-swatch { background: var(--amber) !important; }
 .calendar-event.is-cancelled { border-color: rgba(206,59,48,.55); }
 .calendar-event.is-cancelled .event-swatch { background: var(--red) !important; }
 .calendar-event small { display: block; color: var(--muted); margin-top: 2px; }
+.calendar-attendee-toggle { margin: 12px 0 0 52px; padding: 0; border: 0; background: transparent; color: var(--muted); font: inherit; font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .45px; cursor: pointer; }
+.calendar-attendee-toggle:hover { color: var(--ink); }
+.calendar-attendee-toggle[aria-expanded="true"] span { display: inline-block; transform: rotate(180deg); }
+.calendar-attendees { margin: 10px 0 0 52px; padding-top: 8px; border-top: 1px solid var(--line); }
+.calendar-attendees[hidden] { display: none; }
+.calendar-attendee-row { min-height: 34px; display: flex; align-items: center; gap: 9px; }
+.calendar-attendee-row .person-link { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.calendar-attendee-row .pill { flex: 0 0 auto; margin-left: auto; font-size: .68rem; }
+.calendar-attendee-avatar { width: 28px; height: 28px; flex: 0 0 28px; overflow: hidden; display: grid; place-items: center; border-radius: 50%; background: var(--avatar); font-size: .6rem; font-weight: 700; }
+.calendar-attendee-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.pill.pending { background: #596071; }
 .friend-search { width: 320px; max-width: 100%; margin-bottom: 22px; padding: 12px 14px; border: 0; border-radius: 12px; background: var(--card); }
 .friend-tools { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-bottom: 22px; }
 .friend-tools .friend-search { margin-bottom: 0; }

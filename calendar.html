@@ -31,6 +31,28 @@
           const state = eventDisplayState(event);
           return state.cancelled ? "is-cancelled" : state.past ? "is-past" : "is-upcoming";
         }
+        function calendarEventCard(event, index) {
+          const state = eventDisplayState(event);
+          const label = state.cancelled ? "Cancelled" : state.past ? "Past" : "Upcoming";
+          const hostTag = String(event.hostId) === String(DB.currentUserId()) ? '<span class="host-tag">Host</span>' : "";
+          const attendeeId = `calendarAttendees-${event.id}`;
+          return `<article class="card calendar-event ${stateClass(event)}">
+            <a class="calendar-event-link" href="event.html?event=${encodeURIComponent(event.id)}"><span class="event-swatch" style="--event-color:${["#36996f", "#9b3f45", "#8fb0c7", "#e29314"][index % 4]}"></span><span><strong class="calendar-event-title">${esc(event.title)} ${hostTag}</strong><small>${esc(event.time || "Time TBD")} · ${esc(event.groupName)}</small><small>${esc(event.location || "Location TBD")} · ${label}</small></span></a>
+            <button class="calendar-attendee-toggle" type="button" data-event-attendees="${esc(event.id)}" aria-expanded="false" aria-controls="${attendeeId}">Who’s going? <span aria-hidden="true">⌄</span></button>
+            <div class="calendar-attendees" id="${attendeeId}" hidden></div>
+          </article>`;
+        }
+        function attendeeRows(rsvps) {
+          const unique = new Map();
+          rsvps.forEach(function (rsvp) { unique.set(String(rsvp.userId), rsvp); });
+          const people = Array.from(unique.values());
+          if (!people.length) return '<p class="empty">Nobody has been invited yet.</p>';
+          const labels = { going: "Going", maybe: "Maybe", no: "Can’t go", pending: "No response" };
+          return people.map(function (person) {
+            const status = labels[person.status] ? person.status : "pending";
+            return `<div class="calendar-attendee-row">${avatarHtml(person, "calendar-attendee-avatar")}<a class="person-link" href="profile.html?user=${encodeURIComponent(person.userId)}">${esc(person.userName || person.userEmail || `User ${person.userId}`)}</a><span class="pill ${status}">${labels[status]}</span></div>`;
+          }).join("");
+        }
         function renderCalendar() {
           const year = viewDate.getFullYear(), month = viewDate.getMonth();
           const firstDay = new Date(year, month, 1).getDay();
@@ -44,9 +66,22 @@
           }
           const dayEvents = events.filter(function (event) { return event.date === selectedDate; });
           list.innerHTML = `<div class="calendar-layout"><section class="month-calendar"><div class="month-nav"><button data-month="-1">‹</button><strong>${viewDate.toLocaleDateString(undefined, { month: "long", year: "numeric" })}</strong><button data-month="1">›</button></div><div class="weekday-row">${["S", "M", "T", "W", "T", "F", "S"].map(function (day) { return `<span>${day}</span>`; }).join("")}</div><div class="month-grid">${cells.join("")}</div></section>
-            <section class="selected-day"><h2>${prettyDate(selectedDate)}</h2><h3 class="section-label">Group Events</h3><div>${dayEvents.length ? dayEvents.map(function (event, index) { const state = eventDisplayState(event); const label = state.cancelled ? "Cancelled" : state.past ? "Past" : "Upcoming"; const hostTag = String(event.hostId) === String(DB.currentUserId()) ? '<span class="host-tag">Host</span>' : ""; return `<a class="card calendar-event ${stateClass(event)}" href="event.html?event=${encodeURIComponent(event.id)}"><span class="event-swatch" style="--event-color:${["#36996f", "#9b3f45", "#8fb0c7", "#e29314"][index % 4]}"></span><span><strong class="calendar-event-title">${esc(event.title)} ${hostTag}</strong><small>${esc(event.time || "Time TBD")} · ${esc(event.groupName)}</small><small>${esc(event.location || "Location TBD")} · ${label}</small></span></a>`; }).join("") : '<p class="empty">No group events this day.</p>'}</div></section></div>`;
+            <section class="selected-day"><h2>${prettyDate(selectedDate)}</h2><h3 class="section-label">Group Events</h3><div>${dayEvents.length ? dayEvents.map(calendarEventCard).join("") : '<p class="empty">No group events this day.</p>'}</div></section></div>`;
         }
-        list.addEventListener("click", function (event) {
+        list.addEventListener("click", async function (event) {
+          const attendeeButton = event.target.closest("[data-event-attendees]");
+          if (attendeeButton) {
+            const panel = document.getElementById(attendeeButton.getAttribute("aria-controls"));
+            const opening = panel.hidden;
+            panel.hidden = !opening;
+            attendeeButton.setAttribute("aria-expanded", String(opening));
+            if (opening && !panel.dataset.loaded) {
+              panel.innerHTML = '<p class="subtle">Loading invitees...</p>';
+              try { panel.innerHTML = attendeeRows(await DB.getRsvps(attendeeButton.dataset.eventAttendees)); panel.dataset.loaded = "true"; }
+              catch (error) { panel.innerHTML = `<p class="empty">${esc(error.message)}</p>`; }
+            }
+            return;
+          }
           const monthButton = event.target.closest("[data-month]");
           if (monthButton) { viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + Number(monthButton.dataset.month), 1); selectedDate = keyFor(viewDate.getFullYear(), viewDate.getMonth(), 1); renderCalendar(); return; }
           const dayButton = event.target.closest("[data-date]"); if (dayButton) { selectedDate = dayButton.dataset.date; renderCalendar(); }
