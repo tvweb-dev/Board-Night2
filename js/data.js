@@ -163,6 +163,10 @@ const DB = {
     });
   },
 
+  async removeMember(groupId, userId) {
+    return this.api(`/api/groups/${groupId}/members/${userId}`, { method: "DELETE" });
+  },
+
   /* ---- events ---- */
   async getEvents(groupId) {
     const events = await this.api(`/api/events/group/${groupId}`);

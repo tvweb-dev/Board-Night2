@@ -449,6 +449,7 @@ footer.note {
 .member-row > span:last-child { min-width: 0; }
 .member-row strong, .member-row small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .member-row small { color: var(--muted); font-size: .72rem; }
+.member-remove-button { flex: 0 0 auto; margin-left: auto; }
 .member-name-line { display: flex; align-items: center; gap: 7px; min-width: 0; }
 .member-name-line .person-link { min-width: 0; }
 .creator-tag { flex: 0 0 auto; display: inline-flex; align-items: center; padding: 2px 7px; border: 1px solid rgba(226,147,20,.58); border-radius: 999px; background: rgba(226,147,20,.15); color: #f0b54d; font-size: .6rem; font-weight: 800; line-height: 1.35; text-transform: uppercase; letter-spacing: .45px; }

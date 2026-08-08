@@ -53,6 +53,8 @@
           '<p class="empty">Group not found. <a href="dashboard.html">Go back</a></p>';
         return;
       }
+      let groupEvents = await DB.getEvents(groupId);
+      const canRemoveMembers = String(group.hostId) === String(DB.currentUserId()) || groupEvents.some(function (event) { return String(event.hostId) === String(DB.currentUserId()) && eventDisplayState(event).upcoming; });
 
       document.getElementById("groupName").textContent = group.name;
       const groupCover = document.getElementById("groupCoverImage");
@@ -79,7 +81,9 @@
         ul.innerHTML = members.length ? members.map(function (m) {
           const isCreator = String(m.id) === String(group.hostId);
           const creatorTag = isCreator ? '<span class="creator-tag">Creator</span>' : '';
-          return `<li class="member-row">${avatarHtml(m, "member-avatar")}<span><span class="member-name-line"><a class="person-link" href="profile.html?user=${encodeURIComponent(m.id)}"><strong>${esc(m.name)}</strong></a>${creatorTag}</span><small>${isCreator ? 'Group creator' : 'Member'}</small></span></li>`;
+          const canRemove = canRemoveMembers && !isCreator && String(m.id) !== String(DB.currentUserId());
+          const removeButton = canRemove ? `<button class="btn danger small member-remove-button" type="button" data-remove-member="${esc(m.id)}" data-member-name="${esc(m.name)}">Remove member</button>` : "";
+          return `<li class="member-row">${avatarHtml(m, "member-avatar")}<span><span class="member-name-line"><a class="person-link" href="profile.html?user=${encodeURIComponent(m.id)}"><strong>${esc(m.name)}</strong></a>${creatorTag}</span><small>${isCreator ? 'Group creator' : 'Member'}</small></span>${removeButton}</li>`;
         }).join("") : '<li class="empty">No members yet.</li>';
       }
 
@@ -94,7 +98,7 @@
 
       async function renderEvents() {
         const wrap = document.getElementById("eventList");
-        const events = await DB.getEvents(groupId);
+        const events = groupEvents.slice();
         events.sort(function (a, b) {
           const aDate = eventDateTime(a);
           const bDate = eventDateTime(b);
@@ -150,6 +154,18 @@
         if (event.key !== "Enter" || event.isComposing) return;
         event.preventDefault();
         document.getElementById("addMemberBtn").click();
+      });
+      document.getElementById("memberList").addEventListener("click", async function (event) {
+        const button = event.target.closest("[data-remove-member]");
+        if (!button || !confirm(`Remove ${button.dataset.memberName} from this group?`)) return;
+        button.disabled = true;
+        try {
+          await DB.removeMember(groupId, button.dataset.removeMember);
+          await renderMembers();
+        } catch (error) {
+          alert(error.message);
+          button.disabled = false;
+        }
       });
 
       await renderMembers();
