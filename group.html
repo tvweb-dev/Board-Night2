@@ -77,8 +77,9 @@
         const members = await DB.getMembers(groupId);
 
         ul.innerHTML = members.length ? members.map(function (m) {
-          const isHost = String(m.id) === String(group.hostId);
-          return `<li class="member-row">${avatarHtml(m, "member-avatar")}<span><a class="person-link" href="profile.html?user=${encodeURIComponent(m.id)}"><strong>${esc(m.name)}</strong></a>${isHost ? '<small>Host</small>' : '<small>Member</small>'}</span></li>`;
+          const isCreator = String(m.id) === String(group.hostId);
+          const creatorTag = isCreator ? '<span class="creator-tag">Creator</span>' : '';
+          return `<li class="member-row">${avatarHtml(m, "member-avatar")}<span><span class="member-name-line"><a class="person-link" href="profile.html?user=${encodeURIComponent(m.id)}"><strong>${esc(m.name)}</strong></a>${creatorTag}</span><small>${isCreator ? 'Group creator' : 'Member'}</small></span></li>`;
         }).join("") : '<li class="empty">No members yet.</li>';
       }
 

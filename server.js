@@ -244,7 +244,10 @@ async function renderGroup(reqUrl, html) {
         const [members, events] = await Promise.all([getMembers(group.id), getEvents(group.id)]);
         description = `${group.name} has ${members.length} members and ${events.length} events on Board Night.`;
         membersHtml = members.length
-          ? members.map((member) => `<li>${escapeHtml(member.name)}</li>`).join("")
+          ? members.map((member) => {
+            const isCreator = String(member.id) === String(group.hostId);
+            return `<li>${escapeHtml(member.name)}${isCreator ? ' <span class="creator-tag">Creator</span>' : ""}</li>`;
+          }).join("")
           : '<li class="empty">No members yet.</li>';
         eventsHtml = events.length
           ? events.map((event) => `<article class="card"><h3>${escapeHtml(event.title)} <span class="pill ${event.cancelled ? "cancelled" : "active"}">${escapeHtml(event.status)}</span></h3><p class="subtle">${escapeHtml(prettyDate(event.date))} · ${escapeHtml(event.time || "TBD")} · ${escapeHtml(event.location || "Location TBD")}</p>${event.description ? `<p class="event-description-preview">${escapeHtml(event.description)}</p>` : ""}</article>`).join("")
