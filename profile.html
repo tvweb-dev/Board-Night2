@@ -84,13 +84,19 @@
         if (!details.innerHTML) details.innerHTML = `<p class="empty">${isOwner ? "Add some details so your group can get to know you." : "This player has not added profile details yet."}</p>`;
         document.getElementById("editProfileBtn").hidden = !isOwner;
       }
-      function beginEdit() {
+      function beginEdit(scrollToForm) {
         if (!isOwner) return;
         fields.forEach(function (field) { const raw = value(keys[field]); document.getElementById(field).value = field === "birthday" ? raw.slice(0, 10) : raw; });
         const selected = new Set(favoriteGames.map(function (game) { return String(game.GAME_ID); }));
         const options = document.getElementById("favoriteGameOptions");
         options.innerHTML = games.length ? games.map(function (game) { return `<label class="favorite-game-option"><input type="checkbox" name="favoriteGame" value="${Number(game.GAME_ID)}" ${selected.has(String(game.GAME_ID)) ? "checked" : ""}><span><strong>${esc(game.GAME_NAME)}</strong>${game.CATEGORY ? `<small>${esc(game.CATEGORY)}</small>` : ""}</span></label>`; }).join("") : '<p class="empty">No games are available in the catalog yet.</p>';
         details.hidden = true; form.hidden = false; document.getElementById("editProfileBtn").hidden = true;
+        if (scrollToForm) {
+          requestAnimationFrame(function () {
+            const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            form.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+          });
+        }
       }
       function cancelEdit() { form.hidden = true; details.hidden = false; document.getElementById("editProfileBtn").hidden = !isOwner; document.getElementById("profileError").textContent = ""; renderAvatar(); }
 
@@ -100,7 +106,7 @@
         if (isOwner && !profile.FIRST_NAME && !profile.NICKNAME && !profile.IMAGE_URL) beginEdit();
       } catch (error) { status.textContent = error.message; status.className = "notice"; return; }
 
-      document.getElementById("editProfileBtn").addEventListener("click", beginEdit);
+      document.getElementById("editProfileBtn").addEventListener("click", function () { beginEdit(true); });
       document.getElementById("cancelProfileBtn").addEventListener("click", cancelEdit);
       document.getElementById("imageUrl").addEventListener("input", function (event) { profile.IMAGE_URL = event.target.value.trim(); renderAvatar(); });
       bindImageUpload("profileImageFile", "imageUrl", "profile");
