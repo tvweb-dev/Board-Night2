@@ -60,6 +60,12 @@
         <a class="btn secondary" id="emailBtn" href="#">Open RSVP link</a>
         <button class="btn danger" id="cancelEventBtn">Cancel event</button>
       </div>
+      <div class="host-game-control">
+        <h3>Game <span class="subtle">(optional)</span></h3>
+        <p class="subtle">Search the board game catalogue to add or change the game for this event.</p>
+        <div id="hostGamePicker"></div>
+        <div class="btn-row"><button class="btn secondary" id="saveEventGameBtn" type="button">Save game</button></div>
+      </div>
       <div class="host-image-control">
         <h3>Event image</h3>
         <label for="hostEventImageUrl">Image URL</label>
@@ -104,6 +110,7 @@
 
       const me = DB.currentUser();
       let hostActionPending = false;
+      let hostGamePicker = null;
 
       function amHost() {
         return String(ev.hostId) === String(me.id);
@@ -226,6 +233,17 @@
         box.style.display = "block";
         rehostBox.style.display = "none";
         document.getElementById("hostOnlyNotice").style.display = "none";
+        if (!hostGamePicker) {
+          hostGamePicker = GamePicker.create(document.getElementById("hostGamePicker"), {
+            inputId: "hostGameSearch",
+            label: "Search board games",
+            placeholder: "Start typing a game name...",
+            selectedGame: ev.game,
+            allowClear: true
+          });
+        } else {
+          hostGamePicker.setSelected(ev.game);
+        }
         document.getElementById("hostEventImageUrl").value = ev.imageUrl || "";
         const hostImagePreview = document.getElementById("hostEventImagePreview");
         hostImagePreview.src = ev.imageUrl || "";
@@ -310,6 +328,29 @@
           showHostStatus(ev.imageUrl ? "Event image updated successfully." : "Event image removed successfully.");
         } catch (error) { showHostStatus(error.message); }
         finally { button.disabled = false; button.textContent = "Save image"; }
+      });
+
+      document.getElementById("saveEventGameBtn").addEventListener("click", async function () {
+        if (!hostGamePicker || hostActionPending) return;
+        const button = this;
+        const selectedGame = hostGamePicker.getSelected();
+        hostActionPending = true;
+        button.disabled = true;
+        button.textContent = "Saving...";
+        try {
+          const updated = await DB.updateEventGame(ev.id, selectedGame ? selectedGame.GAME_ID : null);
+          ev.gameId = updated.gameId;
+          ev.game = updated.game;
+          hostGamePicker.setSelected(ev.game);
+          renderEventGame();
+          showHostStatus(ev.game ? `${ev.game.GAME_NAME} added to this event.` : "Game removed from this event.");
+        } catch (error) {
+          showHostStatus(error.message);
+        } finally {
+          hostActionPending = false;
+          button.disabled = false;
+          button.textContent = "Save game";
+        }
       });
 
       document.getElementById("changeHostBtn").addEventListener("click", async function () {

@@ -217,6 +217,9 @@ textarea { min-height: 70px; resize: vertical; }
 }
 
 .invite-members { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 14px; }
+.host-game-control { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 14px; }
+.host-game-control h3 { margin: 0 0 2px; }
+.host-game-control h3 .subtle { font-size: .72rem; font-weight: 400; }
 .host-image-control { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 14px; }
 .host-image-control h3 { margin: 0; }
 .invite-members h3 { margin-bottom: 2px; }

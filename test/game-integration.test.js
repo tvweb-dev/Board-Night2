@@ -1,5 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
 
 function storage(values = {}) {
   const entries = new Map(Object.entries(values));
@@ -121,6 +123,14 @@ test("host game removal PATCHes null", async () => {
   global.fetch = async (url, options) => { body = JSON.parse(options.body); return response({ EVENT_ID: 3, GAME_ID: null, GAME: null }); };
   await DB.updateEventGame(3, null);
   assert.deepEqual(body, { gameId: null });
+});
+
+test("existing event page gives the host a catalogue game picker", () => {
+  const page = fs.readFileSync(path.join(__dirname, "../event.html"), "utf8");
+  assert.match(page, /id="hostGamePicker"/);
+  assert.match(page, /GamePicker\.create\(document\.getElementById\("hostGamePicker"\)/);
+  assert.match(page, /DB\.updateEventGame\(ev\.id, selectedGame \? selectedGame\.GAME_ID : null\)/);
+  assert.match(page, /id="saveEventGameBtn"/);
 });
 
 test("API failures reject without fabricating data", async () => {
