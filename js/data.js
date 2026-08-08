@@ -194,6 +194,28 @@ const DB = {
     });
   },
 
+  async getAvailability(startDate, endDate) {
+    const rows = await this.api(`/api/availability?start=${encodeURIComponent(startDate)}&end=${encodeURIComponent(endDate)}`);
+    return rows.map((row) => ({
+      id: row.AVAILABILITY_ID,
+      userId: row.USER_ID,
+      userName: this.displayName(row),
+      imageUrl: row.IMAGE_URL || "",
+      date: row.AVAILABILITY_DATE ? String(row.AVAILABILITY_DATE).slice(0, 10) : "",
+      status: String(row.AVAILABILITY_STATUS || "").toLowerCase(),
+      startTime: row.START_TIME || "",
+      endTime: row.END_TIME || "",
+      note: row.NOTE || ""
+    }));
+  },
+
+  async saveAvailability(date, availability) {
+    return this.api(`/api/availability/${encodeURIComponent(date)}`, {
+      method: "PUT",
+      body: JSON.stringify(availability)
+    });
+  },
+
   /* ---- profiles ---- */
   async getProfile(userId) {
     return this.api(`/api/profiles/${userId}`);

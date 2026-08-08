@@ -12,7 +12,7 @@
   <header class="topbar" id="topbar"></header>
   <main class="container">
     <div class="page-heading"><div><h1>Calendar</h1><p class="subtle">Events you host or have been invited to, organized by date.</p></div></div>
-    <div class="calendar-legend"><span><i class="is-upcoming"></i> Upcoming</span><span><i class="is-past"></i> Past</span><span><i class="is-cancelled"></i> Cancelled</span></div>
+    <div class="calendar-legend"><span><i class="is-upcoming"></i> Upcoming</span><span><i class="is-past"></i> Past</span><span><i class="is-cancelled"></i> Cancelled</span><span><i class="is-availability"></i> Availability</span></div>
     <div id="calendarList"><p class="empty">Loading calendar...</p></div>
   </main>
   <script src="js/data.js"></script><script src="js/app.js"></script>
@@ -26,7 +26,14 @@
         const today = new Date();
         let viewDate = new Date(today.getFullYear(), today.getMonth(), 1);
         let selectedDate = keyFor(today.getFullYear(), today.getMonth(), today.getDate());
+        let availability = [];
         function keyFor(year, month, day) { return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`; }
+        async function loadAvailability() {
+          const year = viewDate.getFullYear(), month = viewDate.getMonth();
+          const start = keyFor(year, month, 1);
+          const end = keyFor(year, month, new Date(year, month + 1, 0).getDate());
+          availability = await DB.getAvailability(start, end);
+        }
         function stateClass(event) {
           const state = eventDisplayState(event);
           return state.cancelled ? "is-cancelled" : state.past ? "is-past" : "is-upcoming";
@@ -53,6 +60,25 @@
             return `<div class="calendar-attendee-row">${avatarHtml(person, "calendar-attendee-avatar")}<a class="person-link" href="profile.html?user=${encodeURIComponent(person.userId)}">${esc(person.userName || person.userEmail || `User ${person.userId}`)}</a><span class="pill ${status}">${labels[status]}</span></div>`;
           }).join("");
         }
+        function availabilityRows(items) {
+          if (!items.length) return '<p class="empty">No availability shared for this day.</p>';
+          const labels = { available: "Available", unavailable: "Unavailable", limited: "Limited" };
+          return items.map(function (item) {
+            const time = item.status === "limited" ? `<small>${esc(String(item.startTime).slice(0, 5))}–${esc(String(item.endTime).slice(0, 5))}</small>` : "";
+            const note = item.note ? `<p>${esc(item.note)}</p>` : "";
+            return `<article class="availability-row status-${esc(item.status)}">${avatarHtml({ name: item.userName, imageUrl: item.imageUrl }, "calendar-attendee-avatar")}<div><a class="person-link" href="profile.html?user=${encodeURIComponent(item.userId)}"><strong>${esc(item.userName)}</strong></a>${time}${note}</div><span class="availability-label">${labels[item.status] || esc(item.status)}</span></article>`;
+          }).join("");
+        }
+        function scheduleEditor() {
+          const mine = availability.find(function (item) { return item.date === selectedDate && String(item.userId) === String(DB.currentUserId()); });
+          const status = mine ? mine.status : "available";
+          return `<div class="schedule-editor" id="scheduleEditor" hidden>
+            <label for="availabilityStatus">Availability</label><select id="availabilityStatus"><option value="available" ${status === "available" ? "selected" : ""}>Available</option><option value="unavailable" ${status === "unavailable" ? "selected" : ""}>Unavailable</option><option value="limited" ${status === "limited" ? "selected" : ""}>Limited</option></select>
+            <div class="limited-time-fields" id="limitedTimeFields" ${status === "limited" ? "" : "hidden"}><label>Start time<input id="availabilityStart" type="time" value="${esc(mine && mine.startTime ? String(mine.startTime).slice(0, 5) : "")}"></label><label>End time<input id="availabilityEnd" type="time" value="${esc(mine && mine.endTime ? String(mine.endTime).slice(0, 5) : "")}"></label></div>
+            <label for="availabilityNote">Small note</label><input id="availabilityNote" type="text" maxlength="250" value="${esc(mine ? mine.note : "")}" placeholder="Add a short note">
+            <button class="btn small" id="saveAvailabilityButton" type="button">Save schedule</button>
+          </div>`;
+        }
         function renderCalendar() {
           const year = viewDate.getFullYear(), month = viewDate.getMonth();
           const firstDay = new Date(year, month, 1).getDay();
@@ -61,14 +87,29 @@
           for (let day = 1; day <= days; day += 1) {
             const key = keyFor(year, month, day);
             const dotClasses = Array.from(new Set(events.filter(function (event) { return event.date === key; }).map(stateClass)));
+            if (availability.some(function (item) { return item.date === key; })) dotClasses.push("is-availability");
             const dots = dotClasses.map(function (className) { return `<i class="${className}"></i>`; }).join("");
             cells.push(`<button class="calendar-cell ${key === selectedDate ? "is-selected" : ""}" data-date="${key}"><span>${day}</span><span class="calendar-dots">${dots}</span></button>`);
           }
           const dayEvents = events.filter(function (event) { return event.date === selectedDate; });
+          const dayAvailability = availability.filter(function (item) { return item.date === selectedDate; });
           list.innerHTML = `<div class="calendar-layout"><section class="month-calendar"><div class="month-nav"><button data-month="-1">‹</button><strong>${viewDate.toLocaleDateString(undefined, { month: "long", year: "numeric" })}</strong><button data-month="1">›</button></div><div class="weekday-row">${["S", "M", "T", "W", "T", "F", "S"].map(function (day) { return `<span>${day}</span>`; }).join("")}</div><div class="month-grid">${cells.join("")}</div></section>
-            <section class="selected-day"><h2>${prettyDate(selectedDate)}</h2><h3 class="section-label">Group Events</h3><div>${dayEvents.length ? dayEvents.map(calendarEventCard).join("") : '<p class="empty">No group events this day.</p>'}</div></section></div>`;
+            <section class="selected-day"><div class="selected-day-heading"><h2>${prettyDate(selectedDate)}</h2><button class="btn small" id="addScheduleButton" type="button">+ Add To Schedule</button></div>${scheduleEditor()}<h3 class="section-label">Group Events</h3><div>${dayEvents.length ? dayEvents.map(calendarEventCard).join("") : '<p class="empty">No group events this day.</p>'}</div><h3 class="section-label availability-heading">Friends' Availability</h3><div class="availability-list">${availabilityRows(dayAvailability)}</div></section></div>`;
         }
         list.addEventListener("click", async function (event) {
+          const scheduleButton = event.target.closest("#addScheduleButton");
+          if (scheduleButton) { const editor = document.getElementById("scheduleEditor"); editor.hidden = !editor.hidden; return; }
+          const saveButton = event.target.closest("#saveAvailabilityButton");
+          if (saveButton) {
+            const status = document.getElementById("availabilityStatus").value;
+            saveButton.disabled = true;
+            try {
+              await DB.saveAvailability(selectedDate, { status, startTime: document.getElementById("availabilityStart").value, endTime: document.getElementById("availabilityEnd").value, note: document.getElementById("availabilityNote").value.trim() });
+              await loadAvailability();
+              renderCalendar();
+            } catch (error) { alert(error.message); saveButton.disabled = false; }
+            return;
+          }
           const attendeeButton = event.target.closest("[data-event-attendees]");
           if (attendeeButton) {
             const panel = document.getElementById(attendeeButton.getAttribute("aria-controls"));
@@ -83,9 +124,13 @@
             return;
           }
           const monthButton = event.target.closest("[data-month]");
-          if (monthButton) { viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + Number(monthButton.dataset.month), 1); selectedDate = keyFor(viewDate.getFullYear(), viewDate.getMonth(), 1); renderCalendar(); return; }
+          if (monthButton) { viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + Number(monthButton.dataset.month), 1); selectedDate = keyFor(viewDate.getFullYear(), viewDate.getMonth(), 1); await loadAvailability(); renderCalendar(); return; }
           const dayButton = event.target.closest("[data-date]"); if (dayButton) { selectedDate = dayButton.dataset.date; renderCalendar(); }
         });
+        list.addEventListener("change", function (event) {
+          if (event.target.id === "availabilityStatus") document.getElementById("limitedTimeFields").hidden = event.target.value !== "limited";
+        });
+        await loadAvailability();
         renderCalendar();
       } catch (error) { list.innerHTML = `<p class="empty">${esc(error.message)}</p>`; }
     });
