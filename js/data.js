@@ -7,28 +7,33 @@ const DB = {
   CREATED_EVENT_RSVP_KEY: "boardNightCreatedEventRsvp",
 
   async api(path, options = {}) {
+    if (typeof window !== "undefined" && typeof window.beginSiteLoading === "function") window.beginSiteLoading();
     const rawSession = localStorage.getItem(this.SESSION_KEY);
     let session = null;
     try { session = rawSession ? JSON.parse(rawSession) : null; } catch (_) { this.reset(); }
-    const response = await fetch(API_BASE_URL + path, {
-      headers: {
-        "Content-Type": "application/json",
-        ...(session && session.token ? { Authorization: `Bearer ${session.token}` } : {}),
-        ...(options.headers || {})
-      },
-      ...options
-    });
+    try {
+      const response = await fetch(API_BASE_URL + path, {
+        headers: {
+          "Content-Type": "application/json",
+          ...(session && session.token ? { Authorization: `Bearer ${session.token}` } : {}),
+          ...(options.headers || {})
+        },
+        ...options
+      });
 
-    const payload = await response.json().catch(() => ({
-      success: false,
-      message: "Invalid server response"
-    }));
+      const payload = await response.json().catch(() => ({
+        success: false,
+        message: "Invalid server response"
+      }));
 
-    if (!response.ok || payload.success === false) {
-      throw new Error(payload.message || "API request failed");
+      if (!response.ok || payload.success === false) {
+        throw new Error(payload.message || "API request failed");
+      }
+
+      return payload.data === undefined ? payload : payload.data;
+    } finally {
+      if (typeof window !== "undefined" && typeof window.endSiteLoading === "function") window.endSiteLoading();
     }
-
-    return payload.data === undefined ? payload : payload.data;
   },
 
   async uploadImage(file, type) {

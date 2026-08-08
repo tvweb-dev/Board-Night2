@@ -60,6 +60,38 @@ const PLACEHOLDER_IMAGE = {
   profile: "assets/images/profile-placeholder.webp"
 };
 
+let siteLoadingCount = 0;
+let loadingCursor = null;
+
+function ensureLoadingCursor() {
+  if (loadingCursor || !document.body) return;
+  loadingCursor = document.createElement("img");
+  loadingCursor.className = "loading-cursor";
+  loadingCursor.src = "css/design_elements/BN-LOGO-LOADING.gif";
+  loadingCursor.alt = "";
+  loadingCursor.setAttribute("aria-hidden", "true");
+  document.body.appendChild(loadingCursor);
+  document.addEventListener("pointermove", function (event) {
+    loadingCursor.style.left = `${event.clientX}px`;
+    loadingCursor.style.top = `${event.clientY}px`;
+    loadingCursor.classList.add("has-position");
+  }, { passive: true });
+}
+
+function beginSiteLoading() {
+  siteLoadingCount += 1;
+  ensureLoadingCursor();
+  document.documentElement.classList.add("site-loading");
+}
+
+function endSiteLoading() {
+  siteLoadingCount = Math.max(0, siteLoadingCount - 1);
+  if (!siteLoadingCount) document.documentElement.classList.remove("site-loading");
+}
+
+window.beginSiteLoading = beginSiteLoading;
+window.endSiteLoading = endSiteLoading;
+
 function initialsFor(name) {
   return String(name || "BN").split(/\s+/).filter(Boolean).slice(0, 2).map(function (part) { return part[0]; }).join("").toUpperCase();
 }
@@ -280,6 +312,10 @@ function requireSession() {
 
 // Run a function once the DOM is ready
 function ready(fn) {
-  if (document.readyState !== "loading") fn();
-  else document.addEventListener("DOMContentLoaded", fn);
+  function run() {
+    beginSiteLoading();
+    Promise.resolve().then(fn).finally(endSiteLoading);
+  }
+  if (document.readyState !== "loading") run();
+  else document.addEventListener("DOMContentLoaded", run, { once: true });
 }

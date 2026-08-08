@@ -25,6 +25,16 @@
 
 * { box-sizing: border-box; }
 
+.loading-cursor { position: fixed; left: 50%; top: 50%; z-index: 10000; width: 48px; height: 48px; object-fit: contain; opacity: 0; visibility: hidden; transform: translate(-8px, -8px); pointer-events: none; }
+.site-loading, .site-loading * { cursor: none !important; }
+.site-loading .loading-cursor { opacity: 1; visibility: visible; }
+.site-loading .loading-cursor:not(.has-position) { transform: translate(-50%, -50%); }
+
+@media (pointer: coarse) {
+  .site-loading, .site-loading * { cursor: auto !important; }
+  .loading-cursor { display: none; }
+}
+
 body {
   margin: 0;
   font-family: "tahoma", Tahoma, sans-serif;
