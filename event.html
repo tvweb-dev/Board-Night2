@@ -118,7 +118,7 @@
 
       function renderHeader() {
         const displayState = eventDisplayState(ev);
-        const eventImage = document.getElementById("eventImage"); eventImage.src = ev.imageUrl || ""; eventImage.hidden = !ev.imageUrl;
+        const eventImage = document.getElementById("eventImage"); eventImage.src = ev.imageUrl || PLACEHOLDER_IMAGE.event; eventImage.hidden = false;
         document.getElementById("eventTitle").textContent = ev.title;
         const eventStatus = document.getElementById("eventStatus");
         eventStatus.textContent = displayState.cancelled ? "CANCELED" : displayState.past ? "PAST" : "ACTIVE";

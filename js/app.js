@@ -45,6 +45,11 @@ function eventDisplayState(event, now = new Date()) {
 const STATUS_LABEL = { going: "Going", maybe: "Maybe", no: "Can't make it" };
 const STATUS_CLASS = { going: "going", maybe: "maybe", no: "no" };
 const NOTIFICATION_SEEN_KEY = "boardNightSeenNotifications";
+const PLACEHOLDER_IMAGE = {
+  group: "assets/images/group-placeholder.webp",
+  event: "assets/images/event-placeholder.webp",
+  profile: "assets/images/profile-placeholder.webp"
+};
 
 function initialsFor(name) {
   return String(name || "BN").split(/\s+/).filter(Boolean).slice(0, 2).map(function (part) { return part[0]; }).join("").toUpperCase();
@@ -52,8 +57,8 @@ function initialsFor(name) {
 
 function avatarHtml(person, className, style = "") {
   const name = person && (person.name || person.userName) || "Board Night player";
-  const imageUrl = person && person.imageUrl;
-  const image = imageUrl ? `<img src="${esc(imageUrl)}" alt="">` : `<span>${esc(initialsFor(name))}</span>`;
+  const imageUrl = person && person.imageUrl || PLACEHOLDER_IMAGE.profile;
+  const image = `<img src="${esc(imageUrl)}" alt="">`;
   return `<span class="${esc(className)}"${style ? ` style="${esc(style)}"` : ""} aria-hidden="true">${image}</span>`;
 }
 
@@ -221,12 +226,12 @@ function renderTopbar() {
 
   DB.getProfile(user.id).then(function (profile) {
     const name = DB.displayName(profile);
-    const imageUrl = profile.IMAGE_URL || "";
+    const imageUrl = profile.IMAGE_URL || PLACEHOLDER_IMAGE.profile;
     const desktopAvatar = el.querySelector(".account-avatar");
     const mobileAvatar = el.querySelector(".mobile-account");
     const userName = el.querySelector(".topbar-user");
-    if (desktopAvatar) desktopAvatar.innerHTML = imageUrl ? `<img src="${esc(imageUrl)}" alt="">` : `<span>${esc(initialsFor(name))}</span>`;
-    if (mobileAvatar) mobileAvatar.innerHTML = imageUrl ? `<img src="${esc(imageUrl)}" alt="">` : `<span>${esc(initialsFor(name))}</span>`;
+    if (desktopAvatar) desktopAvatar.innerHTML = `<img src="${esc(imageUrl)}" alt="">`;
+    if (mobileAvatar) mobileAvatar.innerHTML = `<img src="${esc(imageUrl)}" alt="">`;
     if (userName) userName.textContent = name;
   }).catch(function () {});
 }

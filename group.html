@@ -57,7 +57,7 @@
       document.getElementById("groupName").textContent = group.name;
       const groupCover = document.getElementById("groupCoverImage");
       const groupTitleImage = document.getElementById("groupTitleImage");
-      function renderGroupImage() { groupCover.src = group.imageUrl || ""; groupCover.hidden = !group.imageUrl; groupTitleImage.innerHTML = group.imageUrl ? `<img src="${esc(group.imageUrl)}" alt="">` : ""; }
+      function renderGroupImage() { const image = group.imageUrl || PLACEHOLDER_IMAGE.group; groupCover.src = image; groupCover.hidden = false; groupTitleImage.innerHTML = `<img src="${esc(image)}" alt="">`; }
       renderGroupImage();
       if (String(group.hostId) === String(DB.currentUserId())) {
         document.getElementById("groupImageSettings").hidden = false;
@@ -116,7 +116,7 @@
 
           return `<a class="card group-event-card ${borderClass}" style="text-decoration:none;color:inherit;display:flex;"
                      href="event.html?event=${encodeURIComponent(e.id)}">
-                    <span class="group-event-swatch">${e.imageUrl ? `<img src="${esc(e.imageUrl)}" alt="">` : ""}</span><span><h3>${esc(e.title)} <small class="pill ${stateClass}">${stateLabel}</small></h3><p class="subtle">${prettyDate(e.date)} · ${esc(e.time || "Time TBD")} · ${esc(e.location || "Location TBD")}</p><strong class="going-label">${going} going</strong></span>
+                    <span class="group-event-swatch"><img src="${esc(e.imageUrl || PLACEHOLDER_IMAGE.event)}" alt=""></span><span><h3>${esc(e.title)} <small class="pill ${stateClass}">${stateLabel}</small></h3><p class="subtle">${prettyDate(e.date)} · ${esc(e.time || "Time TBD")} · ${esc(e.location || "Location TBD")}</p><strong class="going-label">${going} going</strong></span>
                   </a>`;
         }));
 

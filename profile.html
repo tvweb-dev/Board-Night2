@@ -67,8 +67,8 @@
       function displayName() { return value("NICKNAME") || [value("FIRST_NAME"), value("LAST_NAME")].filter(Boolean).join(" ") || value("EMAIL") || `User ${userId}`; }
       function renderAvatar() {
         const avatar = document.getElementById("profileAvatar");
-        const image = value("IMAGE_URL");
-        avatar.innerHTML = image ? `<img src="${esc(image)}" alt="${esc(displayName())}">` : `<span>${esc(displayName().charAt(0).toUpperCase())}</span>`;
+        const image = value("IMAGE_URL") || PLACEHOLDER_IMAGE.profile;
+        avatar.innerHTML = `<img src="${esc(image)}" alt="${esc(displayName())}">`;
       }
       function detail(label, text) { return text ? `<div class="profile-detail"><span>${esc(label)}</span><strong>${esc(text)}</strong></div>` : ""; }
       function render() {

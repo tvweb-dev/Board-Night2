@@ -37,7 +37,7 @@
           const hostTag = String(event.hostId) === String(DB.currentUserId()) ? '<span class="host-tag">Host</span>' : "";
           const attendeeId = `calendarAttendees-${event.id}`;
           return `<article class="card calendar-event ${stateClass(event)}">
-            <a class="calendar-event-link" href="event.html?event=${encodeURIComponent(event.id)}"><span class="event-swatch" style="--event-color:${["#36996f", "#9b3f45", "#8fb0c7", "#e29314"][index % 4]}"></span><span><strong class="calendar-event-title">${esc(event.title)} ${hostTag}</strong><small>${esc(event.time || "Time TBD")} · ${esc(event.groupName)}</small><small>${esc(event.location || "Location TBD")} · ${label}</small></span></a>
+            <a class="calendar-event-link" href="event.html?event=${encodeURIComponent(event.id)}"><span class="event-swatch" style="--event-color:${["#36996f", "#9b3f45", "#8fb0c7", "#e29314"][index % 4]}"><img src="${esc(event.imageUrl || PLACEHOLDER_IMAGE.event)}" alt=""></span><span><strong class="calendar-event-title">${esc(event.title)} ${hostTag}</strong><small>${esc(event.time || "Time TBD")} · ${esc(event.groupName)}</small><small>${esc(event.location || "Location TBD")} · ${label}</small></span></a>
             <button class="calendar-attendee-toggle" type="button" data-event-attendees="${esc(event.id)}" aria-expanded="false" aria-controls="${attendeeId}">Who’s going? <span aria-hidden="true">⌄</span></button>
             <div class="calendar-attendees" id="${attendeeId}" hidden></div>
           </article>`;
