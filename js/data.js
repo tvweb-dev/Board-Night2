@@ -203,7 +203,8 @@ const DB = {
       imageUrl: row.IMAGE_URL || "",
       sharedGroupCount: Number(row.SHARED_GROUP_COUNT) || 0,
       friendsSince: row.FRIENDS_SINCE || "",
-      hidden: Boolean(Number(row.IS_HIDDEN))
+      hidden: Boolean(Number(row.IS_HIDDEN)),
+      note: row.FRIEND_NOTE || ""
     }));
   },
 
@@ -211,6 +212,13 @@ const DB = {
     return this.api(`/api/friends/${friendId}/hidden`, {
       method: "PATCH",
       body: JSON.stringify({ hidden: Boolean(hidden) })
+    });
+  },
+
+  async saveFriendNote(friendId, note) {
+    return this.api(`/api/friends/${friendId}/note`, {
+      method: "PUT",
+      body: JSON.stringify({ note })
     });
   },
 

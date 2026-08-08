@@ -19,12 +19,26 @@
     <h2 class="section-label">All Friends</h2>
     <div id="friendList" class="grid"><p class="empty">Loading friends...</p></div>
   </main>
+  <div class="modal-backdrop" id="friendNoteModal" hidden>
+    <form class="modal-card friend-note-modal" id="friendNoteForm" role="dialog" aria-modal="true" aria-labelledby="friendNoteTitle">
+      <h2 id="friendNoteTitle">Friend note</h2>
+      <p class="subtle" id="friendNotePerson"></p>
+      <label for="friendNoteText">Personal note or reminder</label>
+      <textarea id="friendNoteText" maxlength="300" rows="5" placeholder="Add a short private reminder..."></textarea>
+      <p class="character-counter" id="friendNoteCounter">0 / 300</p>
+      <p class="form-error" id="friendNoteError" role="alert"></p>
+      <div class="btn-row"><button class="btn secondary" id="cancelFriendNote" type="button">Cancel</button><button class="btn" id="saveFriendNote" type="submit">Save note</button></div>
+    </form>
+  </div>
   <script src="js/data.js"></script><script src="js/app.js"></script>
   <script>
     ready(async function () {
       if (!requireSession()) return;
       renderTopbar();
       const list = document.getElementById("friendList");
+      const noteModal = document.getElementById("friendNoteModal");
+      const noteText = document.getElementById("friendNoteText");
+      let noteFriend = null;
       try {
         const friends = await DB.getFriends();
         function renderFriends(query) {
@@ -35,13 +49,27 @@
           list.innerHTML = visible.length ? visible.map(function (friend, index) {
             const since = friend.friendsSince ? prettyDate(String(friend.friendsSince).slice(0, 10)) : "Unknown";
             const buttonLabel = friend.hidden ? "Show friend" : "Hide friend";
-            return `<article class="card friend-card${friend.hidden ? " is-hidden-friend" : ""}">${avatarHtml(friend, "friend-avatar", `--avatar-color:${["#8fb0c7", "#e29314", "#36996f", "#ce3b30", "#9b3f45"][index % 5]}`)}<div class="friend-card-copy"><h3><a class="person-link" href="profile.html?user=${encodeURIComponent(friend.id)}">${esc(friend.name)}</a></h3><p class="subtle">${friend.sharedGroupCount} group${friend.sharedGroupCount === 1 ? "" : "s"} together</p></div><button class="btn secondary small friend-visibility-button" type="button" data-friend-id="${esc(friend.id)}">${buttonLabel}</button><p class="friend-since"><span>Friends since</span><time>${esc(since)}</time></p></article>`;
+            const tooltipId = `friendNoteTooltip-${friend.id}`;
+            const tooltip = friend.note ? `<span class="friend-note-tooltip" id="${tooltipId}" role="tooltip">${esc(friend.note)}</span>` : "";
+            return `<article class="card friend-card${friend.hidden ? " is-hidden-friend" : ""}">${avatarHtml(friend, "friend-avatar", `--avatar-color:${["#8fb0c7", "#e29314", "#36996f", "#ce3b30", "#9b3f45"][index % 5]}`)}<div class="friend-card-copy"><h3 class="friend-name-wrap"><a class="person-link" href="profile.html?user=${encodeURIComponent(friend.id)}"${friend.note ? ` aria-describedby="${tooltipId}"` : ""}>${esc(friend.name)}</a>${tooltip}</h3><p class="subtle">${friend.sharedGroupCount} group${friend.sharedGroupCount === 1 ? "" : "s"} together</p></div><div class="friend-card-actions"><button class="btn secondary small friend-note-button" type="button" data-note-friend="${esc(friend.id)}">${friend.note ? "Edit note" : "Add note"}</button><button class="btn secondary small friend-visibility-button" type="button" data-friend-id="${esc(friend.id)}">${buttonLabel}</button></div><p class="friend-since"><span>Friends since</span><time>${esc(since)}</time></p></article>`;
           }).join("") : `<p class="empty">${query ? `No friends match “${esc(query)}”.` : showAll ? "No shared group members yet." : "No visible friends. Select Show all friends to view hidden friends."}</p>`;
         }
         renderFriends("");
         document.getElementById("friendSearch").addEventListener("input", function (event) { renderFriends(event.target.value.trim()); });
         document.getElementById("showAllFriends").addEventListener("change", function () { renderFriends(document.getElementById("friendSearch").value.trim()); });
         list.addEventListener("click", async function (event) {
+          const noteButton = event.target.closest("[data-note-friend]");
+          if (noteButton) {
+            noteFriend = friends.find(function (item) { return String(item.id) === String(noteButton.dataset.noteFriend); });
+            if (!noteFriend) return;
+            document.getElementById("friendNotePerson").textContent = `Only you can see this note about ${noteFriend.name}.`;
+            noteText.value = noteFriend.note || "";
+            document.getElementById("friendNoteCounter").textContent = `${noteText.value.length} / 300`;
+            document.getElementById("friendNoteError").textContent = "";
+            noteModal.hidden = false;
+            noteText.focus();
+            return;
+          }
           const button = event.target.closest(".friend-visibility-button");
           if (!button) return;
           const friend = friends.find(function (item) { return String(item.id) === String(button.dataset.friendId); });
@@ -55,6 +83,23 @@
             alert(error.message);
             button.disabled = false;
           }
+        });
+        noteText.addEventListener("input", function () { document.getElementById("friendNoteCounter").textContent = `${noteText.value.length} / 300`; });
+        document.getElementById("cancelFriendNote").addEventListener("click", function () { noteModal.hidden = true; noteFriend = null; });
+        noteModal.addEventListener("click", function (event) { if (event.target === noteModal) { noteModal.hidden = true; noteFriend = null; } });
+        document.getElementById("friendNoteForm").addEventListener("submit", async function (event) {
+          event.preventDefault();
+          if (!noteFriend) return;
+          const saveButton = document.getElementById("saveFriendNote");
+          saveButton.disabled = true;
+          try {
+            const note = noteText.value.trim();
+            await DB.saveFriendNote(noteFriend.id, note);
+            noteFriend.note = note;
+            noteModal.hidden = true;
+            renderFriends(document.getElementById("friendSearch").value.trim());
+          } catch (error) { document.getElementById("friendNoteError").textContent = error.message; }
+          finally { saveButton.disabled = false; }
         });
       } catch (error) { list.innerHTML = `<p class="empty">${esc(error.message)}</p>`; }
     });

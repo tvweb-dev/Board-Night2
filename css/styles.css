@@ -374,6 +374,12 @@ footer.note {
 .friend-card .friend-since span { font-weight: 700; text-transform: uppercase; letter-spacing: .35px; }
 .friend-card .friend-since time { overflow: hidden; color: var(--ink); text-overflow: ellipsis; }
 .friend-visibility-button { max-width: 100px; white-space: nowrap; }
+.friend-card-actions { display: flex; flex-direction: column; align-items: stretch; gap: 6px; }
+.friend-card-actions .btn { min-height: 0; padding: 5px 7px; font-size: .64rem; white-space: nowrap; }
+.friend-name-wrap { position: relative; overflow: visible !important; }
+.friend-note-tooltip { position: absolute; left: 0; top: calc(100% + 7px); z-index: 20; width: max-content; max-width: min(280px, 70vw); padding: 9px 11px; border: 1px solid var(--line); border-radius: 6px; background: #111722; color: var(--ink); box-shadow: var(--shadow); font-family: inherit; font-size: .76rem; font-weight: 400; line-height: 1.4; white-space: normal; opacity: 0; visibility: hidden; transform: translateY(-3px); transition: opacity .15s ease, transform .15s ease; pointer-events: none; }
+.friend-name-wrap:hover .friend-note-tooltip, .friend-name-wrap:focus-within .friend-note-tooltip { opacity: 1; visibility: visible; transform: translateY(0); }
+.friend-note-modal textarea { width: 100%; resize: vertical; }
 .friend-card.is-hidden-friend { opacity: .72; border-style: dashed; }
 .friend-card h3 { overflow: hidden; }
 .friend-card .person-link { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
