@@ -340,12 +340,13 @@ footer.note {
 .show-all-friends { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); cursor: pointer; }
 .show-all-friends input { width: 18px; height: 18px; accent-color: var(--green); }
 #friendList { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
-.friend-card { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
-.friend-card > div:last-child { min-width: 0; flex: 1; }
+.friend-card { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; padding: 14px 16px; }
 .friend-card h3, .friend-card p { margin: 0; }
 .friend-card-copy { min-width: 0; flex: 1; }
-.friend-card .friend-since { margin-top: 3px; color: var(--ink); font-size: .82rem; }
-.friend-visibility-button { flex: 0 0 auto; max-width: 140px; white-space: normal; }
+.friend-card .friend-since { grid-column: 2 / -1; display: flex; align-items: baseline; gap: 6px; min-width: 0; color: var(--muted); font-size: .72rem; white-space: nowrap; }
+.friend-card .friend-since span { font-weight: 700; text-transform: uppercase; letter-spacing: .35px; }
+.friend-card .friend-since time { overflow: hidden; color: var(--ink); text-overflow: ellipsis; }
+.friend-visibility-button { max-width: 100px; white-space: nowrap; }
 .friend-card.is-hidden-friend { opacity: .72; border-style: dashed; }
 .friend-card h3 { overflow: hidden; }
 .friend-card .person-link { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

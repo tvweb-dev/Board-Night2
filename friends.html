@@ -34,8 +34,8 @@
           });
           list.innerHTML = visible.length ? visible.map(function (friend, index) {
             const since = friend.friendsSince ? prettyDate(String(friend.friendsSince).slice(0, 10)) : "Unknown";
-            const buttonLabel = friend.hidden ? "SHOW YOUR FRIEND" : "Hide friend";
-            return `<article class="card friend-card${friend.hidden ? " is-hidden-friend" : ""}">${avatarHtml(friend, "friend-avatar", `--avatar-color:${["#8fb0c7", "#e29314", "#36996f", "#ce3b30", "#9b3f45"][index % 5]}`)}<div class="friend-card-copy"><h3><a class="person-link" href="profile.html?user=${encodeURIComponent(friend.id)}">${esc(friend.name)}</a></h3><p class="subtle">${friend.sharedGroupCount} group${friend.sharedGroupCount === 1 ? "" : "s"} together</p><p class="friend-since">Friends Since: ${esc(since)}</p></div><button class="btn secondary small friend-visibility-button" type="button" data-friend-id="${esc(friend.id)}">${buttonLabel}</button></article>`;
+            const buttonLabel = friend.hidden ? "Show friend" : "Hide friend";
+            return `<article class="card friend-card${friend.hidden ? " is-hidden-friend" : ""}">${avatarHtml(friend, "friend-avatar", `--avatar-color:${["#8fb0c7", "#e29314", "#36996f", "#ce3b30", "#9b3f45"][index % 5]}`)}<div class="friend-card-copy"><h3><a class="person-link" href="profile.html?user=${encodeURIComponent(friend.id)}">${esc(friend.name)}</a></h3><p class="subtle">${friend.sharedGroupCount} group${friend.sharedGroupCount === 1 ? "" : "s"} together</p></div><button class="btn secondary small friend-visibility-button" type="button" data-friend-id="${esc(friend.id)}">${buttonLabel}</button><p class="friend-since"><span>Friends since</span><time>${esc(since)}</time></p></article>`;
           }).join("") : `<p class="empty">${query ? `No friends match “${esc(query)}”.` : showAll ? "No shared group members yet." : "No visible friends. Select Show all friends to view hidden friends."}</p>`;
         }
         renderFriends("");
