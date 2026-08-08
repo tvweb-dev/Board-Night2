@@ -13,6 +13,7 @@
 
   <main class="container">
     <div class="page-heading"><div><h1>Groups</h1><p class="subtle">Your board game groups and players.</p></div><button class="btn" id="openGroupModal">+ New Group</button></div>
+    <label class="inline-check group-inactive-toggle"><input id="showInactiveGroups" type="checkbox"> Show Inactive Groups</label>
     <div id="groupList" class="grid group-grid"></div>
     <footer class="note">Connected to the Board Night Express API.</footer>
   </main>
@@ -46,12 +47,16 @@
         list.innerHTML = '<p class="empty">Loading groups...</p>';
 
         const groups = await DB.getGroups();
-        if (!groups.length) {
-          list.innerHTML = '<p class="empty">No groups yet - create one above.</p>';
+        const showInactive = document.getElementById("showInactiveGroups").checked;
+        const activeGroups = groups.filter(function (group) { return group.active; });
+        const inactiveGroups = groups.filter(function (group) { return !group.active; });
+        const displayedGroups = showInactive ? activeGroups.concat(inactiveGroups) : activeGroups;
+        if (!displayedGroups.length) {
+          list.innerHTML = inactiveGroups.length ? '<p class="empty">No active groups. Select Show Inactive Groups to view your inactive groups.</p>' : '<p class="empty">No groups yet - create one above.</p>';
           return;
         }
 
-        const cards = await Promise.all(groups.map(async function (g, groupIndex) {
+        const cards = await Promise.all(displayedGroups.map(async function (g, groupIndex) {
           const members = await DB.getMembers(g.id);
           const memberCount = members.length;
           const eventCount = (await DB.getEvents(g.id)).length;
@@ -61,6 +66,13 @@
           const creatorTag = isCreator ? '<span class="creator-tag">Creator</span>' : '';
           return `<a class="card group-card" style="--group-color:${color}" href="group.html?group=${encodeURIComponent(g.id)}"><img class="group-card-image" src="${esc(groupImage)}" alt=""><div class="group-card-head"><span class="group-swatch"><img src="${esc(groupImage)}" alt=""></span><div><span class="group-card-title-line"><h3>${esc(g.name)}</h3>${creatorTag}</span><p class="subtle">${memberCount} member${memberCount === 1 ? "" : "s"} · ${eventCount} event${eventCount === 1 ? "" : "s"}</p></div></div><div class="group-avatars">${members.slice(0, 4).map(function (member, index) { return avatarHtml(member, "group-avatar", `--avatar-color:${["#ce3b30", "#e29314", "#8fb0c7", "#36996f"][index % 4]}`); }).join("")}</div></a>`;
         }));
+
+        if (showInactive && inactiveGroups.length) {
+          for (let index = activeGroups.length; index < cards.length; index += 1) {
+            cards[index] = cards[index].replace('class="card group-card"', 'class="card group-card is-inactive-group"');
+          }
+          cards.splice(activeGroups.length, 0, '<h2 class="section-label group-grid-divider">Inactive Groups</h2>');
+        }
 
         list.innerHTML = cards.join("");
       }
@@ -87,6 +99,7 @@
       document.getElementById("openGroupModal").addEventListener("click", function () { modal.hidden = false; document.getElementById("groupName").focus(); });
       document.getElementById("closeGroupModal").addEventListener("click", function () { modal.hidden = true; });
       modal.addEventListener("click", function (event) { if (event.target === modal) modal.hidden = true; });
+      document.getElementById("showInactiveGroups").addEventListener("change", function () { renderGroups().catch(function (error) { document.getElementById("groupList").innerHTML = `<p class="empty">${esc(error.message)}</p>`; }); });
 
       renderGroups().catch(function (error) {
         document.getElementById("groupList").innerHTML =

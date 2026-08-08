@@ -422,6 +422,11 @@ footer.note {
 .group-card-head h3, .group-card-head p { margin: 0; }
 .group-card-head > div { min-width: 0; }
 .group-card-title-line { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; }
+.group-inactive-toggle { width: fit-content; margin: 0 0 18px; }
+.group-grid-divider { grid-column: 1 / -1; margin: 18px 0 0; padding-top: 22px; border-top: 1px solid var(--line); }
+.group-card.is-inactive-group { opacity: .72; border-style: dashed; }
+.group-lifecycle-banner { margin: 0 0 20px; padding: 11px 14px; border: 1px solid var(--line); border-left: 4px solid var(--muted); border-radius: 6px; background: var(--panel); color: var(--muted); }
+.group-lifecycle-settings { margin-bottom: 18px; }
 .group-swatch { width: 40px; height: 40px; flex: 0 0 auto; border-radius: 11px; background: var(--group-color); }
 .group-avatars { display: flex; padding-left: 8px; }
 .group-avatars > .group-avatar { width: 28px; height: 28px; margin-left: -8px; overflow: hidden; display: grid; place-items: center; border: 2px solid var(--card); border-radius: 50%; background: var(--avatar-color); color: var(--bg); font-size: .62rem; font-weight: 700; }

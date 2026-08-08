@@ -15,6 +15,7 @@
     <p class="back-link"><a href="dashboard.html">‹ Back to Groups</a></p>
     <img class="group-cover-image" id="groupCoverImage" alt="" hidden>
     <div class="group-title"><span class="group-title-swatch" id="groupTitleImage"></span><h1 id="groupName">Group</h1></div>
+    <div class="group-lifecycle-banner" id="groupLifecycleBanner" hidden></div>
     <div class="group-detail-layout">
       <section class="group-events-column">
         <div class="section-heading"><h2>Events</h2><a class="btn small" id="newEventBtn" href="#">+ New Event</a></div>
@@ -24,6 +25,7 @@
         <div class="card group-image-settings" id="groupImageSettings" hidden>
           <h3>Group image</h3><label for="groupImageUrl">Image URL</label><input id="groupImageUrl" type="url" maxlength="500" placeholder="https://example.com/group.jpg"><label for="groupImageFile">Upload group image</label><input class="image-file-input" id="groupImageFile" type="file" accept="image/*"><div class="btn-row"><button class="btn small" id="saveGroupImageBtn">Save image</button></div>
         </div>
+        <div class="card group-lifecycle-settings" id="groupLifecycleSettings" hidden><h3>Group status</h3><p class="subtle" id="groupLifecycleHelp"></p><button class="btn small" id="groupLifecycleButton" type="button"></button></div>
         <h2>Members</h2>
         <div class="card member-panel"><ul class="plain" id="memberList"></ul></div>
         <div class="card invite-panel">
@@ -57,6 +59,13 @@
       const canRemoveMembers = String(group.hostId) === String(DB.currentUserId()) || groupEvents.some(function (event) { return String(event.hostId) === String(DB.currentUserId()) && eventDisplayState(event).upcoming; });
 
       document.getElementById("groupName").textContent = group.name;
+      if (!group.active) {
+        const banner = document.getElementById("groupLifecycleBanner");
+        banner.textContent = "This group is inactive. Its members and events are kept for history.";
+        banner.hidden = false;
+        document.getElementById("newEventBtn").hidden = true;
+        document.querySelector(".invite-panel").hidden = true;
+      }
       const groupCover = document.getElementById("groupCoverImage");
       const groupTitleImage = document.getElementById("groupTitleImage");
       function renderGroupImage() { const image = group.imageUrl || PLACEHOLDER_IMAGE.group; groupCover.src = image; groupCover.hidden = false; groupTitleImage.innerHTML = `<img src="${esc(image)}" alt="">`; }
@@ -70,6 +79,21 @@
           try { const saved = await DB.updateGroupImage(group.id, document.getElementById("groupImageUrl").value.trim()); group.imageUrl = saved.GROUP_IMAGE_URL || ""; renderGroupImage(); }
           catch (error) { alert(error.message); }
           finally { button.disabled = false; }
+        });
+        const lifecycleSettings = document.getElementById("groupLifecycleSettings");
+        const lifecycleButton = document.getElementById("groupLifecycleButton");
+        lifecycleSettings.hidden = false;
+        document.getElementById("groupLifecycleHelp").textContent = group.active ? "Inactive groups remain available as history." : "Reactivating creates a new active group with a new group ID and the same members.";
+        lifecycleButton.textContent = group.active ? "Set group as inactive" : "Reactivate as new group";
+        lifecycleButton.classList.toggle("danger", group.active);
+        lifecycleButton.addEventListener("click", async function () {
+          const prompt = group.active ? "Set this group as inactive?" : "Reactivate this group as a new group with the same members?";
+          if (!confirm(prompt)) return;
+          lifecycleButton.disabled = true;
+          try {
+            if (group.active) { await DB.setGroupInactive(group.id); location.reload(); }
+            else { const created = await DB.reactivateGroup(group.id); location.href = `group.html?group=${encodeURIComponent(created.GROUP_ID)}`; }
+          } catch (error) { alert(error.message); lifecycleButton.disabled = false; }
         });
       }
       document.getElementById("newEventBtn").href =

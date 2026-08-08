@@ -145,7 +145,10 @@ const DB = {
       hostId: row.CREATED_BY,
       memberRole: row.MEMBER_ROLE,
       imageUrl: row.GROUP_IMAGE_URL || "",
-      createdAt: row.CREATED_AT
+      createdAt: row.CREATED_AT,
+      active: row.IS_ACTIVE == null ? true : Boolean(Number(row.IS_ACTIVE)),
+      inactivatedAt: row.INACTIVATED_AT || "",
+      reactivatedFromGroupId: row.REACTIVATED_FROM_GROUP_ID || null
     };
   },
 
@@ -154,6 +157,14 @@ const DB = {
       method: "PATCH",
       body: JSON.stringify({ groupImageUrl })
     });
+  },
+
+  async setGroupInactive(groupId) {
+    return this.api(`/api/groups/${groupId}/inactive`, { method: "PATCH" });
+  },
+
+  async reactivateGroup(groupId) {
+    return this.api(`/api/groups/${groupId}/reactivate`, { method: "POST" });
   },
 
   /* ---- members ---- */
