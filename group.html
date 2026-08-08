@@ -85,7 +85,7 @@
       async function renderFriendOptions() {
         const friends = await DB.getFriends();
         const options = friends.map(function (friend) {
-          const label = `${friend.name} [USER_ID #${friend.id}]`;
+          const label = `${friend.name} [ID ${friend.id}]`;
           return `<option value="${esc(label)}"></option>`;
         });
         document.getElementById("friendOptions").innerHTML = '<option value="" label="Type to search friends"></option>' + options.join("");
@@ -134,7 +134,7 @@
           alert("Please enter an existing user ID, email, nickname, or full name.");
           return;
         }
-        const selectedFriend = enteredValue.match(/\[USER_ID #(\d+)\]$/i);
+        const selectedFriend = enteredValue.match(/\[ID (\d+)\]$/i);
         const memberQuery = selectedFriend ? selectedFriend[1] : enteredValue;
 
         try {
