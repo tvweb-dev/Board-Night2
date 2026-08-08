@@ -289,6 +289,9 @@ footer.note {
 .event-detail-image[hidden], .group-cover-image[hidden] { display: none; }
 .media-url-preview { width: min(100%, 420px); aspect-ratio: 16 / 8; margin-top: 10px; border-radius: 6px; object-fit: cover; background: var(--input); }
 .media-url-preview[hidden] { display: none; }
+.image-file-input { width: 100%; margin: 0 0 10px; padding: 8px; border: 1px dashed var(--line); border-radius: 6px; background: var(--input); color: var(--muted); font: inherit; font-size: .78rem; }
+.image-file-input::file-selector-button { margin-right: 10px; padding: 6px 9px; border: 0; border-radius: 5px; background: var(--green); color: var(--ink); font: inherit; font-weight: 700; cursor: pointer; }
+.image-upload-status { min-height: 18px; margin: -4px 0 8px; display: block; color: var(--muted); font-size: .72rem; }
 .event-card-details { margin-bottom: 12px; display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 10px; }
 .event-card-details p { min-width: 0; margin: 0; padding: 9px 10px; border-radius: 7px; background: rgba(18,22,31,.4); }
 .event-card-details span, .event-card-description > span { display: block; margin-bottom: 3px; color: var(--muted); font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .45px; }

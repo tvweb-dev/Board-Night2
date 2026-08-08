@@ -63,6 +63,8 @@
         <h3>Event image</h3>
         <label for="hostEventImageUrl">Image URL</label>
         <input id="hostEventImageUrl" type="url" maxlength="500" placeholder="https://example.com/game-night.jpg">
+        <label for="hostEventImageFile">Upload event image</label>
+        <input class="image-file-input" id="hostEventImageFile" type="file" accept="image/*">
         <img class="media-url-preview" id="hostEventImagePreview" alt="Event image preview" hidden>
         <div class="btn-row"><button class="btn secondary" id="saveEventImageBtn" type="button">Save image</button></div>
       </div>
@@ -279,6 +281,7 @@
       const hostImageInput = document.getElementById("hostEventImageUrl");
       const hostImagePreview = document.getElementById("hostEventImagePreview");
       hostImageInput.addEventListener("input", function () { hostImagePreview.src = hostImageInput.value.trim(); hostImagePreview.hidden = !hostImageInput.value.trim(); });
+      bindImageUpload("hostEventImageFile", "hostEventImageUrl", "event");
       hostImagePreview.addEventListener("error", function () { hostImagePreview.hidden = true; });
       document.getElementById("saveEventImageBtn").addEventListener("click", async function () {
         const button = this; button.disabled = true; button.textContent = "Saving...";

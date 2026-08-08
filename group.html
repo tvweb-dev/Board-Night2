@@ -22,7 +22,7 @@
       </section>
       <aside class="group-members-column">
         <div class="card group-image-settings" id="groupImageSettings" hidden>
-          <h3>Group image</h3><label for="groupImageUrl">Image URL</label><input id="groupImageUrl" type="url" maxlength="500" placeholder="https://example.com/group.jpg"><div class="btn-row"><button class="btn small" id="saveGroupImageBtn">Save image</button></div>
+          <h3>Group image</h3><label for="groupImageUrl">Image URL</label><input id="groupImageUrl" type="url" maxlength="500" placeholder="https://example.com/group.jpg"><label for="groupImageFile">Upload group image</label><input class="image-file-input" id="groupImageFile" type="file" accept="image/*"><div class="btn-row"><button class="btn small" id="saveGroupImageBtn">Save image</button></div>
         </div>
         <h2>Members</h2>
         <div class="card member-panel"><ul class="plain" id="memberList"></ul></div>
@@ -64,6 +64,7 @@
       if (String(group.hostId) === String(DB.currentUserId())) {
         document.getElementById("groupImageSettings").hidden = false;
         document.getElementById("groupImageUrl").value = group.imageUrl || "";
+        bindImageUpload("groupImageFile", "groupImageUrl", "group");
         document.getElementById("saveGroupImageBtn").addEventListener("click", async function () {
           const button = this; button.disabled = true;
           try { const saved = await DB.updateGroupImage(group.id, document.getElementById("groupImageUrl").value.trim()); group.imageUrl = saved.GROUP_IMAGE_URL || ""; renderGroupImage(); }

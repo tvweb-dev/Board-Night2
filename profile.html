@@ -27,6 +27,7 @@
           <div><label for="lastName">Last name</label><input id="lastName" maxlength="100" required></div>
           <div><label for="nickname">Nickname</label><input id="nickname" maxlength="100" required></div>
           <div class="profile-field-wide"><label for="imageUrl">Profile image URL</label><input id="imageUrl" type="url" maxlength="500" placeholder="https://example.com/photo.jpg"></div>
+          <div class="profile-field-wide"><label for="profileImageFile">Upload profile image</label><input class="image-file-input" id="profileImageFile" type="file" accept="image/*"></div>
           <div><label for="birthday">Birthday</label><input id="birthday" type="date" required></div>
           <div><label for="city">City</label><input id="city" maxlength="100" required></div>
           <div><label for="province">Province / State</label><input id="province" maxlength="100" required></div>
@@ -102,6 +103,7 @@
       document.getElementById("editProfileBtn").addEventListener("click", beginEdit);
       document.getElementById("cancelProfileBtn").addEventListener("click", cancelEdit);
       document.getElementById("imageUrl").addEventListener("input", function (event) { profile.IMAGE_URL = event.target.value.trim(); renderAvatar(); });
+      bindImageUpload("profileImageFile", "imageUrl", "profile");
       form.addEventListener("submit", async function (event) {
         event.preventDefault();
         const error = document.getElementById("profileError"); error.textContent = "";

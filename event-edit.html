@@ -35,6 +35,8 @@
 
       <label for="imageUrl">Event image URL</label>
       <input id="imageUrl" type="url" maxlength="500" placeholder="https://example.com/game-night.jpg" />
+      <label for="eventImageFile">Upload event image</label>
+      <input class="image-file-input" id="eventImageFile" type="file" accept="image/*" />
       <img class="media-url-preview" id="imagePreview" alt="Event image preview" hidden />
 
       <div class="btn-row">
@@ -95,6 +97,7 @@
       const imagePreview = document.getElementById("imagePreview");
       function previewImage() { imagePreview.src = imageInput.value.trim(); imagePreview.hidden = !imageInput.value.trim(); }
       imageInput.addEventListener("input", previewImage);
+      bindImageUpload("eventImageFile", "imageUrl", "event", previewImage);
       imagePreview.addEventListener("error", function () { imagePreview.hidden = true; });
       previewImage();
 

@@ -52,6 +52,7 @@
         <div><label for="newFavoriteDrink">Favorite drink</label><input id="newFavoriteDrink" maxlength="100" required></div>
         <div><label for="newAllergies">Allergies</label><input id="newAllergies" maxlength="255" placeholder="Enter None if applicable" required></div>
         <div class="onboarding-field-wide"><label for="newImageUrl">Profile image URL <span>(optional)</span></label><input id="newImageUrl" type="url" maxlength="500" placeholder="https://example.com/photo.jpg"></div>
+        <div class="onboarding-field-wide"><label for="newImageFile">Upload profile image <span>(optional)</span></label><input class="image-file-input" id="newImageFile" type="file" accept="image/*"></div>
       </div>
       <fieldset class="favorite-games-fieldset">
         <legend>Favorite games</legend>
@@ -73,6 +74,7 @@
       const profileModal = document.getElementById("profileModal");
       const profileForm = document.getElementById("newProfileForm");
       let games = [];
+      bindImageUpload("newImageFile", "newImageUrl", "profile");
 
       form.addEventListener("submit", async function (event) {
         event.preventDefault();

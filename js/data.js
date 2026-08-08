@@ -31,6 +31,22 @@ const DB = {
     return payload.data === undefined ? payload : payload.data;
   },
 
+  async uploadImage(file, type) {
+    if (!file || !String(file.type || "").startsWith("image/")) throw new Error("Choose a valid image file");
+    if (file.size > 10 * 1024 * 1024) throw new Error("Image must be 10 MB or smaller");
+    const signed = await this.api("/api/uploads/signature", { method: "POST", body: JSON.stringify({ type }) });
+    const form = new FormData();
+    form.append("file", file);
+    form.append("api_key", signed.apiKey);
+    form.append("timestamp", String(signed.timestamp));
+    form.append("folder", signed.folder);
+    form.append("signature", signed.signature);
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${encodeURIComponent(signed.cloudName)}/image/upload`, { method: "POST", body: form });
+    const result = await response.json().catch(function () { return {}; });
+    if (!response.ok || !result.secure_url) throw new Error(result.error && result.error.message || "Image upload failed");
+    return result.secure_url;
+  },
+
   load() {
     return {
       currentUserId: this.currentUserId(),

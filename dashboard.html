@@ -24,6 +24,8 @@
       <input id="groupName" placeholder="Sunday Boardgamers" />
       <label for="groupImageUrl">Group image URL</label>
       <input id="groupImageUrl" type="url" maxlength="500" placeholder="https://example.com/group.jpg" />
+      <label for="newGroupImageFile">Upload group image</label>
+      <input class="image-file-input" id="newGroupImageFile" type="file" accept="image/*" />
       <div class="btn-row">
         <button class="btn secondary" id="closeGroupModal">Cancel</button>
         <button class="btn" id="createGroupBtn">Create group</button>
@@ -37,6 +39,7 @@
     ready(function () {
       if (!requireSession()) return;
       renderTopbar();
+      bindImageUpload("newGroupImageFile", "groupImageUrl", "group");
 
       async function renderGroups() {
         const list = document.getElementById("groupList");

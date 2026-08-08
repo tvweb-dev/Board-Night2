@@ -71,6 +71,32 @@ function avatarHtml(person, className, style = "") {
   return `<span class="${esc(className)}"${style ? ` style="${esc(style)}"` : ""} aria-hidden="true">${image}</span>`;
 }
 
+function bindImageUpload(fileInputId, urlInputId, type, onUploaded) {
+  const fileInput = document.getElementById(fileInputId);
+  const urlInput = document.getElementById(urlInputId);
+  if (!fileInput || !urlInput) return;
+  const status = document.createElement("small");
+  status.className = "image-upload-status";
+  status.setAttribute("role", "status");
+  fileInput.insertAdjacentElement("afterend", status);
+  fileInput.addEventListener("change", async function () {
+    const file = fileInput.files && fileInput.files[0];
+    if (!file) return;
+    fileInput.disabled = true;
+    status.textContent = "Uploading...";
+    try {
+      const imageUrl = await DB.uploadImage(file, type);
+      urlInput.value = imageUrl;
+      urlInput.dispatchEvent(new Event("input", { bubbles: true }));
+      status.textContent = "Upload complete";
+      if (onUploaded) onUploaded(imageUrl);
+    } catch (error) {
+      status.textContent = error.message;
+      fileInput.value = "";
+    } finally { fileInput.disabled = false; }
+  });
+}
+
 function startNotificationToasts() {
   let dismissTimer = null;
   const storageKey = `${NOTIFICATION_SEEN_KEY}:${DB.currentUserId()}`;
