@@ -50,6 +50,18 @@ The SSR server in `server.js` renders route-level SEO tags (title, description, 
 
 `js/app.js` holds small shared helpers: reading URL params (`qs`), escaping text (`esc`), formatting dates, and rendering the top bar.
 
+`js/game-picker.js` provides the shared debounced board-game search used by profile favorites and event creation/editing. It searches the server-side catalogue rather than downloading the full 3,000-game legacy list.
+
+## Board-game integration
+
+- Profile favorites use `GET /api/games/search` and the existing favorites read/write routes.
+- Event creation sends an optional `gameId`.
+- Event details read the nested `GAME` metadata from `GET /api/events/:eventId`.
+- Event hosts can change or remove the selected game through `PATCH /api/events/:eventId/game`.
+- Compact cards use game thumbnails; event details prefer the larger image and fall back to the thumbnail or local event placeholder.
+
+Run local validation with `npm test`, `npm run build`, and `npm run check`.
+
 ## What's wired up (MVP / Version 1)
 
 | Story | Where | Status |
@@ -72,7 +84,7 @@ The SSR server in `server.js` renders route-level SEO tags (title, description, 
 
 ## Out of scope for now (V2 / V3)
 
-Description field is stubbed in; everything else from V2/V3 (game voting, rules links, dice/timer, snack list, profiles) is intentionally not built yet.
+Game voting, dice/timer, and snack lists remain out of scope for this version.
 
 ---
 

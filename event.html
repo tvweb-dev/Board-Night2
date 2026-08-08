@@ -20,6 +20,7 @@
     <h1><span id="eventTitle">Event</span> <span class="pill active" id="eventStatus">ACTIVE</span></h1>
     <p class="subtle" id="eventMeta"></p>
     <p class="event-description" id="eventDesc" hidden></p>
+    <section class="card event-game-detail" id="eventGameDetail" aria-labelledby="eventGameHeading" hidden></section>
 
     <div class="card" id="rsvpBox">
       <h3>Your RSVP</h3>
@@ -87,6 +88,7 @@
 
   <script src="js/data.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/game-picker.js"></script>
   <script>
     ready(async function () {
       if (!requireSession()) return;
@@ -135,6 +137,21 @@
           ? '<div class="notice"><strong>This event is cancelled.</strong></div>' : "";
       }
 
+      function renderEventGame() {
+        const section = document.getElementById("eventGameDetail");
+        const game = ev.game;
+        if (!game) { section.hidden = true; section.innerHTML = ""; return; }
+        const facts = [GamePicker.range(game.MIN_PLAYERS, game.MAX_PLAYERS, "players"), GamePicker.range(game.MIN_PLAYTIME, game.MAX_PLAYTIME, "minutes"), Number(game.MIN_AGE) ? `Ages ${Number(game.MIN_AGE)}+` : ""].filter(Boolean);
+        const extra = [game.CATEGORY ? `<div><span>Category</span><strong>${esc(game.CATEGORY)}</strong></div>` : "", GamePicker.rating(game) ? `<div><span>Rating</span><strong>${esc(GamePicker.rating(game))}</strong></div>` : "", game.YEAR_PUBLISHED ? `<div><span>Published</span><strong>${esc(game.YEAR_PUBLISHED)}</strong></div>` : ""].filter(Boolean).join("");
+        section.hidden = false;
+        section.innerHTML = `<div class="event-game-hero"><img src="${esc(GamePicker.imageUrl(game, true))}" alt="${esc(game.GAME_NAME)} cover"><div><p class="section-label">Game we're playing</p><h2 id="eventGameHeading">${esc(game.GAME_NAME)}</h2><p>${esc(facts.join(" · "))}</p>${game.RULES_URL ? `<a class="btn secondary small" href="${esc(game.RULES_URL)}" target="_blank" rel="noopener noreferrer">View rules</a>` : ""}</div></div>${extra ? `<div class="event-game-facts">${extra}</div>` : ""}${game.DESCRIPTION ? `<div class="event-game-copy"><h3>About the game</h3><p>${esc(game.DESCRIPTION)}</p></div>` : ""}${game.MECHANICS ? `<div class="event-game-copy"><h3>Mechanics</h3><p>${esc(Array.isArray(game.MECHANICS) ? game.MECHANICS.join(", ") : game.MECHANICS)}</p></div>` : ""}`;
+        const image = section.querySelector("img");
+        image.addEventListener("error", function () {
+          if (game.THUMBNAIL_URL && !image.dataset.thumbnailTried) { image.dataset.thumbnailTried = "true"; image.src = game.THUMBNAIL_URL; }
+          else { image.onerror = null; image.src = "assets/images/event-placeholder.webp"; }
+        });
+      }
+
       async function renderWhosComing() {
         const rsvps = await DB.getRsvps(ev.id);
         const buckets = { going: [], maybe: [], no: [], pending: [] };
@@ -157,7 +174,8 @@
           const ul = document.getElementById(id);
           ul.innerHTML = entries.length
             ? entries.map(function (entry) {
-              return '<li class="rsvp-person">' + avatarHtml(entry, "rsvp-avatar") + '<a class="person-link" href="profile.html?user=' + encodeURIComponent(entry.userId) + '">' + esc(entry.userName || entry.userEmail || `User ${entry.userId}`) + "</a></li>";
+              const preferences = id === "listGoing" ? `<dl class="attendee-preferences"><div><dt>Food</dt><dd>${esc(entry.favoriteFood)}</dd></div><div><dt>Drink</dt><dd>${esc(entry.favoriteDrink)}</dd></div><div><dt>Allergies</dt><dd>${esc(entry.allergies)}</dd></div></dl>` : "";
+              return '<li class="rsvp-person">' + avatarHtml(entry, "rsvp-avatar") + '<div class="rsvp-person-copy"><a class="person-link" href="profile.html?user=' + encodeURIComponent(entry.userId) + '">' + esc(entry.userName || entry.userEmail || `User ${entry.userId}`) + "</a>" + preferences + "</div></li>";
             }).join("")
             : '<li class="empty">Nobody yet</li>';
         }
@@ -361,6 +379,7 @@
       });
 
       renderHeader();
+      renderEventGame();
       await renderWhosComing();
       await renderMyRsvp();
       await renderHostControls();

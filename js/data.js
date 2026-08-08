@@ -1,6 +1,6 @@
 /* Board Night - API-backed data layer */
 
-const API_BASE_URL = window.BOARD_NIGHT_API_URL || "https://board-night-server-594j5.ondigitalocean.app";
+const API_BASE_URL = (typeof window !== "undefined" && window.BOARD_NIGHT_API_URL) || "https://board-night-server-594j5.ondigitalocean.app";
 
 const DB = {
   SESSION_KEY: "boardNightSession",
@@ -271,6 +271,16 @@ const DB = {
     return this.api("/api/games");
   },
 
+  async searchGames(query, limit = 12) {
+    const value = String(query || "").trim();
+    if (!value) return [];
+    return this.api(`/api/games/search?q=${encodeURIComponent(value)}&limit=${Math.min(50, Math.max(1, Number(limit) || 12))}`);
+  },
+
+  async getGame(gameId) {
+    return this.api(`/api/games/${encodeURIComponent(gameId)}`);
+  },
+
   async getFavoriteGames(userId) {
     return this.api(`/api/games/favorites/${userId}`);
   },
@@ -283,15 +293,8 @@ const DB = {
   },
 
   async getEvent(id) {
-    const groups = await this.getGroups();
-
-    for (const group of groups) {
-      const events = await this.getEvents(group.id);
-      const event = events.find((e) => String(e.id) === String(id));
-      if (event) return event;
-    }
-
-    return null;
+    const event = await this.api(`/api/events/${encodeURIComponent(id)}`);
+    return event ? this.mapEvent(event) : null;
   },
 
   async createEvent(ev) {
@@ -305,6 +308,7 @@ const DB = {
         eventTime: ev.time || "",
         eventLocation: ev.location || "",
         eventImageUrl: ev.imageUrl || "",
+        gameId: ev.gameId == null ? null : Number(ev.gameId),
         rehostedFromEventId: ev.rehostedFromEventId || null
       })
     });
@@ -327,6 +331,8 @@ const DB = {
       imageUrl: created.EVENT_IMAGE_URL || ev.imageUrl || "",
       EVENT_DESCRIPTION: created.EVENT_DESCRIPTION ?? null,
       description: created.EVENT_DESCRIPTION || ev.description || "",
+      gameId: created.GAME_ID == null ? (ev.gameId == null ? null : Number(ev.gameId)) : Number(created.GAME_ID),
+      game: created.GAME || ev.game || null,
       status: created.EVENT_STATUS || "ACTIVE",
       cancelled: ["CANCELED", "CANCELLED"].includes(created.EVENT_STATUS),
       displayStatus: created.DISPLAY_STATUS || "UPCOMING",
@@ -357,6 +363,14 @@ const DB = {
     });
   },
 
+  async updateEventGame(eventId, gameId) {
+    const updated = await this.api(`/api/events/${eventId}/game`, {
+      method: "PATCH",
+      body: JSON.stringify({ gameId: gameId == null ? null : Number(gameId) })
+    });
+    return this.mapEvent(updated.event || updated);
+  },
+
   async cancelEvent(eventId) {
     const response = await this.api(`/api/events/${eventId}/cancel`, { method: "PATCH" });
     return response.event || response;
@@ -385,6 +399,8 @@ const DB = {
       imageUrl: row.EVENT_IMAGE_URL || "",
       EVENT_DESCRIPTION: row.EVENT_DESCRIPTION ?? null,
       description: row.EVENT_DESCRIPTION || "",
+      gameId: row.GAME_ID == null ? null : Number(row.GAME_ID),
+      game: row.GAME || null,
       status: row.EVENT_STATUS || "ACTIVE",
       cancelled: ["CANCELED", "CANCELLED"].includes(row.EVENT_STATUS),
       displayStatus: row.DISPLAY_STATUS || "",
@@ -402,6 +418,9 @@ const DB = {
       userName: this.displayName(row),
       userEmail: row.EMAIL || "",
       imageUrl: row.IMAGE_URL || "",
+      favoriteFood: row.FAVORITE_FOOD || "Not provided",
+      favoriteDrink: row.FAVORITE_DRINK || "Not provided",
+      allergies: row.ALLERGIES || "None listed",
       status: this.fromApiStatus(row.RSVP_STATUS),
       emailStatus: row.EMAIL_STATUS || row.INVITE_EMAIL_STATUS || "",
       emailSentAt: row.EMAIL_SENT_AT || row.INVITE_EMAIL_SENT_AT || null
@@ -413,6 +432,7 @@ const DB = {
     if (createdRsvp && String(createdRsvp.eventId) === String(eventId)) {
       // The create-event response is authoritative for the host's initial RSVP.
       // Replace any pending invite row for the host instead of showing both.
+      const storedHostRsvp = mapped.find((rsvp) => String(rsvp.userId) === String(createdRsvp.userId));
       mapped = mapped.filter((rsvp) => String(rsvp.userId) !== String(createdRsvp.userId));
       const host = this.currentUser();
       mapped.unshift({
@@ -422,6 +442,9 @@ const DB = {
         userName: host.name,
         userEmail: host.email,
         imageUrl: "",
+        favoriteFood: storedHostRsvp ? storedHostRsvp.favoriteFood : "Not provided",
+        favoriteDrink: storedHostRsvp ? storedHostRsvp.favoriteDrink : "Not provided",
+        allergies: storedHostRsvp ? storedHostRsvp.allergies : "None listed",
         status: createdRsvp.status,
         emailStatus: "",
         emailSentAt: null
@@ -516,3 +539,5 @@ const DB = {
     return this.api("/api/notifications/read-all", { method: "PATCH" });
   }
 };
+
+if (typeof module === "object" && module.exports) module.exports = DB;

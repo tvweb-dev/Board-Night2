@@ -56,8 +56,9 @@
       </div>
       <fieldset class="favorite-games-fieldset">
         <legend>Favorite games</legend>
-        <p class="subtle">Select at least one game.</p>
-        <div class="favorite-game-options" id="newFavoriteGameOptions"><p class="subtle">Loading games...</p></div>
+        <p class="subtle">Search and select at least one game.</p>
+        <div id="newFavoriteGamePicker"></div>
+        <div class="favorite-game-edit-list" id="newFavoriteGameList"></div>
       </fieldset>
       <p class="form-error" id="profileFormError" role="alert" aria-live="polite"></p>
       <div class="btn-row"><button class="btn" id="saveNewProfileBtn" type="submit">Save profile and continue</button></div>
@@ -66,6 +67,7 @@
 
   <script src="js/data.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/game-picker.js"></script>
   <script>
     ready(function () {
       const form = document.getElementById("createAccountForm");
@@ -73,8 +75,16 @@
       const errorMessage = document.getElementById("formError");
       const profileModal = document.getElementById("profileModal");
       const profileForm = document.getElementById("newProfileForm");
-      let games = [];
+      let favoriteGames = [];
+      let favoritePicker;
       bindImageUpload("newImageFile", "newImageUrl", "profile");
+
+      function renderFavoriteGames() {
+        const list = document.getElementById("newFavoriteGameList");
+        list.innerHTML = favoriteGames.length ? favoriteGames.map(function (game) {
+          return `<div class="favorite-game-edit-row"><img src="${esc(GamePicker.imageUrl(game))}" alt=""><span><strong>${esc(game.GAME_NAME)}</strong><small>${esc(GamePicker.compactMeta(game).join(" · ") || game.CATEGORY || "Board game")}</small></span><button class="btn secondary small" type="button" data-remove-game="${Number(game.GAME_ID)}" aria-label="Remove ${esc(game.GAME_NAME)} from favorites">Remove</button></div>`;
+        }).join("") : '<p class="empty">Search above to add a favorite game.</p>';
+      }
 
       form.addEventListener("submit", async function (event) {
         event.preventDefault();
@@ -98,10 +108,17 @@
           profileModal.hidden = false;
           document.body.classList.add("modal-open");
           document.getElementById("newBirthday").max = new Date().toLocaleDateString("en-CA");
-          games = await DB.getGames();
-          document.getElementById("newFavoriteGameOptions").innerHTML = games.length ? games.map(function (game) {
-            return `<label class="favorite-game-option"><input type="checkbox" name="newFavoriteGame" value="${Number(game.GAME_ID)}"><span><strong>${esc(game.GAME_NAME)}</strong>${game.CATEGORY ? `<small>${esc(game.CATEGORY)}</small>` : ""}</span></label>`;
-          }).join("") : '<p class="empty">No games are currently available.</p>';
+          favoritePicker = GamePicker.create(document.getElementById("newFavoriteGamePicker"), {
+            inputId: "newFavoriteGameSearch",
+            label: "Search for a favorite game",
+            allowClear: false,
+            onSelect: function (game) {
+              if (!favoriteGames.some(function (favorite) { return String(favorite.GAME_ID) === String(game.GAME_ID); })) favoriteGames.push(game);
+              renderFavoriteGames();
+              favoritePicker.setSelected(null);
+            }
+          });
+          renderFavoriteGames();
           document.getElementById("newFirstName").focus();
         } catch (error) {
           errorMessage.textContent = error.message;
@@ -110,12 +127,19 @@
         }
       });
 
+      document.getElementById("newFavoriteGameList").addEventListener("click", function (event) {
+        const button = event.target.closest("[data-remove-game]");
+        if (!button) return;
+        favoriteGames = favoriteGames.filter(function (game) { return String(game.GAME_ID) !== button.dataset.removeGame; });
+        renderFavoriteGames();
+      });
+
       profileForm.addEventListener("submit", async function (event) {
         event.preventDefault();
         const profileError = document.getElementById("profileFormError");
         const saveButton = document.getElementById("saveNewProfileBtn");
         profileError.textContent = "";
-        const gameIds = Array.from(document.querySelectorAll('input[name="newFavoriteGame"]:checked')).map(function (input) { return Number(input.value); });
+        const gameIds = favoriteGames.map(function (game) { return Number(game.GAME_ID); });
         if (!gameIds.length) { profileError.textContent = "Select at least one favorite game."; return; }
         const payload = {
           firstName: document.getElementById("newFirstName").value.trim(), lastName: document.getElementById("newLastName").value.trim(),

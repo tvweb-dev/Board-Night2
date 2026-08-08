@@ -33,6 +33,11 @@
       <textarea id="description" maxlength="2000" placeholder="Tell your group what the event is about..."></textarea>
       <p class="character-counter" id="descriptionCounter">0 / 2000</p>
 
+      <fieldset class="event-game-fieldset">
+        <legend>Game we're playing <span>(optional)</span></legend>
+        <div id="eventGamePicker"></div>
+      </fieldset>
+
       <label for="imageUrl">Event image URL</label>
       <input id="imageUrl" type="url" maxlength="500" placeholder="https://example.com/game-night.jpg" />
       <label for="eventImageFile">Upload event image</label>
@@ -48,6 +53,7 @@
 
   <script src="js/data.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/game-picker.js"></script>
   <script>
     ready(async function () {
       if (!requireSession()) return;
@@ -66,6 +72,11 @@
 
       if (rehostSource && String(rehostSource.hostId) !== String(DB.currentUserId())) {
         document.querySelector(".container").innerHTML = '<p class="notice">Only the original host can host this event again.</p>';
+        return;
+      }
+
+      if (existing && String(existing.hostId) !== String(DB.currentUserId())) {
+        document.querySelector(".container").innerHTML = '<p class="notice">Only the event host can edit this event.</p>';
         return;
       }
 
@@ -88,6 +99,14 @@
       }
       if (rehostSource) document.getElementById("date").min = new Date().toLocaleDateString("en-CA");
 
+      const gamePicker = GamePicker.create(document.getElementById("eventGamePicker"), {
+        inputId: "eventGameSearch",
+        label: "Search the game catalogue",
+        placeholder: "Search for Catan, Risk, Azul...",
+        selectedGame: source && source.game,
+        allowClear: true
+      });
+
       const descriptionInput = document.getElementById("description");
       const descriptionCounter = document.getElementById("descriptionCounter");
       descriptionInput.addEventListener("input", function () {
@@ -109,7 +128,9 @@
           time: document.getElementById("time").value,
           location: document.getElementById("location").value.trim(),
           description: descriptionInput.value.trim(),
-          imageUrl: imageInput.value.trim()
+          imageUrl: imageInput.value.trim(),
+          gameId: gamePicker.getSelected() ? Number(gamePicker.getSelected().GAME_ID) : null,
+          game: gamePicker.getSelected()
         };
 
         if (!fields.title || !fields.date || !fields.time || !fields.location) {
@@ -133,6 +154,9 @@
           let saved;
           if (existing) {
             saved = await DB.updateEvent(existing.id, fields);
+            if (String(existing.gameId || "") !== String(fields.gameId || "")) {
+              saved = await DB.updateEventGame(existing.id, fields.gameId);
+            }
           } else {
             fields.groupId = rehostSource ? rehostSource.groupId : groupId;
             fields.rehostedFromEventId = rehostSource ? rehostSource.id : null;

@@ -43,6 +43,7 @@
 
   <script src="js/data.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/game-picker.js"></script>
   <script>
     ready(async function () {
       if (!requireSession()) return;
@@ -146,11 +147,12 @@
 
           return `<a class="card group-event-card ${borderClass}" style="text-decoration:none;color:inherit;display:flex;"
                      href="event.html?event=${encodeURIComponent(e.id)}">
-                    <span class="group-event-swatch"><img src="${esc(e.imageUrl || PLACEHOLDER_IMAGE.event)}" alt=""></span><span><h3>${esc(e.title)} <small class="pill ${stateClass}">${stateLabel}</small></h3><p class="subtle">${prettyDate(e.date)} · ${esc(e.time || "Time TBD")} · ${esc(e.location || "Location TBD")}</p><strong class="going-label">${going} going</strong></span>
+                    <span class="group-event-swatch"><img src="${esc(e.imageUrl || PLACEHOLDER_IMAGE.event)}" alt=""></span><span><h3>${esc(e.title)} <small class="pill ${stateClass}">${stateLabel}</small></h3><p class="subtle">${prettyDate(e.date)} · ${esc(e.time || "Time TBD")} · ${esc(e.location || "Location TBD")}</p>${e.game ? `<span class="group-event-game"><img src="${esc(GamePicker.imageUrl(e.game))}" alt=""><span><strong>${esc(e.game.GAME_NAME)}</strong><small>${esc(GamePicker.compactMeta(e.game).join(" · "))}</small></span></span>` : ""}<strong class="going-label">${going} going</strong></span>
                   </a>`;
         }));
 
         wrap.innerHTML = cards.join("");
+        wrap.querySelectorAll(".group-event-game img").forEach(function (image) { image.addEventListener("error", function () { image.onerror = null; image.src = PLACEHOLDER_IMAGE.event; }); });
         events.forEach(function (event) {
           if (!event.description) return;
           const preview = wrap.querySelector('[data-event-description="' + CSS.escape(String(event.id)) + '"]');

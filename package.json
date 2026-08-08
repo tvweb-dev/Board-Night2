@@ -4,7 +4,10 @@
   "private": true,
   "description": "SEO-rich server-rendered frontend for Board Night.",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --test",
+    "build": "node --check server.js && node --check js/app.js && node --check js/data.js && node --check js/game-picker.js",
+    "check": "npm run build && git diff --check"
   },
   "engines": {
     "node": ">=18"

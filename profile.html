@@ -20,6 +20,10 @@
       </header>
 
       <div class="profile-details" id="profileDetails"></div>
+      <section class="profile-favorite-games" aria-labelledby="favoriteGamesHeading">
+        <h2 id="favoriteGamesHeading">Favorite games</h2>
+        <div class="favorite-game-cards" id="favoriteGameCards"></div>
+      </section>
 
       <form class="profile-form" id="profileForm" hidden>
         <div class="profile-form-grid">
@@ -38,15 +42,17 @@
         </div>
         <fieldset class="favorite-games-fieldset">
           <legend>Favorite games</legend>
-          <p class="subtle">Choose the games you enjoy most.</p>
-          <div class="favorite-game-options" id="favoriteGameOptions"></div>
+          <p class="subtle">Search the game catalogue to add favorites. Changes are saved immediately.</p>
+          <div id="favoriteGamePicker"></div>
+          <div class="favorite-game-edit-list" id="favoriteGameEditList"></div>
+          <p class="form-error" id="favoriteGameError" role="status" aria-live="polite"></p>
         </fieldset>
         <p class="form-error" id="profileError" role="alert"></p>
         <div class="btn-row"><button class="btn" type="submit">Save profile</button><button class="btn secondary" id="cancelProfileBtn" type="button">Cancel</button></div>
       </form>
     </section>
   </main>
-  <script src="js/data.js"></script><script src="js/app.js"></script>
+  <script src="js/data.js"></script><script src="js/app.js"></script><script src="js/game-picker.js"></script>
   <script>
     ready(async function () {
       if (!requireSession()) return;
@@ -62,7 +68,7 @@
       const keys = { firstName: "FIRST_NAME", lastName: "LAST_NAME", nickname: "NICKNAME", imageUrl: "IMAGE_URL", birthday: "BIRTHDAY", favoriteFood: "FAVORITE_FOOD", favoriteDrink: "FAVORITE_DRINK", allergies: "ALLERGIES", city: "CITY", province: "PROVINCE", country: "COUNTRY" };
       let profile;
       let favoriteGames = [];
-      let games = [];
+      let favoritePicker;
 
       function value(key) { return profile[key] == null ? "" : String(profile[key]); }
       function displayName() { return value("NICKNAME") || [value("FIRST_NAME"), value("LAST_NAME")].filter(Boolean).join(" ") || value("EMAIL") || `User ${userId}`; }
@@ -72,6 +78,35 @@
         avatar.innerHTML = `<img src="${esc(image)}" alt="${esc(displayName())}">`;
       }
       function detail(label, text) { return text ? `<div class="profile-detail"><span>${esc(label)}</span><strong>${esc(text)}</strong></div>` : ""; }
+      function gameMeta(game) { return GamePicker.compactMeta(game).join(" · ") || game.CATEGORY || "Board game"; }
+      function renderFavoriteGames() {
+        const cards = document.getElementById("favoriteGameCards");
+        cards.innerHTML = favoriteGames.length ? favoriteGames.map(function (game) {
+          return `<article class="favorite-game-card"><img src="${esc(GamePicker.imageUrl(game))}" alt="${esc(game.GAME_NAME)} cover"><div><strong>${esc(game.GAME_NAME)}</strong><small>${esc(gameMeta(game))}</small>${GamePicker.rating(game) ? `<small>${esc(GamePicker.rating(game))}</small>` : ""}</div></article>`;
+        }).join("") : '<p class="empty">No favorite games selected yet.</p>';
+        cards.querySelectorAll("img").forEach(function (image) { image.addEventListener("error", function () { image.src = "assets/images/event-placeholder.webp"; }); });
+        renderFavoriteEditList();
+      }
+      function renderFavoriteEditList() {
+        const list = document.getElementById("favoriteGameEditList");
+        list.innerHTML = favoriteGames.length ? favoriteGames.map(function (game) {
+          return `<div class="favorite-game-edit-row"><img src="${esc(GamePicker.imageUrl(game))}" alt=""><span><strong>${esc(game.GAME_NAME)}</strong><small>${esc(gameMeta(game))}</small></span><button class="btn secondary small" type="button" data-remove-game="${Number(game.GAME_ID)}" aria-label="Remove ${esc(game.GAME_NAME)} from favorites">Remove</button></div>`;
+        }).join("") : '<p class="empty">Search above to add your first favorite.</p>';
+        list.querySelectorAll("img").forEach(function (image) { image.addEventListener("error", function () { image.src = "assets/images/event-placeholder.webp"; }); });
+      }
+      async function saveFavoriteGames(nextGames) {
+        const error = document.getElementById("favoriteGameError");
+        error.textContent = "";
+        try {
+          await DB.replaceFavoriteGames(me.id, nextGames.map(function (game) { return Number(game.GAME_ID); }));
+          favoriteGames = nextGames;
+          renderFavoriteGames();
+          return true;
+        } catch (saveError) {
+          error.textContent = saveError.message;
+          return false;
+        }
+      }
       function render() {
         document.getElementById("profileName").textContent = displayName();
         document.getElementById("profileEmail").textContent = value("EMAIL");
@@ -79,17 +114,15 @@
         renderAvatar();
         const location = [value("CITY"), value("PROVINCE"), value("COUNTRY")].filter(Boolean).join(", ");
         const birthday = value("BIRTHDAY") ? prettyDate(value("BIRTHDAY").slice(0, 10)) : "";
-        const gameNames = favoriteGames.map(function (game) { return game.GAME_NAME; }).join(", ") || "None selected";
-        details.innerHTML = detail("Name", [value("FIRST_NAME"), value("LAST_NAME")].filter(Boolean).join(" ")) + detail("Nickname", value("NICKNAME")) + detail("Location", location) + detail("Birthday", birthday) + detail("Favorite food", value("FAVORITE_FOOD")) + detail("Favorite drink", value("FAVORITE_DRINK")) + detail("Allergies", value("ALLERGIES")) + detail("Favorite games", gameNames);
+        details.innerHTML = detail("Name", [value("FIRST_NAME"), value("LAST_NAME")].filter(Boolean).join(" ")) + detail("Nickname", value("NICKNAME")) + detail("Location", location) + detail("Birthday", birthday) + detail("Favorite food", value("FAVORITE_FOOD")) + detail("Favorite drink", value("FAVORITE_DRINK")) + detail("Allergies", value("ALLERGIES"));
         if (!details.innerHTML) details.innerHTML = `<p class="empty">${isOwner ? "Add some details so your group can get to know you." : "This player has not added profile details yet."}</p>`;
+        renderFavoriteGames();
         document.getElementById("editProfileBtn").hidden = !isOwner;
       }
       function beginEdit(scrollToForm) {
         if (!isOwner) return;
         fields.forEach(function (field) { const raw = value(keys[field]); document.getElementById(field).value = field === "birthday" ? raw.slice(0, 10) : raw; });
-        const selected = new Set(favoriteGames.map(function (game) { return String(game.GAME_ID); }));
-        const options = document.getElementById("favoriteGameOptions");
-        options.innerHTML = games.length ? games.map(function (game) { return `<label class="favorite-game-option"><input type="checkbox" name="favoriteGame" value="${Number(game.GAME_ID)}" ${selected.has(String(game.GAME_ID)) ? "checked" : ""}><span><strong>${esc(game.GAME_NAME)}</strong>${game.CATEGORY ? `<small>${esc(game.CATEGORY)}</small>` : ""}</span></label>`; }).join("") : '<p class="empty">No games are available in the catalog yet.</p>';
+        renderFavoriteEditList();
         details.hidden = true; form.hidden = false; document.getElementById("editProfileBtn").hidden = true;
         if (scrollToForm) {
           requestAnimationFrame(function () {
@@ -101,22 +134,42 @@
       function cancelEdit() { form.hidden = true; details.hidden = false; document.getElementById("editProfileBtn").hidden = !isOwner; document.getElementById("profileError").textContent = ""; renderAvatar(); }
 
       try {
-        [profile, favoriteGames, games] = await Promise.all([DB.getProfile(userId), DB.getFavoriteGames(userId), DB.getGames()]);
+        [profile, favoriteGames] = await Promise.all([DB.getProfile(userId), DB.getFavoriteGames(userId)]);
         status.hidden = true; content.hidden = false; render();
+        if (isOwner) {
+          favoritePicker = GamePicker.create(document.getElementById("favoriteGamePicker"), {
+            inputId: "favoriteGameSearch",
+            label: "Search for a favorite game",
+            allowClear: false,
+            onSelect: async function (game) {
+              if (favoriteGames.some(function (favorite) { return String(favorite.GAME_ID) === String(game.GAME_ID); })) {
+                document.getElementById("favoriteGameError").textContent = `${game.GAME_NAME} is already a favorite.`;
+              } else {
+                await saveFavoriteGames(favoriteGames.concat(game));
+              }
+              favoritePicker.setSelected(null);
+            }
+          });
+        }
         if (isOwner && !profile.FIRST_NAME && !profile.NICKNAME && !profile.IMAGE_URL) beginEdit();
       } catch (error) { status.textContent = error.message; status.className = "notice"; return; }
 
       document.getElementById("editProfileBtn").addEventListener("click", function () { beginEdit(true); });
       document.getElementById("cancelProfileBtn").addEventListener("click", cancelEdit);
+      document.getElementById("favoriteGameEditList").addEventListener("click", async function (event) {
+        const button = event.target.closest("[data-remove-game]");
+        if (!button || !isOwner) return;
+        button.disabled = true;
+        const nextGames = favoriteGames.filter(function (game) { return String(game.GAME_ID) !== button.dataset.removeGame; });
+        if (!await saveFavoriteGames(nextGames)) button.disabled = false;
+      });
       document.getElementById("imageUrl").addEventListener("input", function (event) { profile.IMAGE_URL = event.target.value.trim(); renderAvatar(); });
       bindImageUpload("profileImageFile", "imageUrl", "profile");
       form.addEventListener("submit", async function (event) {
         event.preventDefault();
         const error = document.getElementById("profileError"); error.textContent = "";
         const payload = {}; fields.forEach(function (field) { payload[field] = document.getElementById(field).value.trim(); });
-        const gameIds = Array.from(document.querySelectorAll('input[name="favoriteGame"]:checked')).map(function (input) { return Number(input.value); });
-        if (!gameIds.length) { error.textContent = "Select at least one favorite game."; return; }
-        try { profile = await DB.saveProfile(userId, payload); await DB.replaceFavoriteGames(userId, gameIds); favoriteGames = games.filter(function (game) { return gameIds.includes(Number(game.GAME_ID)); }); form.hidden = true; details.hidden = false; render(); }
+        try { profile = await DB.saveProfile(userId, payload); form.hidden = true; details.hidden = false; render(); }
         catch (saveError) { error.textContent = saveError.message; }
       });
     });
