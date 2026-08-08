@@ -20,6 +20,15 @@ function prettyDate(dateStr) {
   return d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" });
 }
 
+function prettyTime(timeStr) {
+  const value = String(timeStr || "").trim();
+  if (!value) return "Time TBD";
+  const parts = value.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+  if (!parts) return value;
+  const date = new Date(2000, 0, 1, Number(parts[1]), Number(parts[2]));
+  return date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+}
+
 function eventDateTime(event) {
   const dateParts = String(event && event.date || "").match(/^(\d{4})-(\d{2})-(\d{2})/);
   if (!dateParts) return null;
