@@ -155,7 +155,7 @@ function startNotificationToasts() {
     toast.setAttribute("aria-live", "polite");
     toast.innerHTML = `
       <span class="toast-indicator" aria-hidden="true"></span>
-      <a class="toast-copy" href="notifications.html">
+      <a class="toast-copy" href="${esc(notificationDestination(item))}">
         <strong>${esc(item.TITLE || "New notification")}</strong>
         <span>${esc(item.MESSAGE || "You have a new Board Night update.")}</span>
       </a>
@@ -188,6 +188,17 @@ function startNotificationToasts() {
 
   check();
   window.setInterval(check, 30000);
+}
+
+function notificationDestination(item) {
+  const type = String(item && item.TYPE || "").toUpperCase();
+  if (type === "GROUP_MEMBER_ADDED" && item.GROUP_ID) {
+    return `group.html?group=${encodeURIComponent(item.GROUP_ID)}&invitation=${encodeURIComponent(item.NOTIFICATION_ID)}`;
+  }
+  if ((type === "EVENT_INVITE" || type === "RSVP_CHANGED") && item.EVENT_ID) {
+    return `event.html?event=${encodeURIComponent(item.EVENT_ID)}`;
+  }
+  return "notifications.html";
 }
 
 // Shared desktop application shell, based on the desktop standalone design.

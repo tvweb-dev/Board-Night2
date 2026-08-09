@@ -40,9 +40,11 @@
           summary.textContent = unread ? `${unread} unread update${unread === 1 ? "" : "s"}.` : "You are all caught up.";
           markAll.disabled = unread === 0;
           list.innerHTML = notifications.length ? notifications.map(function (item) {
+            const destination = notificationDestination(item);
+            const actionLabel = item.TYPE === "GROUP_MEMBER_ADDED" ? "Respond to invitation" : item.TYPE === "EVENT_INVITE" ? "Confirm RSVP" : item.EVENT_ID ? "View event" : item.GROUP_ID ? "View group" : "";
             return `<article class="notification-item ${item.IS_READ ? "is-read" : ""}" data-id="${Number(item.NOTIFICATION_ID)}">
               <span class="notification-dot" aria-hidden="true"></span>
-              <div class="notification-copy"><h2>${esc(item.TITLE)}</h2><p>${esc(item.MESSAGE)}</p><time datetime="${esc(item.CREATED_AT)}">${esc(formatTime(item.CREATED_AT))}</time></div>
+              <div class="notification-copy"><h2>${esc(item.TITLE)}</h2><p>${esc(item.MESSAGE)}</p>${actionLabel ? `<a class="notification-action-link" href="${esc(destination)}">${esc(actionLabel)} &rarr;</a>` : ""}<time datetime="${esc(item.CREATED_AT)}">${esc(formatTime(item.CREATED_AT))}</time></div>
               ${item.IS_READ ? "" : '<button class="btn secondary mark-read" type="button">Mark read</button>'}
             </article>`;
           }).join("") : '<p class="notification-empty">No notifications yet.</p>';

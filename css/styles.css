@@ -127,6 +127,7 @@ a.card:hover { border-color: rgba(143,176,199,.45); transform: translateY(-1px);
 .notification-copy h2 { margin: 0 0 3px; font-family: Tahoma, sans-serif; font-size: .96rem; }
 .notification-copy p { margin: 0; color: var(--muted); font-size: .88rem; overflow-wrap: anywhere; }
 .notification-copy time { display: block; margin-top: 7px; color: rgba(236,231,218,.38); font-size: .74rem; }
+.notification-action-link { display: inline-block; margin-top: 9px; font-size: .82rem; font-weight: 700; }
 .notification-empty { padding: 48px 0; color: var(--muted); text-align: center; }
 .notification-toast { position: fixed; right: 24px; bottom: 24px; z-index: 100; width: min(380px, calc(100vw - 32px)); display: grid; grid-template-columns: 8px minmax(0, 1fr) 32px; gap: 12px; align-items: start; padding: 16px; border: 1px solid rgba(143,176,199,.35); border-radius: 8px; background: #171c26; box-shadow: 0 12px 32px rgba(0,0,0,.42); animation: toast-in .2s ease-out; }
 .notification-toast.is-leaving { opacity: 0; transform: translateY(8px); transition: opacity .18s, transform .18s; }
@@ -136,6 +137,10 @@ a.card:hover { border-color: rgba(143,176,199,.45); transform: translateY(-1px);
 .toast-copy strong, .toast-copy span { display: block; }
 .toast-copy strong { margin-bottom: 3px; font-family: "gambado-sans-forte", sans-serif; font-size: .94rem; }
 .toast-copy span { color: var(--muted); font-size: .84rem; overflow-wrap: anywhere; }
+.group-invitation-response { margin: 18px 0; display: flex; align-items: center; justify-content: space-between; gap: 20px; border-color: rgba(54,153,111,.55); }
+.group-invitation-response[hidden] { display: none; }
+.group-invitation-response h2, .group-invitation-response p { margin: 0 0 5px; }
+.group-invitation-response.is-complete .btn-row { display: none; }
 .toast-close { width: 32px; height: 32px; margin: -7px -7px 0 0; padding: 0; border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 22px; line-height: 1; cursor: pointer; }
 .toast-close:hover { color: var(--ink); }
 @keyframes toast-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -614,6 +619,8 @@ footer.note {
 }
 
 @media (max-width: 767px) {
+  .group-invitation-response { align-items: stretch; flex-direction: column; }
+  .group-invitation-response .btn-row, .group-invitation-response .btn { width: 100%; }
   body { background: #12151c; }
   .app-shell { padding: 68px 0 92px; background: var(--bg); }
 

@@ -15,6 +15,11 @@
     <p class="back-link"><a href="dashboard.html">‹ Back to Groups</a></p>
     <img class="group-cover-image" id="groupCoverImage" alt="" hidden>
     <div class="group-title"><span class="group-title-swatch" id="groupTitleImage"></span><h1 id="groupName">Group</h1></div>
+    <section class="card group-invitation-response" id="groupInvitationResponse" aria-labelledby="groupInvitationHeading" hidden>
+      <div><h2 id="groupInvitationHeading">Group invitation</h2><p>You have been invited to join this group.</p></div>
+      <div class="btn-row"><button class="btn" id="joinGroupBtn" type="button">Join Group</button><button class="btn danger" id="declineGroupBtn" type="button">Don't Join Group</button></div>
+      <p class="subtle" id="groupInvitationStatus" role="status" aria-live="polite"></p>
+    </section>
     <div class="group-lifecycle-banner" id="groupLifecycleBanner" hidden></div>
     <div class="group-detail-layout">
       <section class="group-events-column">
@@ -49,6 +54,7 @@
       if (!requireSession()) return;
       renderTopbar();
       const groupId = qs("group");
+      const invitationId = qs("invitation");
       const group = await DB.getGroup(groupId);
 
       if (!group) {
@@ -57,6 +63,31 @@
         return;
       }
       let groupEvents = await DB.getEvents(groupId);
+      if (invitationId) {
+        const responsePanel = document.getElementById("groupInvitationResponse");
+        const responseStatus = document.getElementById("groupInvitationStatus");
+        responsePanel.hidden = false;
+        async function respondToInvitation(decision) {
+          const buttons = responsePanel.querySelectorAll("button");
+          buttons.forEach(function (button) { button.disabled = true; });
+          responseStatus.textContent = decision === "JOIN" ? "Joining group..." : "Declining invitation...";
+          try {
+            await DB.respondToGroupInvitation(invitationId, decision);
+            if (decision === "DECLINE") {
+              location.href = "dashboard.html";
+              return;
+            }
+            responseStatus.textContent = "You joined this group.";
+            responsePanel.classList.add("is-complete");
+            window.history.replaceState({}, "", `group.html?group=${encodeURIComponent(groupId)}`);
+          } catch (error) {
+            responseStatus.textContent = error.message;
+            buttons.forEach(function (button) { button.disabled = false; });
+          }
+        }
+        document.getElementById("joinGroupBtn").addEventListener("click", function () { respondToInvitation("JOIN"); });
+        document.getElementById("declineGroupBtn").addEventListener("click", function () { respondToInvitation("DECLINE"); });
+      }
       const canRemoveMembers = String(group.hostId) === String(DB.currentUserId()) || groupEvents.some(function (event) { return String(event.hostId) === String(DB.currentUserId()) && eventDisplayState(event).upcoming; });
 
       document.getElementById("groupName").textContent = group.name;

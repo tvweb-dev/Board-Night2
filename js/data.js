@@ -540,6 +540,13 @@ const DB = {
     return this.api(`/api/notifications/${notificationId}/read`, { method: "PATCH" });
   },
 
+  async respondToGroupInvitation(notificationId, decision) {
+    return this.api(`/api/notifications/${notificationId}/group-invitation`, {
+      method: "PATCH",
+      body: JSON.stringify({ decision })
+    });
+  },
+
   async markAllNotificationsRead() {
     return this.api("/api/notifications/read-all", { method: "PATCH" });
   }
