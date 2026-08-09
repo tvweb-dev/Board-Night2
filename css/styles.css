@@ -132,11 +132,13 @@ a.card:hover { border-color: rgba(143,176,199,.45); transform: translateY(-1px);
 .notification-toast { position: fixed; right: 24px; bottom: 24px; z-index: 100; width: min(380px, calc(100vw - 32px)); display: grid; grid-template-columns: 8px minmax(0, 1fr) 32px; gap: 12px; align-items: start; padding: 16px; border: 1px solid rgba(143,176,199,.35); border-radius: 8px; background: #171c26; box-shadow: 0 12px 32px rgba(0,0,0,.42); animation: toast-in .2s ease-out; }
 .notification-toast.is-leaving { opacity: 0; transform: translateY(8px); transition: opacity .18s, transform .18s; }
 .toast-indicator { width: 8px; height: 8px; margin-top: 7px; border-radius: 50%; background: var(--accent); }
+.toast-content { min-width: 0; }
 .toast-copy { min-width: 0; color: var(--ink); text-decoration: none; }
 .toast-copy:hover { color: var(--ink); }
 .toast-copy strong, .toast-copy span { display: block; }
 .toast-copy strong { margin-bottom: 3px; font-family: "gambado-sans-forte", sans-serif; font-size: .94rem; }
 .toast-copy span { color: var(--muted); font-size: .84rem; overflow-wrap: anywhere; }
+.toast-other-link { display: inline-block; margin-top: 10px; font-size: .78rem; font-weight: 700; }
 .group-invitation-response { margin: 18px 0; display: flex; align-items: center; justify-content: space-between; gap: 20px; border-color: rgba(54,153,111,.55); }
 .group-invitation-response[hidden] { display: none; }
 .group-invitation-response h2, .group-invitation-response p { margin: 0 0 5px; }

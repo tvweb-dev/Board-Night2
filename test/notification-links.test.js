@@ -28,3 +28,10 @@ test("notification list includes response and RSVP links", () => {
   assert.match(page, /Respond to invitation/);
   assert.match(page, /Confirm RSVP/);
 });
+
+test("notification popup links to the full list when a new batch has additional items", () => {
+  const app = read("js/app.js");
+  assert.match(app, /unseenItems\.length - 1/);
+  assert.match(app, /See \$\{additionalCount\} other new notification/);
+  assert.match(app, /class="toast-other-link" href="notifications\.html"/);
+});

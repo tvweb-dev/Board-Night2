@@ -145,7 +145,7 @@ function startNotificationToasts() {
     window.setTimeout(function () { toast.remove(); }, 180);
   }
 
-  function show(item) {
+  function show(item, additionalCount) {
     const existing = document.getElementById("notificationToast");
     if (existing) existing.remove();
     const toast = document.createElement("aside");
@@ -155,10 +155,13 @@ function startNotificationToasts() {
     toast.setAttribute("aria-live", "polite");
     toast.innerHTML = `
       <span class="toast-indicator" aria-hidden="true"></span>
-      <a class="toast-copy" href="${esc(notificationDestination(item))}">
-        <strong>${esc(item.TITLE || "New notification")}</strong>
-        <span>${esc(item.MESSAGE || "You have a new Board Night update.")}</span>
-      </a>
+      <div class="toast-content">
+        <a class="toast-copy" href="${esc(notificationDestination(item))}">
+          <strong>${esc(item.TITLE || "New notification")}</strong>
+          <span>${esc(item.MESSAGE || "You have a new Board Night update.")}</span>
+        </a>
+        ${additionalCount > 0 ? `<a class="toast-other-link" href="notifications.html">See ${additionalCount} other new notification${additionalCount === 1 ? "" : "s"}</a>` : ""}
+      </div>
       <button class="toast-close" type="button" aria-label="Close notification">&times;</button>`;
     document.body.appendChild(toast);
     toast.querySelector(".toast-close").addEventListener("click", function () { dismiss(toast); });
@@ -179,10 +182,10 @@ function startNotificationToasts() {
         mobileCount.hidden = items.length === 0;
       }
       const seen = seenIds();
-      const newest = items.find(function (item) { return !seen.has(String(item.NOTIFICATION_ID)); });
-      if (!newest) return;
+      const unseenItems = items.filter(function (item) { return !seen.has(String(item.NOTIFICATION_ID)); });
+      if (!unseenItems.length) return;
       items.forEach(function (item) { remember(item.NOTIFICATION_ID); });
-      show(newest);
+      show(unseenItems[0], unseenItems.length - 1);
     } catch (_) {}
   }
 
