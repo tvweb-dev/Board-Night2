@@ -17,6 +17,11 @@
     <p class="subtle">Set time, date and location for a group event.</p>
 
     <div class="card">
+      <label for="groupSelect">Group</label>
+      <select id="groupSelect" required>
+        <option value="">Choose a group</option>
+      </select>
+
       <label for="title">Event title</label>
       <input id="title" placeholder="e.g. Catan Night" />
 
@@ -64,6 +69,7 @@
       const existing = eventId ? await DB.getEvent(eventId) : null;
       const rehostSource = rehostId ? await DB.getEvent(rehostId) : null;
       const source = existing || rehostSource;
+      const groupSelect = document.getElementById("groupSelect");
 
       if ((eventId || rehostId) && !source) {
         document.querySelector(".container").innerHTML = '<p class="notice">Event not found.</p>';
@@ -79,6 +85,17 @@
         document.querySelector(".container").innerHTML = '<p class="notice">Only the event host can edit this event.</p>';
         return;
       }
+
+      const groups = (await DB.getGroups()).filter(function (group) {
+        return group.active || (source && String(group.id) === String(source.groupId));
+      });
+      groupSelect.innerHTML = '<option value="">Choose a group</option>' + groups.map(function (group) {
+        return `<option value="${esc(group.id)}">${esc(group.name)}</option>`;
+      }).join("");
+
+      const selectedGroupId = source ? source.groupId : groupId;
+      if (selectedGroupId) groupSelect.value = String(selectedGroupId);
+      if (source) groupSelect.disabled = true;
 
       const back = source
         ? "event.html?event=" + encodeURIComponent(source.id)
@@ -123,6 +140,7 @@
       document.getElementById("saveBtn").addEventListener("click", async function () {
         const saveButton = document.getElementById("saveBtn");
         const fields = {
+          groupId: groupSelect.value,
           title: document.getElementById("title").value.trim(),
           date: document.getElementById("date").value,
           time: document.getElementById("time").value,
@@ -133,8 +151,8 @@
           game: gamePicker.getSelected()
         };
 
-        if (!fields.title || !fields.date || !fields.time || !fields.location) {
-          alert("Please fill in a title, date, time and location.");
+        if (!fields.groupId || !fields.title || !fields.date || !fields.time || !fields.location) {
+          alert("Please choose a group and fill in a title, date, time and location.");
           return;
         }
 
@@ -158,7 +176,6 @@
               saved = await DB.updateEventGame(existing.id, fields.gameId);
             }
           } else {
-            fields.groupId = rehostSource ? rehostSource.groupId : groupId;
             fields.rehostedFromEventId = rehostSource ? rehostSource.id : null;
             saved = await DB.createEvent(fields);
           }

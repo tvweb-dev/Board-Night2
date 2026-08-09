@@ -94,6 +94,13 @@ test("event creation sends the selected GAME_ID", async () => {
   assert.equal(created.gameId, 1);
 });
 
+test("new event form offers the user's groups and submits the selected group", () => {
+  const page = fs.readFileSync(path.join(__dirname, "../event-edit.html"), "utf8");
+  assert.match(page, /<select id="groupSelect" required>/);
+  assert.match(page, /await DB\.getGroups\(\)/);
+  assert.match(page, /groupId: groupSelect\.value/);
+});
+
 test("event mapping handles nested and null games", () => {
   const game = { GAME_ID: 1, GAME_NAME: "Catan", THUMBNAIL_URL: "catan.jpg" };
   assert.equal(DB.mapEvent({ EVENT_ID: 1, GAME_ID: 1, GAME: game }).game, game);
