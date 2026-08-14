@@ -140,7 +140,8 @@
           const creatorTag = isCreator ? '<span class="creator-tag">Creator</span>' : '';
           const canRemove = canRemoveMembers && !isCreator && String(m.id) !== String(DB.currentUserId());
           const removeButton = canRemove ? `<button class="btn danger small member-remove-button" type="button" data-remove-member="${esc(m.id)}" data-member-name="${esc(m.name)}" aria-label="Remove ${esc(m.name)} from group">Remove</button>` : "";
-          return `<li class="member-row">${avatarHtml(m, "member-avatar")}<span><span class="member-name-line"><a class="person-link" href="profile.html?user=${encodeURIComponent(m.id)}"><strong>${esc(m.name)}</strong></a>${creatorTag}</span><small>${isCreator ? 'Group creator' : 'Member'}</small></span>${removeButton}</li>`;
+          const memberStatus = isCreator ? "Group creator" : m.pending ? "Member pending" : "Member";
+          return `<li class="member-row">${avatarHtml(m, "member-avatar")}<span><span class="member-name-line"><a class="person-link" href="profile.html?user=${encodeURIComponent(m.id)}"><strong>${esc(m.name)}</strong></a>${creatorTag}</span><small>${memberStatus}</small></span>${removeButton}</li>`;
         }).join("") : '<li class="empty">No members yet.</li>';
       }
 

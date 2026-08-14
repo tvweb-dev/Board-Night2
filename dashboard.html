@@ -46,7 +46,7 @@
         const list = document.getElementById("groupList");
         list.innerHTML = '<p class="empty">Loading groups...</p>';
 
-        const groups = await DB.getGroups();
+        const groups = (await DB.getGroups()).filter(function (group) { return !group.pending; });
         const showInactive = document.getElementById("showInactiveGroups").checked;
         const activeGroups = groups.filter(function (group) { return group.active; });
         const inactiveGroups = groups.filter(function (group) { return !group.active; });

@@ -149,6 +149,7 @@ const DB = {
       name: row.GROUP_NAME,
       hostId: row.CREATED_BY,
       memberRole: row.MEMBER_ROLE,
+      pending: String(row.MEMBER_ROLE || "").toUpperCase() === "PENDING",
       imageUrl: row.GROUP_IMAGE_URL || "",
       createdAt: row.CREATED_AT,
       active: row.IS_ACTIVE == null ? true : Boolean(Number(row.IS_ACTIVE)),
@@ -180,7 +181,8 @@ const DB = {
       name: this.displayName(row),
       email: row.EMAIL || "",
       imageUrl: row.IMAGE_URL || "",
-      role: row.MEMBER_ROLE
+      role: row.MEMBER_ROLE,
+      pending: String(row.MEMBER_ROLE || "").toUpperCase() === "PENDING"
     }));
   },
 

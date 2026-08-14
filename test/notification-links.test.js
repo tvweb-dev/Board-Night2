@@ -23,6 +23,15 @@ test("group invitation page offers join and decline actions through the API", ()
   assert.match(data, /\/group-invitation/);
 });
 
+test("pending group invitees are labelled as member pending", () => {
+  const dashboard = fs.readFileSync(path.join(__dirname, "../dashboard.html"), "utf8");
+  const group = fs.readFileSync(path.join(__dirname, "../group.html"), "utf8");
+  const data = fs.readFileSync(path.join(__dirname, "../js/data.js"), "utf8");
+  assert.match(data, /MEMBER_ROLE[\s\S]*PENDING/);
+  assert.match(dashboard, /filter\(function \(group\) \{ return !group\.pending; \}\)/);
+  assert.match(group, /Member pending/);
+});
+
 test("notification list includes response and RSVP links", () => {
   const page = read("notifications.html");
   assert.match(page, /Respond to invitation/);
