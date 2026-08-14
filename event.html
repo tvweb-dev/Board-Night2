@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Board Night - Event</title>
-  <link rel="icon" type="image/svg+xml" href="css/design_elements/BNFavicon.svg" />
+  <link rel="icon" type="image/svg+xml" href="css/design_elements/BNFavicon 1.svg" />
   <link rel="stylesheet" href="https://use.typekit.net/oga8xpj.css" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
@@ -155,7 +155,7 @@
         const image = section.querySelector("img");
         image.addEventListener("error", function () {
           if (game.THUMBNAIL_URL && !image.dataset.thumbnailTried) { image.dataset.thumbnailTried = "true"; image.src = game.THUMBNAIL_URL; }
-          else { image.onerror = null; image.src = "assets/images/event-placeholder.webp"; }
+          else { image.onerror = null; image.src = PLACEHOLDER_IMAGE.event; }
         });
       }
 

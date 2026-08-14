@@ -55,9 +55,9 @@ const STATUS_LABEL = { going: "Going", maybe: "Maybe", no: "Can't make it" };
 const STATUS_CLASS = { going: "going", maybe: "maybe", no: "no" };
 const NOTIFICATION_SEEN_KEY = "boardNightSeenNotifications";
 const PLACEHOLDER_IMAGE = {
-  group: "assets/images/group-placeholder.webp",
-  event: "assets/images/event-placeholder.webp",
-  profile: "assets/images/profile-placeholder.webp"
+  group: "css/design_elements/BNplaceholder.svg",
+  event: "css/design_elements/BNplaceholder.svg",
+  profile: "css/design_elements/BNplaceholder.svg"
 };
 
 let siteLoadingCount = 0;
@@ -238,7 +238,7 @@ function renderTopbar() {
     <div class="mobile-bar">
       ${mobileBack}
       <a class="mobile-brand" href="dashboard.html" aria-label="Board Night home">
-        <img src="css/design_elements/BNlogo.svg" alt="">
+        <img src="css/design_elements/BNlogo 1.svg" alt="">
         <span>BOARD NIGHT</span>
       </a>
       <a class="mobile-notifications" href="notifications.html" aria-label="Notifications">
@@ -248,7 +248,7 @@ function renderTopbar() {
       <a class="mobile-account" href="profile.html?user=${encodeURIComponent(user.id)}" aria-label="View your profile">${esc(initials)}</a>
     </div>
     <a class="brand" href="dashboard.html" aria-label="Board Night home">
-      <img class="brand-logo" src="css/design_elements/BNlogo.svg" alt="">
+      <img class="brand-logo" src="css/design_elements/BNlogo 1.svg" alt="">
       <span>BOARD NIGHT</span>
     </a>
     <nav class="sidebar-nav" aria-label="Main navigation">
@@ -286,7 +286,7 @@ function renderTopbar() {
   mobileNav.innerHTML = `
     <a class="mobile-nav-link ${groupsActive ? "is-active" : ""}" href="dashboard.html"><span aria-hidden="true">♟</span><small>Groups</small></a>
     <a class="mobile-nav-link ${eventsActive ? "is-active" : ""}" href="events.html"><span aria-hidden="true">⚄</span><small>Events</small></a>
-    <a class="mobile-nav-home" href="dashboard.html" aria-label="Board Night home"><img src="css/design_elements/BNlogo.svg" alt=""></a>
+    <a class="mobile-nav-home" href="dashboard.html" aria-label="Board Night home"><img src="css/design_elements/BNlogo 1.svg" alt=""></a>
     <a class="mobile-nav-link ${calendarActive ? "is-active" : ""}" href="calendar.html"><span aria-hidden="true">□</span><small>Calendar</small></a>
     <a class="mobile-nav-link ${friendsActive ? "is-active" : ""}" href="friends.html"><span aria-hidden="true">♡</span><small>Friends</small></a>`;
   document.body.appendChild(mobileNav);

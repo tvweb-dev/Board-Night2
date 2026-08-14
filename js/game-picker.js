@@ -4,7 +4,7 @@
   if (typeof module === "object" && module.exports) module.exports = api;
   root.GamePicker = api;
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
-  const FALLBACK_IMAGE = "assets/images/event-placeholder.webp";
+  const FALLBACK_IMAGE = "css/design_elements/BNplaceholder.svg";
 
   function imageUrl(game, large) {
     if (!game) return FALLBACK_IMAGE;

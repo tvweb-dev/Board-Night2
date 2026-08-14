@@ -67,7 +67,7 @@ test("compact game metadata and rating render enriched fields", () => {
 
 test("compact images prefer thumbnails and support fallback", () => {
   assert.equal(GamePicker.imageUrl({ THUMBNAIL_URL: "thumb.jpg", IMAGE_URL: "large.jpg" }), "thumb.jpg");
-  assert.equal(GamePicker.imageUrl({}, false), "assets/images/event-placeholder.webp");
+  assert.equal(GamePicker.imageUrl({}, false), "css/design_elements/BNplaceholder.svg");
 });
 
 test("favorite writes use the existing relationship endpoint", async () => {
