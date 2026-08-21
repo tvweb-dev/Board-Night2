@@ -397,6 +397,14 @@ footer.note {
 .calendar-attendee-avatar { width: 28px; height: 28px; flex: 0 0 28px; overflow: hidden; display: grid; place-items: center; border-radius: 50%; background: var(--avatar); font-size: .6rem; font-weight: 700; }
 .calendar-attendee-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .pill.pending { background: #596071; }
+.add-friend-form { max-width: 720px; margin: 0 0 24px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
+.add-friend-form > label { display: block; margin-bottom: 7px; }
+.add-friend-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: stretch; }
+.add-friend-row input { width: 100%; min-width: 0; }
+.add-friend-row .btn { min-width: 112px; }
+.form-status { min-height: 20px; margin: 7px 0 0; color: var(--muted); font-size: .78rem; }
+.form-status.is-error { color: #ef8c84; }
+.form-status.is-success { color: #73c9a3; }
 .friend-search { width: 320px; max-width: 100%; margin-bottom: 22px; padding: 12px 14px; border: 0; border-radius: 12px; background: var(--card); }
 .friend-tools { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-bottom: 22px; }
 .friend-tools .friend-search { margin-bottom: 0; }
@@ -643,6 +651,9 @@ footer.note {
     max-width: none;
     padding: 20px 28px 36px;
   }
+
+  .add-friend-row { grid-template-columns: 1fr; }
+  .add-friend-row .btn { width: 100%; }
 
   .grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
