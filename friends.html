@@ -11,7 +11,15 @@
 <body>
   <header class="topbar" id="topbar"></header>
   <main class="container">
-    <div class="page-heading"><div><h1>Friends</h1><p class="subtle">People who share groups with you.</p></div></div>
+    <div class="page-heading"><div><h1>Friends</h1><p class="subtle">People you have added or share groups with.</p></div></div>
+    <form class="add-friend-form" id="addFriendForm">
+      <label for="addFriendQuery">Add a friend</label>
+      <div class="add-friend-row">
+        <input id="addFriendQuery" type="text" maxlength="254" autocomplete="off" placeholder="Full name, nickname, email, or user ID" required />
+        <button class="btn" id="addFriendButton" type="submit">Add friend</button>
+      </div>
+      <p class="form-status" id="addFriendStatus" role="status" aria-live="polite"></p>
+    </form>
     <div class="friend-tools">
       <input class="friend-search" id="friendSearch" type="search" placeholder="Search friends" />
       <label class="show-all-friends"><input id="showAllFriends" type="checkbox" /> <span>Show all friends</span></label>
@@ -55,6 +63,29 @@
           }).join("") : `<p class="empty">${query ? `No friends match “${esc(query)}”.` : showAll ? "No shared group members yet." : "No visible friends. Select Show all friends to view hidden friends."}</p>`;
         }
         renderFriends("");
+        document.getElementById("addFriendForm").addEventListener("submit", async function (event) {
+          event.preventDefault();
+          const input = document.getElementById("addFriendQuery");
+          const button = document.getElementById("addFriendButton");
+          const status = document.getElementById("addFriendStatus");
+          const query = input.value.trim();
+          if (!query) { status.className = "form-status is-error"; status.textContent = "Enter a name, nickname, email, or user ID."; input.focus(); return; }
+          button.disabled = true;
+          status.className = "form-status";
+          status.textContent = "Adding friend...";
+          try {
+            const added = await DB.addFriend(query);
+            const refreshed = await DB.getFriends();
+            friends.splice(0, friends.length, ...refreshed);
+            input.value = "";
+            status.className = "form-status is-success";
+            status.textContent = added.ALREADY_FRIEND ? "This person is already in your friends list." : "Friend added.";
+            renderFriends(document.getElementById("friendSearch").value.trim());
+          } catch (error) {
+            status.className = "form-status is-error";
+            status.textContent = error.message;
+          } finally { button.disabled = false; }
+        });
         document.getElementById("friendSearch").addEventListener("input", function (event) { renderFriends(event.target.value.trim()); });
         document.getElementById("showAllFriends").addEventListener("change", function () { renderFriends(document.getElementById("friendSearch").value.trim()); });
         list.addEventListener("click", async function (event) {

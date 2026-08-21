@@ -226,6 +226,13 @@ const DB = {
     }));
   },
 
+  async addFriend(friendQuery) {
+    return this.api("/api/friends", {
+      method: "POST",
+      body: JSON.stringify({ friendQuery: String(friendQuery || "").trim() })
+    });
+  },
+
   async setFriendHidden(friendId, hidden) {
     return this.api(`/api/friends/${friendId}/hidden`, {
       method: "PATCH",

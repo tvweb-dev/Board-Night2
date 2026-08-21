@@ -29,6 +29,22 @@ test("authenticated API calls retain the existing bearer token", async () => {
   assert.equal(request.options.headers.Authorization, "Bearer secret-token");
 });
 
+test("adding a friend posts the entered lookup value", async () => {
+  let request;
+  global.fetch = async (url, options) => { request = { url, options }; return response({ USER_ID: 9, NICKNAME: "DiceFan" }); };
+  await DB.addFriend("  DiceFan  ");
+  assert.match(request.url, /\/api\/friends$/);
+  assert.equal(request.options.method, "POST");
+  assert.deepEqual(JSON.parse(request.options.body), { friendQuery: "DiceFan" });
+});
+
+test("friends page connects its add form to the friend API and refreshes the list", () => {
+  const page = fs.readFileSync(path.join(__dirname, "../friends.html"), "utf8");
+  assert.match(page, /id="addFriendForm"/);
+  assert.match(page, /await DB\.addFriend\(query\)/);
+  assert.match(page, /await DB\.getFriends\(\)/);
+});
+
 test("blank game searches do not call the API", async () => {
   let calls = 0;
   global.fetch = async () => { calls += 1; return response([]); };
